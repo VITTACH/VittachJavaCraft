@@ -530,41 +530,47 @@ class Human implements ProcessorInput, ValueOfHealth {
             humanVector.set(camera.direction.x, camera.direction.y, camera.direction.z).scl((i + 1) * depth);
             for (int x = startX; x < endX; x++)
                 for (int y = startY; y < endY; y++)
-                    for (int z = startZ; z < endZ; z++) {
+                    for (int z = startZ; z < endZ; z++)
                         if (getBlockId(x, y, z) != 'o')
                             if (cameraPosition.x + humanVector.x >= -x * b_size + xMapLength / 2 * b_size - b_size / 2
                                     && cameraPosition.x + humanVector.x < -x * b_size + b_size / 2 + xMapLength / 2 * b_size
                                     && cameraPosition.z + humanVector.z >= -z * b_size + zMapLength / 2 * b_size - b_size / 1.9
-                                    && cameraPosition.z + humanVector.z < -z * b_size + b_size / 1.9 + zMapLength / 2 * b_size)
-                                if ((y - 3) * b_size + b_size / 1.9 < humanVector.y + cameraPosition.y &&
-                                        cameraPosition.y + humanVector.y < (y - 1) * b_size - b_size / 1.9f &&
-                                        getBlockId(x, y, z) != 'N' &&
-                                        getBlockId(x, y, z) != 'A' &&
-                                        getBlockId(x, y, z) != 'L' ||
-                                        cameraPosition.y + humanVector.y > (y - 3) * b_size + b_size / 2.f &&
-                                                cameraPosition.y + humanVector.y < y * b_size + depth - b_size / 0.4) {
-                                    //one block of world was selected
-                                    if (!builderTimer.isActive()) {
-                                        if (!(selectedBlockX == x && selectedBlockY == y && selectedBlockZ == z)) {
-                                            selectedBlockX = x;
-                                            selectedBlockY = y;
-                                            selectedBlockZ = z;
-                                            builderTimer.visible = true;
-                                            builderTimer.start(1000);
-                                        }
-                                        if (!builderTimer.visible) JJEngine.world.delBlock(x, y, z);
-                                    } else if (!(selectedBlockX == x && selectedBlockY == y && selectedBlockZ == z)) {
+                                    && cameraPosition.z + humanVector.z < -z * b_size + b_size / 1.9 + zMapLength / 2 * b_size
+                                    && ((y - 3) * b_size + b_size / 1.9 < humanVector.y + cameraPosition.y
+                                    && cameraPosition.y + humanVector.y < (y - 1) * b_size - b_size / 1.9f
+                                    && getBlockId(x, y, z) != 'N'
+                                    && getBlockId(x, y, z) != 'A'
+                                    && getBlockId(x, y, z) != 'L'
+                                    || cameraPosition.y + humanVector.y > (y - 3) * b_size + b_size / 2.f
+                                    && cameraPosition.y + humanVector.y < y * b_size + depth - b_size / 0.4)) {
+
+                                // one block of world selected
+                                if (!builderTimer.isActive()) {
+                                    if (!(selectedBlockX == x && selectedBlockY == y && selectedBlockZ == z)) {
+                                        selectedBlockX = x;
+                                        selectedBlockY = y;
+                                        selectedBlockZ = z;
+                                        builderTimer.visible = true;
+                                        builderTimer.start(1000);
+                                    }
+
+                                    if (!builderTimer.visible) {
+                                        JJEngine.world.delBlock(x, y, z);
+                                    }
+                                } else {
+                                    if (!(selectedBlockX == x && selectedBlockY == y && selectedBlockZ == z)) {
                                         selectedBlockX = x;
                                         selectedBlockY = y;
                                         selectedBlockZ = z;
                                         builderTimer.start(1000);
                                     }
-                                    x = xMapLength;
-                                    y = yMapLength;
-                                    i = step + 1;
-                                    break;
                                 }
-                    }
+
+                                x = xMapLength;
+                                y = yMapLength;
+                                i = step + 1;
+                                break;
+                            }
         }
         if (i == step) {
             selectedBlockX = selectedBlockY = selectedBlockZ = -1;

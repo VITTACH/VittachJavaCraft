@@ -12,11 +12,11 @@ public class MeshCompress {
     public static Mesh mergeMeshes(List<Mesh> meshes, List<Matrix4> transforms) {
         if (meshes == null || meshes.isEmpty()) return null;
 
-        int indexOffset = 0;
-        int vertexOffset = 0;
         int indexTotalSize = 0;
         int vertexTotalSize = 0;
-        int vertexSizeOffsets = 0;
+        int vertexSizeOffset = 0;
+        int indexOffset = 0;
+        int vertexOffset = 0;
 
         for (Mesh mesh : meshes) {
             vertexTotalSize += mesh.getNumVertices() * mesh.getVertexSize() / 4;
@@ -43,14 +43,14 @@ public class MeshCompress {
                 indexOffset += numIndices;
             }
 
-            meshAttribute.getVertices(0, baseSize, vertices, vertexSizeOffsets);
+            meshAttribute.getVertices(0, baseSize, vertices, vertexSizeOffset);
             int offset = posAttr.offset / 4;
             int dimension = posAttr.numComponents;
             Matrix4 matrix4 = transforms.get(i);
             Mesh.transform(matrix4, vertices, vertexSize, offset, dimension, vertexOffset, numVertices);
 
             vertexOffset += numVertices;
-            vertexSizeOffsets += baseSize;
+            vertexSizeOffset += baseSize;
         }
 
         Mesh result = new Mesh(true, vertexOffset, indexTotalSize, meshes.get(0).getVertexAttributes());

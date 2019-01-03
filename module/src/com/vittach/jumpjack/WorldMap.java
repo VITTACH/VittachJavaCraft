@@ -22,9 +22,8 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 
-import java.util.List;
-import java.util.Random;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by ZHARIKOV VITALIY at 23.02.2016
@@ -34,9 +33,8 @@ public class WorldMap {
     private Model skyBoxModel;
     private ShaderProgram shader;
     private Environment environment;
-    private List<MeshObj> mergedMeshs;
-    private List<MeshObj> meshObjects;
     private Matrix4 transactionMatrix;
+    private Map<Vector3, Mesh> meshsMap;
     private List<Mesh> meshes;
 
     char[][][] worldMap;
@@ -52,23 +50,21 @@ public class WorldMap {
     private ArrayList<ModelInstance> highlights;
 
     private ArrayList<PointLight> pointLights;
-    private ArrayList<ArrayIndex> newEntities;
 
     int mapLengthX;
     int mapLengthZ;
     int mapLengthY;
     int mouseX;
     int mouseY;
-    private int areaSize = 32; // 32- MAX VALUE
+    private int areaSize = 8; // 32 is MAX VALUE
 
     public WorldMap() {
-        mouseY = 3; // TODO WTF magical number?
+        mouseY = 3; // TODO WTF, magical number?
         blockSize = 0.5f;
         transactionMatrix = new Matrix4();
 
         shader = new ShaderProgram(Gdx.files.internal("glshs/vertex.glsl"), Gdx.files.internal("glshs/fragment.glsl"));
-        meshObjects = new ArrayList<MeshObj>();
-        mergedMeshs = new ArrayList<MeshObj>();
+        meshsMap = new ConcurrentHashMap<Vector3, Mesh>();
 
         MeshBuilder builder = new MeshBuilder();
         VertexAttributes attributes = new VertexAttributes(
@@ -89,15 +85,13 @@ public class WorldMap {
         highlightObj.set(new BlendingAttribute(770, 771));
 
         pointLights = new ArrayList<PointLight>();
-        newEntities = new ArrayList<ArrayIndex>();
         highlights = new ArrayList<ModelInstance>();
     }
 
     // построение мира
-    void buildWorld(int startXArea, int startYArea, int startZArea) {
+    private List<MeshObj> buildWorld(int startXArea, int startYArea, int startZArea) {
         pointLights.clear();
-        meshObjects.clear();
-        newEntities.clear();
+        List<MeshObj> meshObjects = new ArrayList<MeshObj>();
         for (int x = startXArea; x < startXArea + areaSize; x++)
             for (int y = startYArea; y < startYArea + areaSize; y++)
                 for (int z = startZArea; z < startZArea + areaSize; z++) {
@@ -130,94 +124,43 @@ public class WorldMap {
                                                                 if (worldMap[x][y][z + 1] != 'o' && worldMap[x][y][z + 1] != 'A' &&
                                                                         worldMap[x][y][z + 1] != 'N' && worldMap[x][y][z + 1] != 'L')
                                                                     continue;
+                    Mesh mesh = null;
                     switch (worldMap[x][y][z]) {
-                        case 't':
-                            meshObjects.add(new MeshObj(meshes.get(0), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'b':
-                            meshObjects.add(new MeshObj(meshes.get(1), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'd':
-                            meshObjects.add(new MeshObj(meshes.get(2), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
+                        case 't': mesh = meshes.get(0); break;
+                        case 'b': mesh = meshes.get(1); break;
+                        case 'd': mesh = meshes.get(2); break;
                         case 'f':
-                            meshObjects.add(new MeshObj(meshes.get(3), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            pointLights.add(new PointLight().set(1, 1, 1, -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize, 2.5f));
+                            mesh = meshes.get(3);
+                            pointLights.add(new PointLight().set(1, 1, 1,
+                                    -(x % areaSize) * blockSize, (y % areaSize) * blockSize, -(z % areaSize) * blockSize, 2.5f));
                             break;
-                        case 'S':
-                            meshObjects.add(new MeshObj(meshes.get(4), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 's':
-                            meshObjects.add(new MeshObj(meshes.get(5), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'k':
-                            meshObjects.add(new MeshObj(meshes.get(6), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'D':
-                            meshObjects.add(new MeshObj(meshes.get(7), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'B':
-                            meshObjects.add(new MeshObj(meshes.get(8), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
+                        case 'S': mesh = meshes.get(4); break;
+                        case 's': mesh = meshes.get(5); break;
+                        case 'k': mesh = meshes.get(6); break;
+                        case 'D': mesh = meshes.get(7); break;
+                        case 'B': mesh = meshes.get(8); break;
                         case 'L':
-                            meshObjects.add(new MeshObj(meshes.get(9), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            pointLights.add(new PointLight().set(1, 1, 1, -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize, 2.0f));
+                            mesh = meshes.get(9);
+                            pointLights.add(new PointLight().set(1, 1, 1,
+                                    -(x % areaSize) * blockSize, (y % areaSize) * blockSize, -(z % areaSize) * blockSize, 2.0f));
                             break;
-                        case 'G':
-                            meshObjects.add(new MeshObj(meshes.get(10), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'c':
-                            meshObjects.add(new MeshObj(meshes.get(11), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'R':
-                            meshObjects.add(new MeshObj(meshes.get(12), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'r':
-                            meshObjects.add(new MeshObj(meshes.get(13), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'y':
-                            meshObjects.add(new MeshObj(meshes.get(14), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'W':
-                            meshObjects.add(new MeshObj(meshes.get(15), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'w':
-                            meshObjects.add(new MeshObj(meshes.get(16), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'M':
-                            meshObjects.add(new MeshObj(meshes.get(17), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'A':
-                            meshObjects.add(new MeshObj(meshes.get(18), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
-                        case 'N':
-                            meshObjects.add(new MeshObj(meshes.get(19), -x * blockSize + mapLengthX / 2 * blockSize, y *
-                                    blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-                            break;
+                        case 'G': mesh = meshes.get(10); break;
+                        case 'c': mesh = meshes.get(11); break;
+                        case 'R': mesh = meshes.get(12); break;
+                        case 'r': mesh = meshes.get(13); break;
+                        case 'y': mesh = meshes.get(14); break;
+                        case 'W': mesh = meshes.get(15); break;
+                        case 'w': mesh = meshes.get(16); break;
+                        case 'M': mesh = meshes.get(17); break;
+                        case 'A': mesh = meshes.get(18); break;
+                        case 'N': mesh = meshes.get(19); break;
                     }
-                    if (worldMap[x][y][z] != 'o') newEntities.add(new ArrayIndex(x, y, z));
+                    if (mesh != null) {
+                        meshObjects.add(new MeshObj(mesh,
+                                -(x % areaSize) * blockSize, (y % areaSize) * blockSize, -(z % areaSize) * blockSize));
+                    }
                 }
+        return meshObjects;
     }
 
     private void updateEnvironment() {
@@ -380,39 +323,43 @@ public class WorldMap {
         build();
     }
 
-    void build() {
+    public void build() {
         for (int xArea = 0; xArea < mapLengthX; xArea += areaSize)
             for (int yArea = 0; yArea < mapLengthY; yArea += areaSize)
                 for (int zArea = 0; zArea < mapLengthZ; zArea += areaSize) {
-                    buildWorld(xArea, yArea, zArea);
+                    Mesh mesh = createMesh(buildWorld(xArea, yArea, zArea));
+                    if (mesh == null) continue;
 
-                    Mesh meshObj = createMesh();
-                    if (meshObj == null) continue;
-
-                    float x = -xArea / areaSize + xArea / areaSize * 2 * blockSize;
-                    float y = yArea / areaSize - yArea / areaSize * 2 * blockSize;
-                    float z = -zArea / areaSize + zArea / areaSize * 2 * blockSize;
-                    mergedMeshs.add(new MeshObj(meshObj, x, y, z));
+                    updateMeshMap(xArea, yArea, zArea, mesh);
                 }
 
         JJEngine.human.setWorld(worldMap);
         updateEnvironment();
     }
 
-    void delBlock(int x, int y, int z) {
+    public void delBlock(int x, int y, int z) {
         worldMap[x][y][z] = 'o';
-        int size = newEntities.size();
-        for (int i = 0; i < size; i++) {
-            if (newEntities.get(i).x == x && newEntities.get(i).y == y && newEntities.get(i).z == z) {
-                newEntities.remove(i);
-                meshObjects.remove(i);
-                createMesh();
-                break;
-            }
-        }
+        updateWorld(x, y, z);
     }
 
-    void setBlock(int x, int y, int z) {
+    private void updateWorld(int x, int y, int z) {
+        int startXArea = x / areaSize * areaSize;
+        int startYArea = y / areaSize * areaSize;
+        int startZArea = z / areaSize * areaSize;
+
+        Mesh mesh = createMesh(buildWorld(startXArea, startYArea, startZArea));
+        if (mesh == null) return;
+        updateMeshMap(startXArea, startYArea, startZArea, mesh);
+    }
+
+    private void updateMeshMap(int xArea, int yArea, int zArea, Mesh merged) {
+        float x = mapLengthX / 2 * blockSize - xArea * blockSize;
+        float y = yArea * blockSize - blockSize * 2;
+        float z = mapLengthZ / 2 * blockSize - zArea * blockSize;
+        meshsMap.put(new Vector3(x, y, z), merged);
+    }
+
+    public void setBlock(int x, int y, int z) {
         int index = Math.abs(mouseY - 3) * 10 + mouseX + 1;
         if (index > 20) {
             index = 20;
@@ -425,76 +372,34 @@ public class WorldMap {
                         cameraPosition.z >= -z * blockSize + mapLengthZ / 2 * blockSize - blockSize + vel &&
                         cameraPosition.z < mapLengthZ / 2 * blockSize - vel - (z - 1) * blockSize) &&
                 worldMap[x][y][z] == 'o') {
-            meshObjects.add(new MeshObj(meshes.get(index), -x * blockSize + mapLengthX / 2 * blockSize,
-                    y * blockSize - blockSize * 2, -z * blockSize + mapLengthZ / 2 * blockSize));
-            newEntities.add(new ArrayIndex(x, y, z));
             switch (index) {
-                case 1:
-                    worldMap[x][y][z] = 't';
-                    break;
-                case 2:
-                    worldMap[x][y][z] = 'b';
-                    break;
-                case 3:
-                    worldMap[x][y][z] = 'd';
-                    break;
-                case 4:
-                    worldMap[x][y][z] = 'f';
-                    break;
-                case 5:
-                    worldMap[x][y][z] = 'S';
-                    break;
-                case 6:
-                    worldMap[x][y][z] = 's';
-                    break;
-                case 7:
-                    worldMap[x][y][z] = 'k';
-                    break;
-                case 8:
-                    worldMap[x][y][z] = 'D';
-                    break;
-                case 9:
-                    worldMap[x][y][z] = 'B';
-                    break;
-                case 10:
-                    worldMap[x][y][z] = 'L';
-                    break;
-                case 11:
-                    worldMap[x][y][z] = 'G';
-                    break;
-                case 12:
-                    worldMap[x][y][z] = 'c';
-                    break;
-                case 13:
-                    worldMap[x][y][z] = 'R';
-                    break;
-                case 14:
-                    worldMap[x][y][z] = 'r';
-                    break;
-                case 15:
-                    worldMap[x][y][z] = 'y';
-                    break;
-                case 16:
-                    worldMap[x][y][z] = 'W';
-                    break;
-                case 17:
-                    worldMap[x][y][z] = 'w';
-                    break;
-                case 18:
-                    worldMap[x][y][z] = 'M';
-                    break;
-                case 19:
-                    worldMap[x][y][z] = 'A';
-                    break;
-                case 20:
-                    worldMap[x][y][z] = 'N';
-                    break;
+                case 1: worldMap[x][y][z] = 't'; break;
+                case 2: worldMap[x][y][z] = 'b'; break;
+                case 3: worldMap[x][y][z] = 'd'; break;
+                case 4: worldMap[x][y][z] = 'f'; break;
+                case 5: worldMap[x][y][z] = 'S'; break;
+                case 6: worldMap[x][y][z] = 's'; break;
+                case 7: worldMap[x][y][z] = 'k'; break;
+                case 8: worldMap[x][y][z] = 'D'; break;
+                case 9: worldMap[x][y][z] = 'B'; break;
+                case 10: worldMap[x][y][z] = 'L'; break;
+                case 11: worldMap[x][y][z] = 'G'; break;
+                case 12: worldMap[x][y][z] = 'c'; break;
+                case 13: worldMap[x][y][z] = 'R'; break;
+                case 14: worldMap[x][y][z] = 'r'; break;
+                case 15: worldMap[x][y][z] = 'y'; break;
+                case 16: worldMap[x][y][z] = 'W'; break;
+                case 17: worldMap[x][y][z] = 'w'; break;
+                case 18: worldMap[x][y][z] = 'M'; break;
+                case 19: worldMap[x][y][z] = 'A'; break;
+                case 20: worldMap[x][y][z] = 'N'; break;
             }
-            createMesh();
+
+            updateWorld(x, y, z);
         }
     }
 
-    private Mesh createMesh() {
+    private Mesh createMesh(List<MeshObj> meshObjects) {
         List<Mesh> meshes = new ArrayList<Mesh>();
         List<Matrix4> transactionList = new ArrayList<Matrix4>();
         for (MeshObj meshObject : meshObjects) {
@@ -523,10 +428,11 @@ public class WorldMap {
         shader.setUniformMatrix("modelView", perspectiveCams.combined);
         shader.setUniformf("uCameraFar", perspectiveCams.far);
         shader.setUniformf("uLightPosition", perspectiveCams.position);
-        for (MeshObj obj : mergedMeshs) {
-            transactionMatrix.setToTranslation(obj.getPosition());
+
+        for (Map.Entry<Vector3, Mesh> entries : meshsMap.entrySet()) {
+            transactionMatrix.setToTranslation(entries.getKey());
             shader.setUniformMatrix("model", transactionMatrix);
-            obj.getMesh().render(shader, GL20.GL_TRIANGLES);
+            entries.getValue().render(shader, GL20.GL_TRIANGLES);
         }
         shader.end();
 
@@ -538,9 +444,8 @@ public class WorldMap {
 
     public void dispose() {
         highlights.clear();
-        newEntities.clear();
         modelBatch.dispose();
-        meshObjects.clear();
+        meshsMap.clear();
     }
 
     void clearHighlights() {
