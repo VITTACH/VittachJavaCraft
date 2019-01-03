@@ -3,46 +3,42 @@ package com.vittach.jumpjack;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class NewWorld implements GameScreen {
-    private JJEngine engine;
-
-    NewWorld(JJEngine engine) { this.engine = engine; }
+    private JJEngine engineInst = JJEngine.getInstance();
+    private Preference prefInst = Preference.getInstance();
 
     public void render(Viewport view) {
-        engine.news.Display(view);
-        if (engine.news.PressedKeyCode >= 0) {
-            Preference.inputListener.clnProces();
-            switch (engine.news.PressedKeyCode) {
-                // create new world
-                case 1:
-                    engine.screen = 0;
-                    engine.human.healthValue = 100;
-                    engine.human.deathWinState = 0;
-                    this.engine.fileLoader.setFileName(engine.news.getName());
+        engineInst.worldCreator.display(view);
 
-                    engine.world.generateWorld(128, 128, 128);
-                    JJEngine.human.camera.position.set(0, 2, 0);
-                    engine.fileLoader.saveWorld();
+        if (engineInst.worldCreator.pressedKey >= 0) {
+            prefInst.inputListener.cleanProcesses();
 
-                    if (engine.deviceId == 1) {
-                        Preference.inputListener.addListener(engine.leftStick);
-                        Preference.inputListener.addListener(engine.rightStick);
-                    }
-                    Preference.inputListener.addListener(engine.human);
-                    Preference.inputListener.addListener(engine.currentBlock);
+            switch (engineInst.worldCreator.pressedKey) {
+                case 1: // createButton new worldMapInst
+                    engineInst.currentScreen = 0;
+                    engineInst.human.setHealthValue(100);
+                    engineInst.human.deathWinState = 0;
+                    engineInst.fileController.setFileName(engineInst.worldCreator.getName());
+
+                    engineInst.worldMapInst.createWorld(64, 32, 64);
+                    engineInst.human.camera.position.set(0, 2f, 0f);
+                    engineInst.fileController.saveWorld();
+
+                    prefInst.inputListener.addListener(engineInst.human);
+                    prefInst.inputListener.addListener(engineInst.currentBlock);
                     break;
 
-                // go to backButton screenWindow
-                case 2:
-                    engine.screen = 2;
-                    Preference.inputListener.addListener(engine.menu.game);
-                    Preference.inputListener.addListener(engine.menu.load);
-                    Preference.inputListener.addListener(engine.menu.exit);
-                    Preference.inputListener.addListener(engine.menu);
+                case 2: // go to backButton screenWindow
+                    engineInst.currentScreen = 2;
+                    prefInst.inputListener.addListener(engineInst.startMenuInst.gameButton);
+                    prefInst.inputListener.addListener(engineInst.startMenuInst.loadButton);
+                    prefInst.inputListener.addListener(engineInst.startMenuInst.exitButton);
+                    prefInst.inputListener.addListener(engineInst.startMenuInst);
                     break;
             }
-            engine.news.textField.setText(" ");
-            engine.news.textField.setCursorPosition(2);
-            engine.news.PressedKeyCode = -1;
+
+            engineInst.worldCreator.textField.setCursorPosition(2);
+            engineInst.worldCreator.textField.setText(" ");
+            engineInst.worldCreator.pressedKey = -1;
         }
     }
 }

@@ -6,91 +6,92 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class StartMenu extends InputListener {
-    ImageHandler background;
-    private ImageHandler ilogo;
+    public ScreenButton gameButton;
+    public ScreenButton loadButton;
+    public ScreenButton exitButton;
+
+    public int pressedKey = -1;
     private Sprite sprite;
-    SpriteBatch spritewnd;
-    public int DWNKey = -1;
-    private ImageHandler ipaper;
-    public ScreenButton game;
-    public ScreenButton load;
-    public ScreenButton exit;
+    private SpriteBatch spriteWindow;
+
+    private ImageHandler background;
+    private ImageHandler paperImage;
 
     @Override
     public boolean
     touchDown(int x, int y, int id, int b) {
-        if (load.MyTouch_Down(x, y)) DWNKey = 2;
-        if (game.MyTouch_Down(x, y)) DWNKey = 1;
+        if (loadButton.touchDown(x, y)) pressedKey = 2;
+        if (gameButton.touchDown(x, y)) pressedKey = 1;
         return true;
     }
 
     public StartMenu() {
-        ilogo = new ImageHandler();
-        ilogo.load("ui/jumpJackLogo.png");
+        ImageHandler logoImage = new ImageHandler();
+        logoImage.load("ui/jumpJackLogo.png");
 
-        game = new ScreenButton();
-        game.choice = new ImageHandler();
-        game.choice.load("ui/startChoice.png");
-        game.background.load("ui/startButton.png");
-        game.backgroundHandler.blit(game.background);
-        game.setPosition(Preference.windowWidth / 2 - game.background.getWidth() / 2, 128);
-        game.font.load("jumpjack.ttf");
-        game.textY = 19;
-        game.textX = 84;
-        game.textMessage = "idpary";
-        game.font.setPixelSizes(12);
+        gameButton = new ScreenButton();
+        gameButton.choice = new ImageHandler();
+        gameButton.choice.load("ui/startChoice.png");
+        gameButton.background.load("ui/startButton.png");
+        gameButton.screen.blit(gameButton.background);
+        gameButton.setPosition(JJEngine.getInstance().renderWidth / 2 - gameButton.background.getWidth() / 2, 128);
+        gameButton.font.load("jumpjack.ttf");
+        gameButton.textY = 19;
+        gameButton.textX = 84;
+        gameButton.textMessage = "idpary";
+        gameButton.font.setPixelSizes(12);
 
-        load = new ScreenButton();
-        load.choice = new ImageHandler();
-        load.choice.load("ui/startChoice.png");
-        load.background.load("ui/startButton.png");
-        load.backgroundHandler.blit(load.background);
-        load.setPosition(Preference.windowWidth / 2 - load.background.getWidth() / 2, 98);
-        load.font = game.font;
-        load.textY = 19;
-        load.textX = 74;
-        load.textMessage = "hadpshja";
+        loadButton = new ScreenButton();
+        loadButton.choice = new ImageHandler();
+        loadButton.choice.load("ui/startChoice.png");
+        loadButton.background.load("ui/startButton.png");
+        loadButton.screen.blit(loadButton.background);
+        loadButton.setPosition(JJEngine.getInstance().renderWidth / 2 - loadButton.background.getWidth() / 2, 98);
+        loadButton.font = gameButton.font;
+        loadButton.textY = 19;
+        loadButton.textX = 74;
+        loadButton.textMessage = "hadpshja";
 
-        exit = new ScreenButton();
-        exit.choice = new ImageHandler();
-        exit.choice.load("ui/startChoice.png");
-        exit.background.load("ui/startButton.png");
-        exit.backgroundHandler.blit(exit.background);
-        exit.setPosition(Preference.windowWidth / 2 - exit.background.getWidth() / 2, 68);
-        exit.font = game.font;
-        exit.textY = 19;
-        exit.textX = 74;
-        exit.textMessage = "n acrnpf";
+        exitButton = new ScreenButton();
+        exitButton.choice = new ImageHandler();
+        exitButton.choice.load("ui/startChoice.png");
+        exitButton.background.load("ui/startButton.png");
+        exitButton.screen.blit(exitButton.background);
+        exitButton.setPosition(JJEngine.getInstance().renderWidth / 2 - exitButton.background.getWidth() / 2, 68);
+        exitButton.font = gameButton.font;
+        exitButton.textY = 19;
+        exitButton.textX = 74;
+        exitButton.textMessage = "n acrnpf";
 
-        ipaper = new ImageHandler();
-        ipaper.load("ui/foreground.png");
+        paperImage = new ImageHandler();
+        paperImage.load("ui/foreground.png");
 
         background = new ImageHandler();
-        spritewnd = new SpriteBatch();
+        spriteWindow = new SpriteBatch();
         background.load("ui/background.png");
-        background.blit(54, 27, ipaper);
-        background.blit(120, 164, ilogo);
+        background.blit(54, 27, paperImage);
+        background.blit(120, 164, logoImage);
 
-        sprite = background.flip();
+        sprite = background.render();
     }
 
     public void Display(Viewport viewport) {
         viewport.apply();
-        spritewnd.setProjectionMatrix(viewport.getCamera().combined);
-        spritewnd.begin();
-        sprite.draw(spritewnd);
-        spritewnd.end();
-        game.MyDisplay(viewport);
-        load.MyDisplay(viewport);
-        exit.MyDisplay(viewport);
+        spriteWindow.setProjectionMatrix(viewport.getCamera().combined);
+        spriteWindow.begin();
+        sprite.draw(spriteWindow);
+        spriteWindow.end();
+        gameButton.show(viewport);
+        loadButton.show(viewport);
+        exitButton.show(viewport);
     }
 
     public void dispose() {
         background.dispose();
-        spritewnd.dispose();
-        ipaper.dispose();
-        game.dispose();
-        load.dispose();
-        exit.dispose();
+        spriteWindow.dispose();
+        paperImage.dispose();
+        gameButton.dispose();
+        loadButton.dispose();
+        exitButton.dispose();
     }
 }

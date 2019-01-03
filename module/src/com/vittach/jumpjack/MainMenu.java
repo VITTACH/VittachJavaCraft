@@ -3,37 +3,33 @@ package com.vittach.jumpjack;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class MainMenu implements GameScreen {
-    private JJEngine E;
+    public void render(Viewport view) {
+        JJEngine.getInstance().startMenuInst.Display(view);
 
-    MainMenu(JJEngine E) {
-        this.E = E;
-    }
+        if (JJEngine.getInstance().startMenuInst.pressedKey >= 0) {
+            Preference.getInstance().inputListener.cleanProcesses();
 
-    public void
-    render(Viewport view) {
-        E.menu.Display(view);
-        if (E.menu.DWNKey >= 0) {
-            Preference.inputListener.clnProces();
-            switch (E.menu.DWNKey) {
-                //loadButton old world
+            switch (JJEngine.getInstance().startMenuInst.pressedKey) {
+                //loadButton old worldMapInst
                 case 2:
-                    E.screen = 4;
-                    Preference.inputListener.addListener(E.explorer.backButton);
-                    Preference.inputListener.addListener(E.explorer.loadButton);
-                    Preference.inputListener.addListener(E.explorer.acceptButton);
-                    Preference.inputListener.addListener(E.explorer);
-                    E.explorer.updateDir();
-                    E.explorer.getCurDir();
+                    JJEngine.getInstance().currentScreen = 4;
+                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().fileExplorer.backButton);
+                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().fileExplorer.loadButton);
+                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().fileExplorer.acceptButton);
+                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().fileExplorer);
+                    JJEngine.getInstance().fileExplorer.updateDir();
+                    JJEngine.getInstance().fileExplorer.getCurDir();
                     break;
-                //create new world
+                //createButton new worldMapInst
                 case 1:
-                    E.screen = 3;
-                    Preference.inputListener.addListener(E.news.create);
-                    Preference.inputListener.addListener(E.news.goback);
-                    Preference.inputListener.addListener(E.news);
+                    JJEngine.getInstance().currentScreen = 3;
+                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().worldCreator.createButton);
+                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().worldCreator.goBackButton);
+                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().worldCreator);
                     break;
             }
-            E.menu.DWNKey = -1;
+
+            JJEngine.getInstance().startMenuInst.pressedKey = -1;
         }
     }
 }

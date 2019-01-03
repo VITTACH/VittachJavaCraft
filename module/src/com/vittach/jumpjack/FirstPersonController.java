@@ -12,7 +12,7 @@ import java.util.HashSet;
  * Created by ZHARIKOV VITALIY at 22.02.2016.
  */
 
-class Human implements ProcessorInput, ValueOfHealth {
+class FirstPersonController implements ProcessorInput, ValueOfHealth {
     PerspectiveCamera camera;
     private Vector3 humanVector;
     private Vector3 humanMoveVector;
@@ -46,7 +46,8 @@ class Human implements ProcessorInput, ValueOfHealth {
     private int step;
     int selectedBlockX = -1, selectedBlockY = -1, selectedBlockZ = -1;
 
-    int deathWinState, healthValue;
+    int deathWinState;
+    private int healthValue;
     private int deviceId;
     private int FORWARD = Input.Keys.W;
     private int BACK = Input.Keys.S;
@@ -62,8 +63,12 @@ class Human implements ProcessorInput, ValueOfHealth {
         return healthValue;
     }
 
+    public void setHealthValue(int value) {
+        healthValue = value;
+    }
+
     public void teleportation() {
-        if (camera.position.y < -10.0f) {
+        if (camera.position.y < -10) {
             camera.position.set(0, 3, 0);
             fallingTimer.start(10000);
         }
@@ -91,11 +96,6 @@ class Human implements ProcessorInput, ValueOfHealth {
         return pressedKey.add(key_D);
     }
 
-    // установка нового блока на карту
-    void setBlock(Vector3 camPosition) {
-        detectBlock(camPosition, true);
-    }
-
     @Override
     public boolean scrolled(int amount) {
         return false;
@@ -114,17 +114,23 @@ class Human implements ProcessorInput, ValueOfHealth {
         return pressedKey.remove(key_U);
     }
 
-    PerspectiveCamera getCamera() {
+    public PerspectiveCamera getCamera() {
         if (deathWinState == 0) {
-
             controlHuman();
-            camera.translate(humanMoveVector);
-            detectRegion(camera.position, false);
-            detectCollision(camera.position);
-            detectRegion(camera.position, true);
-            detectBlock(camera.position, false);
 
-            if (builderTimer.visible) deleteBlock(camera.position);
+            camera.translate(humanMoveVector);
+
+            detectRegion(false);
+
+            detectCollision();
+
+            detectRegion(true);
+
+            detectBlock(false);
+
+            if (builderTimer.visible) {
+                deleteBlock();
+            }
 
             teleportation();
             camera.update();
@@ -137,23 +143,23 @@ class Human implements ProcessorInput, ValueOfHealth {
     public boolean touchUp(int x, int y, int p, int d) {
         if (builderTimer.isActive()) {
             // на случай, если управление будет сенсорным
-            if (deviceId == 1) setBlock(camera.position);
+            if (deviceId == 1) detectBlock(true);
             builderTimer.stop();
         }
         builderTimer.visible = false;
         selectedBlockX = selectedBlockY = selectedBlockZ = -1;
-        return Preference.usedID.remove(p + offset);
+        return Preference.getInstance().usedID.remove(p + offset);
     }
 
-    private void detectRegion(Vector3 camposit, boolean f) {
+    private void detectRegion(boolean collision) {
         humanVector = new Vector3();
 
         //территория взаимодействия персонажа
-        startX = (int) ((-camposit.x + xMapLength / 2 * b_size) / b_size);
-        startZ = (int) ((-camposit.z + zMapLength / 2 * b_size) / b_size);
-        startY = (int) ((camposit.y + b_size * 2) / b_size);
+        startX = (int) ((-camera.position.x + xMapLength / 2 * b_size) / b_size);
+        startZ = (int) ((-camera.position.z + zMapLength / 2 * b_size) / b_size);
+        startY = (int) ((camera.position.y + b_size * 2) / b_size);
 
-        if (f) {
+        if (collision) {
             endX = startX + 5;
             startX = startX - 3;
             if (startX < 0) startX = 0;
@@ -220,39 +226,39 @@ class Human implements ProcessorInput, ValueOfHealth {
 
     @Override
     public boolean touchDragged(int x, int y, int id) {
-        if (Preference.usedID.contains(id + offset)) mouseMoved(x, y);
+        if (Preference.getInstance().usedID.contains(id + offset)) mouseMoved(x, y);
         return true;
     }
 
     @Override
     public boolean touchDown(int x, int y, int touchId, int button) {
-        if (!((x > 0 && x < Preference.screenWidth / 4
-                        && y > Preference.screenHeight - Preference.screenHeight / 4
-                        && y < Preference.screenHeight)
-                || (x > Preference.screenWidth - Preference.screenWidth / 4f
-                        && x < Preference.screenWidth
-                        && y > Preference.screenHeight - Preference.screenHeight / 4
-                        && y < Preference.screenHeight)
+        if (!((x > 0 && x < Preference.getInstance().screenWidth / 4
+                        && y > Preference.getInstance().screenHeight - Preference.getInstance().screenHeight / 4
+                        && y < Preference.getInstance().screenHeight)
+                || (x > Preference.getInstance().screenWidth - Preference.getInstance().screenWidth / 4f
+                        && x < Preference.getInstance().screenWidth
+                        && y > Preference.getInstance().screenHeight - Preference.getInstance().screenHeight / 4
+                        && y < Preference.getInstance().screenHeight)
                 ) || deviceId == 0) {
 
-            Preference.usedID.add(touchId + offset);
+            Preference.getInstance().usedID.add(touchId + offset);
             if (button == Input.Buttons.LEFT) {
-                deleteBlock(camera.position);
+                deleteBlock();
             }
             if (button == Input.Buttons.RIGHT) {
-                setBlock(camera.position);
+                detectBlock(true);
             }
         }
         return true;
     }
 
-    Human(int deviceId) {
+    FirstPersonController(int deviceId) {
         this.deviceId = deviceId;
         fallingTimer = new MyTimer();
         jumpingTimer = new MyTimer();
         builderTimer = new MyTimer();
 
-        camera = new PerspectiveCamera(67, Preference.windowWidth, Preference.windowHeight);
+        camera = new PerspectiveCamera(67, JJEngine.getInstance().renderWidth, JJEngine.getInstance().renderHeight);
 
         pressedKey = new HashSet<Integer>();
         camera.lookAt(0, 0, 0);
@@ -343,8 +349,9 @@ class Human implements ProcessorInput, ValueOfHealth {
     }
 
     // определение блока, на который смотрит персонаж
-    private void detectBlock(Vector3 camPosition, boolean f) {
-        JJEngine.world.clearHighlights();
+    private void detectBlock(boolean collision) {
+        Vector3 camPosition = camera.position;
+        JJEngine.getInstance().worldMapInst.clearHighlights();
         java_goto:
         for (int i = 0; i < step; i++) {
             humanVector.set(camera.direction.x, camera.direction.y, camera.direction.z).setLength(1f).scl((i + 1) * depth);
@@ -360,8 +367,8 @@ class Human implements ProcessorInput, ValueOfHealth {
                                     && camPosition.y + humanVector.y > (y - 3) * b_size + b_size / 2
                                     && camPosition.y + humanVector.y < y * b_size - 3 * b_size / 2) {
                                 if (getBlockId(x, y, z) != 'N' && getBlockId(x, y, z) != 'A' && getBlockId(x, y, z) != 'L') {
-                                    if (f) JJEngine.world.setBlock(x, y, z - 1);
-                                    else JJEngine.world.selectBlock(2, x, y, z);
+                                    if (collision) JJEngine.getInstance().worldMapInst.setBlock(x, y, z - 1);
+                                    else JJEngine.getInstance().worldMapInst.selectBlock(2, x, y, z);
                                     return;
                                 } else continue java_goto;
                             }
@@ -373,8 +380,8 @@ class Human implements ProcessorInput, ValueOfHealth {
                                     && camPosition.y + humanVector.y > (y - 3) * b_size + b_size / 2
                                     && camPosition.y + humanVector.y < y * b_size - 3 * b_size / 2) {
                                 if (getBlockId(x, y, z) != 'N' && getBlockId(x, y, z) != 'A' && getBlockId(x, y, z) != 'L') {
-                                    if (f) JJEngine.world.setBlock(x, y, z + 1);
-                                    else JJEngine.world.selectBlock(3, x, y, z);
+                                    if (collision) JJEngine.getInstance().worldMapInst.setBlock(x, y, z + 1);
+                                    else JJEngine.getInstance().worldMapInst.selectBlock(3, x, y, z);
                                     return;
                                 } else continue java_goto;
                             }
@@ -386,8 +393,8 @@ class Human implements ProcessorInput, ValueOfHealth {
                                     && camPosition.y + humanVector.y > (y - 3) * b_size + b_size / 2
                                     && y * b_size - 1.5 * b_size > humanVector.y + camPosition.y) {
                                 if (getBlockId(x, y, z) != 'N' && getBlockId(x, y, z) != 'A' && getBlockId(x, y, z) != 'L') {
-                                    if (f) JJEngine.world.setBlock(x + 1, y, z);
-                                    else JJEngine.world.selectBlock(4, x, y, z);
+                                    if (collision) JJEngine.getInstance().worldMapInst.setBlock(x + 1, y, z);
+                                    else JJEngine.getInstance().worldMapInst.selectBlock(4, x, y, z);
                                     return;
                                 } else continue java_goto;
                             }
@@ -399,8 +406,8 @@ class Human implements ProcessorInput, ValueOfHealth {
                                     && camPosition.y + humanVector.y > (y - 3) * b_size + b_size / 2
                                     && y * b_size - 1.5 * b_size > humanVector.y + camPosition.y) {
                                 if (getBlockId(x, y, z) != 'N' && getBlockId(x, y, z) != 'A' && getBlockId(x, y, z) != 'L') {
-                                    if (f) JJEngine.world.setBlock(x - 1, y, z);
-                                    else JJEngine.world.selectBlock(5, x, y, z);
+                                    if (collision) JJEngine.getInstance().worldMapInst.setBlock(x - 1, y, z);
+                                    else JJEngine.getInstance().worldMapInst.selectBlock(5, x, y, z);
                                     return;
                                 } else continue java_goto;
                             }
@@ -411,11 +418,11 @@ class Human implements ProcessorInput, ValueOfHealth {
                                     && camPosition.x + humanVector.x < b_size / 2f - x * b_size + xMapLength / 2f * b_size
                                     && humanVector.z + camPosition.z - b_size / 2 >= zMapLength / 2 * b_size - z * b_size - b_size
                                     && camPosition.z + humanVector.z - b_size / 2.0f < zMapLength / 2.0 * b_size - z * b_size) {
-                                if (!f) {
-                                    JJEngine.world.selectBlock(1, x, y, z);
-                                    JJEngine.world.selectBlock(6, x, y, z);
+                                if (!collision) {
+                                    JJEngine.getInstance().worldMapInst.selectBlock(1, x, y, z);
+                                    JJEngine.getInstance().worldMapInst.selectBlock(6, x, y, z);
                                 } else if (getBlockId(x, y, z) != 'N' && getBlockId(x, y, z) != 'A' && getBlockId(x, y, z) != 'L')
-                                    JJEngine.world.setBlock(x, y - 1, z);
+                                    JJEngine.getInstance().worldMapInst.setBlock(x, y - 1, z);
                                 return;
                             }
                             //столкновение с нижней стенкой
@@ -426,8 +433,8 @@ class Human implements ProcessorInput, ValueOfHealth {
                                     && humanVector.z + camPosition.z - b_size / 2 >= zMapLength / 2 * b_size - z * b_size - b_size
                                     && camPosition.z + humanVector.z - b_size / 2.0f < zMapLength / 2.0 * b_size - z * b_size) {
                                 if (getBlockId(x, y, z) != 'N' && getBlockId(x, y, z) != 'A' && getBlockId(x, y, z) != 'L') {
-                                    if (f) JJEngine.world.setBlock(x, y + 1, z);
-                                    else JJEngine.world.selectBlock(0, x, y, z);
+                                    if (collision) JJEngine.getInstance().worldMapInst.setBlock(x, y + 1, z);
+                                    else JJEngine.getInstance().worldMapInst.selectBlock(0, x, y, z);
                                     return;
                                 } else continue java_goto;
                             }
@@ -436,8 +443,9 @@ class Human implements ProcessorInput, ValueOfHealth {
         }
     }
 
-    //метод, определяющий взаимодейтсвие игрока с элентами на карте
-    private void detectCollision(Vector3 camPosition) {
+    // метод, определяющий взаимодейтсвие игрока с элентами на карте
+    private void detectCollision() {
+        Vector3 camPosition = camera.position;
         stayingOnGround = false;
         for (int x = startX; x < endX; x++)
             for (int y = startY; y < endY; y++)
@@ -524,7 +532,8 @@ class Human implements ProcessorInput, ValueOfHealth {
     }
 
     //метод, удляющий с карты указанный, направлением взгляда, блок
-    private void deleteBlock(Vector3 cameraPosition) {
+    private void deleteBlock() {
+        Vector3 cameraPosition = camera.position;
         int i;
         for (i = 0; i < step; i++) {
             humanVector.set(camera.direction.x, camera.direction.y, camera.direction.z).scl((i + 1) * depth);
@@ -544,7 +553,7 @@ class Human implements ProcessorInput, ValueOfHealth {
                                     || cameraPosition.y + humanVector.y > (y - 3) * b_size + b_size / 2.f
                                     && cameraPosition.y + humanVector.y < y * b_size + depth - b_size / 0.4)) {
 
-                                // one block of world selected
+                                // one block of worldMapInst selected
                                 if (!builderTimer.isActive()) {
                                     if (!(selectedBlockX == x && selectedBlockY == y && selectedBlockZ == z)) {
                                         selectedBlockX = x;
@@ -555,7 +564,7 @@ class Human implements ProcessorInput, ValueOfHealth {
                                     }
 
                                     if (!builderTimer.visible) {
-                                        JJEngine.world.delBlock(x, y, z);
+                                        JJEngine.getInstance().worldMapInst.delBlock(x, y, z);
                                     }
                                 } else {
                                     if (!(selectedBlockX == x && selectedBlockY == y && selectedBlockZ == z)) {

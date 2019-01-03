@@ -7,26 +7,34 @@ import com.vittach.jumpjack.framework.ImageHandler;
 import java.util.HashSet;
 
 public class Preference {
-    static PlayerMusic player = new PlayerMusic();
-    static HashSet<Integer> usedID = new HashSet<Integer>();
-    static InputListener inputListener = new InputListener();
+    public int displayWidth, displayHeight;
 
-    static int screenWidth = Gdx.graphics.getWidth();
-    static int screenHeight = Gdx.graphics.getHeight();
+    public PlayerMusic player = new PlayerMusic();
+    public ImageHandler screenWindow = new ImageHandler();
+    public HashSet<Integer> usedID = new HashSet<Integer>();
+    public InputListener inputListener = new InputListener();
 
-    public static int width, height;
-    public static int windowWidth = 480;
-    public static int windowHeight = 272;
+    public int screenWidth = Gdx.graphics.getWidth();
+    public int screenHeight = Gdx.graphics.getHeight();
 
-    static ImageHandler screenWindow = new ImageHandler();
-
-    static void setWidth(int width1, int width2) {
-        screenWidth = width1;
-        width = width2;
+    void setWidth(int screenWidth, int displayWidth) {
+        this.screenWidth = screenWidth;
+        this.displayWidth = displayWidth;
     }
 
-    static void setHeight(int height1, int height2) {
-        screenHeight = height1;
-        height = height2;
+    void setHeight(int screenHeight, int displayHeight) {
+        this.screenHeight = screenHeight;
+        this.displayHeight = displayHeight;
+    }
+
+    private Preference() { }
+
+    private static Preference instance;
+
+    public synchronized static Preference getInstance() {
+        if (instance == null) {
+            instance = new Preference();
+        }
+        return instance;
     }
 }

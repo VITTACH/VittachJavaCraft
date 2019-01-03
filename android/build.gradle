@@ -63,7 +63,7 @@ task run(type: Exec) {
     }
 
     def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.vittach.jumpjack_alpha/com.vittach.jumpjack_alpha.AndroidLauncher'
+    commandLine "$adb", 'shell', 'am', 'startButton', '-n', 'com.vittach.jumpjack_alpha/com.vittach.jumpjack_alpha.AndroidLauncher'
 }
 
 eclipse {

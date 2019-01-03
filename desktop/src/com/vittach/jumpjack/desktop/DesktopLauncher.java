@@ -11,6 +11,6 @@ public class DesktopLauncher {
         config0.width = 960;
         config0.height= 544;
         config0.title = "JumpJacker";
-        new LwjglApplication(new JJEngine(0), config0);
+        new LwjglApplication(JJEngine.getInstance(0), config0);
     }
 }

@@ -36,6 +36,7 @@ public class WorldMap {
     private Matrix4 transactionMatrix;
     private Map<Vector3, Mesh> meshsMap;
     private List<Mesh> meshes;
+    private JJEngine engineInst = JJEngine.getInstance();
 
     char[][][] worldMap;
     private Vector3 cameraPosition;
@@ -56,20 +57,25 @@ public class WorldMap {
     int mapLengthY;
     int mouseX;
     int mouseY;
-    private int areaSize = 8; // 32 is MAX VALUE
+    private int areaSize = 32; // 32 is MAX VALUE
+    private Texture texture;
 
     public WorldMap() {
         mouseY = 3; // TODO WTF, magical number?
         blockSize = 0.5f;
         transactionMatrix = new Matrix4();
 
+        texture = new Texture(Gdx.files.internal("3d/skyboxSprite.png"));
+
         shader = new ShaderProgram(Gdx.files.internal("glshs/vertex.glsl"), Gdx.files.internal("glshs/fragment.glsl"));
         meshsMap = new ConcurrentHashMap<Vector3, Mesh>();
 
         MeshBuilder builder = new MeshBuilder();
         VertexAttributes attributes = new VertexAttributes(
-                new VertexAttribute(Usage.Position, 3, "a_Position"), new VertexAttribute(Usage.Normal, 3, "a_Normal")
+                new VertexAttribute(Usage.Position, 3, "a_Position"), new VertexAttribute(Usage.Normal, 3, "a_Normal"),
+                new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "a_TexCoord")
         );
+
         builder.begin(attributes, GL20.GL_TRIANGLES);
         builder.box(blockSize, blockSize, blockSize);
         Mesh mesh = builder.end();
@@ -165,7 +171,7 @@ public class WorldMap {
 
     private void updateEnvironment() {
         if (cameraPosition == null) {
-            cameraPosition = JJEngine.human.camera.position;
+            cameraPosition = engineInst.human.camera.position;
         }
 
         environment.clear();
@@ -229,13 +235,13 @@ public class WorldMap {
         }
     }
 
-    // генерация мира (generate world)
-    public void generateWorld(int sizeX, int sizeY, int sizeZ) {
+    // генерация мира (generate worldMapInst)
+    public void createWorld(int sizeX, int sizeY, int sizeZ) {
         this.mapLengthX = sizeX;
         this.mapLengthZ = sizeZ;
         this.mapLengthY = sizeY;
         this.worldMap = new char[sizeX][sizeY][sizeZ];
-        int height = 2 + new Random().nextInt(3);
+        int height = 4;
 
         for (int x = 0; x < sizeX; x++)
             for (int y = 0; y < sizeY; y++)
@@ -243,34 +249,9 @@ public class WorldMap {
                     if (worldMap[x][y][z] == Character.MIN_VALUE) {
                         worldMap[x][y][z] = 'o';
                     }
-                    if (x == sizeX / 2 && z == sizeZ / 2 && y > height && y < height + 3)
+
+                    if (x == sizeX / 2 && z == sizeZ / 2 && y >= height + 1 && y < height + 3) {
                         continue; // do not set blocks on the human place
-                    int randomValue = new Random().nextInt(2);
-                    if (y == height + 2 && new Random().nextInt() % 2 == 1) {
-                        switch (randomValue) {
-                            case 0: // generate wooden wall
-                                int i;
-                                for (i = 1; worldMap[x][y - i][z] == 'o'; i++)
-                                    worldMap[x][y - i][z] = 'D';
-                                if (i > 1) worldMap[x][y][z] = 'B';
-                                break;
-                            case 1: // generate green walls
-                                for (i = 1; worldMap[x][y - i][z] == 'o'; i++)
-                                    worldMap[x][y - i][z] = 'r';
-                                if (i > 1) worldMap[x][y][z] = 'R';
-                                break;
-                        }
-                    } else if (y == height + 1 && (new Random().nextInt()) % 100 == 1) {
-                        // lava generate on the map
-                        if (new Random().nextInt() % 2 == 0)
-                            for (int i = 0; i < 25; i++) {
-                                int genX = new Random().nextInt(6) - 2;
-                                int genZ = new Random().nextInt(6) - 2;
-                                if (x + genX > 0 && x + genX < sizeX && z + genZ > 0 && z + genZ < sizeZ) {
-                                    worldMap[x + genX][y][z + genZ] = 'L';
-                                }
-                            }
-                        else worldMap[x][y][z] = 'A';
                     } else if (y == height + 1 && (new Random().nextInt()) % 100 == 0) {
                         int treeHeight = 6 + new Random().nextInt(7);
                         for (int i = 0; i < treeHeight; i += 1) {
@@ -286,26 +267,27 @@ public class WorldMap {
                             }
                         } else { // generate really big tree
                             worldMap[x][y + treeHeight][z] = 'R';
-                            int bias = new Random().nextInt(2);
-                            for (int i = 3 + bias; i < treeHeight; i += 2) {
+                            for (int i = 3 + new Random().nextInt(2); i < treeHeight; i += 2) {
                                 if (x >= 1) worldMap[x - 1][y + i][z] = 'R';
                                 if (x < sizeX - 1) worldMap[x + 1][y + i][z] = 'R';
                                 if (z >= 1) worldMap[x][y + i][z - 1] = 'R';
                                 if (z < sizeZ - 1) worldMap[x][y + i][z + 1] = 'R';
-                                if (i < treeHeight - 2) {
-                                    if (x < sizeX - 2) worldMap[x + 2][y + i][z] = 'R';
-                                    if (z < sizeZ - 2) worldMap[x][y + i][z + 2] = 'R';
-                                    if (x >= 2) worldMap[x - 2][y + i][z] = 'R';
-                                    if (z >= 2) worldMap[x][y + i][z - 2] = 'R';
-                                    if (z < sizeZ - 1 && x < sizeX - 1) worldMap[x + 1][y + i][z + 1] = 'R';
-                                    if (x < sizeX - 1 && z > 0) worldMap[x + 1][y + i][z - 1] = 'R';
-                                    if (z < sizeZ - 1 && x > 0) worldMap[x - 1][y + i][z + 1] = 'R';
-                                    if (x > 0 && z > 0) worldMap[x - 1][y + i][z - 1] = 'R';
+                                if (i >= treeHeight - 2) {
+                                    continue;
                                 }
+
+                                if (x < sizeX - 2) worldMap[x + 2][y + i][z] = 'R';
+                                if (z < sizeZ - 2) worldMap[x][y + i][z + 2] = 'R';
+                                if (x >= 2) worldMap[x - 2][y + i][z] = 'R';
+                                if (z >= 2) worldMap[x][y + i][z - 2] = 'R';
+                                if (z < sizeZ - 1 && x < sizeX - 1) worldMap[x + 1][y + i][z + 1] = 'R';
+                                if (x < sizeX - 1 && z > 0) worldMap[x + 1][y + i][z - 1] = 'R';
+                                if (z < sizeZ - 1 && x > 0) worldMap[x - 1][y + i][z + 1] = 'R';
+                                if (x > 0 && z > 0) worldMap[x - 1][y + i][z - 1] = 'R';
                             }
                         }
                     } else if (y == height) {
-                        switch (randomValue) { // generate walk road
+                        switch (new Random().nextInt(2)) { // generate walk road
                             case 0:
                                 worldMap[x][y][z] = new Random().nextInt() % 2 == 1? 'b': 'd';
                                 break;
@@ -333,7 +315,7 @@ public class WorldMap {
                     updateMeshMap(xArea, yArea, zArea, mesh);
                 }
 
-        JJEngine.human.setWorld(worldMap);
+        engineInst.human.setWorld(worldMap);
         updateEnvironment();
     }
 
@@ -364,7 +346,7 @@ public class WorldMap {
         if (index > 20) {
             index = 20;
         }
-        float vel = JJEngine.human.oldVelocity;
+        float vel = engineInst.human.oldVelocity;
         if (x >= 0 && x < mapLengthX && y >= 0 && y < mapLengthY && z >= 0 && z < mapLengthZ &&
                 !(cameraPosition.y > (y - 3) * blockSize + vel && cameraPosition.y < y * blockSize &&
                         cameraPosition.x >= -x * blockSize + mapLengthX / 2 * blockSize - blockSize + vel &&
@@ -410,7 +392,7 @@ public class WorldMap {
     }
 
     public void setSkyBox() {
-        // initialize skyBoxModelInst *.obj meshObjects from fileLoader
+        // initialize skyBoxModelInst *.obj meshObjects from fileController
         skyBoxModel = new ObjLoader().loadModel(Gdx.files.internal("3d/skyBoxModel.obj"));
     }
 
@@ -418,26 +400,28 @@ public class WorldMap {
         // claimRegion();
         System.out.println("fps " + Gdx.graphics.getFramesPerSecond());
 
-        cameraPosition = JJEngine.human.camera.position;
-
         viewport.apply();
 
-        PerspectiveCamera perspectiveCams = JJEngine.human.getCamera();
+        PerspectiveCamera perspectiveCam = engineInst.human.getCamera();
 
+        cameraPosition = perspectiveCam.position;
+
+        texture.bind();
         shader.begin();
-        shader.setUniformMatrix("modelView", perspectiveCams.combined);
-        shader.setUniformf("uCameraFar", perspectiveCams.far);
-        shader.setUniformf("uLightPosition", perspectiveCams.position);
+        shader.setUniformMatrix("modelView", perspectiveCam.combined);
+        shader.setUniformf("uCameraFar", perspectiveCam.far);
+        shader.setUniformf("uLightPosition", perspectiveCam.position);
 
         for (Map.Entry<Vector3, Mesh> entries : meshsMap.entrySet()) {
             transactionMatrix.setToTranslation(entries.getKey());
             shader.setUniformMatrix("model", transactionMatrix);
+            // shader.setUniformi("u_texture", 0);
             entries.getValue().render(shader, GL20.GL_TRIANGLES);
         }
         shader.end();
 
-        modelBatch.begin(perspectiveCams);
-        modelBatch.render(new ModelInstance(skyBoxModel, JJEngine.human.camera.position));
+        modelBatch.begin(perspectiveCam);
+        modelBatch.render(new ModelInstance(skyBoxModel, engineInst.human.camera.position));
         modelBatch.render(highlights);
         modelBatch.end();
     }

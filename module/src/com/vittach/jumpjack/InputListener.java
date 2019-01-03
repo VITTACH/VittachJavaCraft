@@ -5,90 +5,92 @@ import com.badlogic.gdx.InputProcessor;
 import java.util.ArrayList;
 
 public class InputListener implements InputProcessor, ProcessorInput {
-    private boolean all_proc;
-    private int numberOf_ID = 0;
-    private ArrayList<ProcessorInput>
-            proces = new ArrayList<ProcessorInput>();
+    private boolean allProcess;
+    private int idCounter = 0;
+    private ArrayList<ProcessorInput> processes = new ArrayList<ProcessorInput>();
 
-    void clnProces() {
-        proces.clear();
+    void cleanProcesses() {
+        processes.clear();
     }
 
     @Override
-    public boolean scrolled(int mont) {
+    public boolean scrolled(int amount) {
         return true;
     }
 
-    void addListener(ProcessorInput p) {
-        p.setIDOffset(numberOf_ID++);
-        proces.add(p);
+    void addListener(ProcessorInput processorInput) {
+        processorInput.setIDOffset(idCounter++);
+        processes.add(processorInput);
     }
 
-    void delProces(ProcessorInput p) {
-        proces.remove(p);
+    void delProces(ProcessorInput processorInput) {
+        processes.remove(processorInput);
     }
 
-    public void setIDOffset(int iset) {
-        numberOf_ID = iset;
-    }
-
-    @Override
-    public boolean keyUp(int id_key) {
-        all_proc = true;
-        for (ProcessorInput Procs : proces)
-            all_proc = all_proc && Procs.keyUp(id_key);
-        return all_proc;
+    public void setIDOffset(int offset) {
+        idCounter = offset;
     }
 
     @Override
-    public boolean keyDown(int i_key) {
-        all_proc = true;
-        for (ProcessorInput Proces : proces)
-            all_proc = all_proc && Proces.keyDown(i_key);
-        return all_proc;
+    public boolean keyUp(int idKey) {
+        allProcess = true;
+        for (ProcessorInput process : processes) {
+            allProcess = allProcess && process.keyUp(idKey);
+        }
+        return allProcess;
     }
 
     @Override
-    public boolean keyTyped(char chr) {
-        all_proc = true;
-        for (ProcessorInput Proces : proces)
-            all_proc = all_proc && Proces.keyTyped(chr);
-        return all_proc;
+    public boolean keyDown(int idkey) {
+        allProcess = true;
+        for (ProcessorInput process : processes) {
+            allProcess = allProcess && process.keyDown(idkey);
+        }
+        return allProcess;
     }
 
     @Override
-    public boolean
-    mouseMoved(int screnx, int screny) {
-        all_proc = true;
-        for (ProcessorInput Proces : proces)
-            all_proc = all_proc && Proces.mouseMoved(screnx, screny);
-        return all_proc;
+    public boolean keyTyped(char code) {
+        allProcess = true;
+        for (ProcessorInput process : processes) {
+            allProcess = allProcess && process.keyTyped(code);
+        }
+        return allProcess;
     }
 
     @Override
-    public boolean
-    touchDragged(int x, int y, int numb_ID) {
-        all_proc = true;
-        for (ProcessorInput Proces : proces)
-            all_proc = all_proc && Proces.touchDragged(x, y, numb_ID);
-        return all_proc;
+    public boolean mouseMoved(int screenX, int screnY) {
+        allProcess = true;
+        for (ProcessorInput process : processes) {
+            allProcess = allProcess && process.mouseMoved(screenX, screnY);
+        }
+        return allProcess;
     }
 
     @Override
-    public boolean
-    touchUp(int x, int y, int pointer, int id) {
-        all_proc = true;
-        for (ProcessorInput Proces : proces)
-            all_proc = all_proc && Proces.touchUp(x, y, pointer, id);
-        return all_proc;
+    public boolean touchDragged(int x, int y, int pointer) {
+        allProcess = true;
+        for (ProcessorInput process : processes) {
+            allProcess = allProcess && process.touchDragged(x, y, pointer);
+        }
+        return allProcess;
     }
 
     @Override
-    public boolean
-    touchDown(int x, int y, int ipointer, int p) {
-        all_proc = true;
-        for (ProcessorInput proc : proces)
-            all_proc = all_proc && proc.touchDown(x, y, ipointer, p);
-        return all_proc;
+    public boolean touchUp(int x, int y, int pointer, int pid) {
+        allProcess = true;
+        for (ProcessorInput process : processes) {
+            allProcess = allProcess && process.touchUp(x, y, pointer, pid);
+        }
+        return allProcess;
+    }
+
+    @Override
+    public boolean touchDown(int x, int y, int pointer, int p) {
+        allProcess = true;
+        for (ProcessorInput process : processes) {
+            allProcess = allProcess && process.touchDown(x, y, pointer, p);
+        }
+        return allProcess;
     }
 }

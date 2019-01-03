@@ -37,7 +37,7 @@ public class HealthBar extends ScreenButton {
 
         if (healthValue != oldHealthValue) {
             textMessage = String.valueOf(healthValue);
-            backgroundHandler.blit(background);
+            screen.blit(background);
             oldHealthValue = healthValue;
             if (healthValue > 99) {
                 font.setPixelSizes(6);
@@ -54,28 +54,28 @@ public class HealthBar extends ScreenButton {
             }
 
             if (healthValue > 75) {
-                backgroundHandler.blit(4, 4, leftDownPiece);
-                backgroundHandler.blit(27, 4, rightDownPiece);
-                backgroundHandler.blit(4, 26, leftUpPiece);
-                backgroundHandler.blit(27, 26, rightUpPiece);
+                screen.blit(4, 4, leftDownPiece);
+                screen.blit(27, 4, rightDownPiece);
+                screen.blit(4, 26, leftUpPiece);
+                screen.blit(27, 26, rightUpPiece);
             }
             if (healthValue > 50 && healthValue <= 75) {
-                backgroundHandler.blit(4, 4, leftDownPiece);
-                backgroundHandler.blit(27, 4, rightDownPiece);
-                backgroundHandler.blit(27, 26, rightUpPiece);
+                screen.blit(4, 4, leftDownPiece);
+                screen.blit(27, 4, rightDownPiece);
+                screen.blit(27, 26, rightUpPiece);
             }
             if (healthValue > 25 && healthValue <= 50) {
-                backgroundHandler.blit(27, 4, rightDownPiece);
-                backgroundHandler.blit(27, 26, rightUpPiece);
+                screen.blit(27, 4, rightDownPiece);
+                screen.blit(27, 26, rightUpPiece);
             }
             if (healthValue > 0 && healthValue <= 25)
-                backgroundHandler.blit(27, 26, rightUpPiece);
+                screen.blit(27, 26, rightUpPiece);
         }
     }
 
     public void display(Viewport viewport) {
         chgHealth();
-        MyDisplay(viewport);
+        show(viewport);
     }
 
     public void dispose() {

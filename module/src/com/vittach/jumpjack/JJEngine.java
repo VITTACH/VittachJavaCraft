@@ -6,113 +6,119 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.ArrayList;
 
 public class JJEngine extends ApplicationAdapter {
-    static Human human;
-    static int deviceId = 1;
-    static WorldMap world;
-    static LoadAndSave fileLoader;
-    static Control leftStick;
-    static Control rightStick;
+    public int deviceId;
+    public int currentScreen = 2;
+    
+    public FirstPersonController human;
+    public WorldMap worldMapInst;
+    public FileController fileController;
 
-    ShapeRenderer cursor;
-    CurrentBlock currentBlock;
-    DeathWin deathWin;
-    Explorer explorer;
-    public Viewport viewport;
-    NewCreate news;
-    StartMenu menu;
-    HealthBar healthBar;
-    SelectBoxs selectBoxs;
-    private OrthographicCamera orthoCamera;
-    int screen = 2;
-    private ArrayList<GameScreen> screenList;
+    public BlockSelector blockSelector;
+    public CurrentBlock currentBlock;
+    public FileExplorer fileExplorer;
+    public WorldCreator worldCreator;
+    public StartMenu startMenuInst;
+    
+    private Preference prefInst;
 
-    public JJEngine(int deviceId) {
-        JJEngine.deviceId = deviceId;
+    public float renderWidth = 480;
+    public float renderHeight = 272;
+
+    private Viewport viewport;
+    private OrthographicCamera orthographicCamera;
+
+    private ArrayList<GameScreen> screens;
+
+    private static JJEngine instance;
+
+    private JJEngine(int deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public static JJEngine getInstance() {
+        return getInstance(0);
+    }
+
+    public static synchronized JJEngine getInstance(int deviceId) {
+        if (instance == null) {
+            instance = new JJEngine(deviceId);
+        }
+        return instance;
     }
 
     @Override
     public void create() {
         currentBlock = new CurrentBlock();
-        explorer = new Explorer();
-        deathWin = new DeathWin();
-        world = new WorldMap();
-        news = new NewCreate();
-        menu = new StartMenu();
-        Preference.inputListener.addListener(menu);
-        selectBoxs = new SelectBoxs();
+        fileExplorer = new FileExplorer();
+        worldCreator = new WorldCreator();
+        startMenuInst = new StartMenu();
+        worldMapInst = new WorldMap();
+        blockSelector = new BlockSelector();
 
-        human = new Human(deviceId);
-        healthBar = new HealthBar(human);
+        prefInst = Preference.getInstance();
+        prefInst.inputListener.addListener(startMenuInst);
 
-        world.setSkyBox();
-        fileLoader = new LoadAndSave(world);
+        human = new FirstPersonController(deviceId);
 
-        Preference.player.load("1.ogg");
-        Preference.player.setLoop(true);
-        Preference.player.setVolume(1f);
-        Preference.player.play();
+        worldMapInst.setSkyBox();
+        fileController = new FileController(worldMapInst);
 
-        screenList = new ArrayList<GameScreen>();
-        screenList.add(new GamePlay(this));
-        screenList.add(new GameStop(this));
-        screenList.add(new MainMenu(this));
-        screenList.add(new NewWorld(this));
-        screenList.add(new LoadSave(this));
+        prefInst.player.load("1.ogg");
+        prefInst.player.setLoop(true);
+        prefInst.player.setVolume(1f);
+        prefInst.player.play();
 
-        cursor = new ShapeRenderer();
+        screens = new ArrayList<GameScreen>();
+        screens.add(new GamePlay());
+        screens.add(new GameStop());
+        screens.add(new MainMenu());
+        screens.add(new NewWorld());
+        screens.add(new LoadSave());
 
-        currentBlock.setPosition(Preference.windowWidth - currentBlock.background.getWidth() - 5,
-                Preference.windowHeight - currentBlock.background.getHeight() - 5);
+        currentBlock.setPosition(renderWidth - currentBlock.background.getWidth(),
+                renderHeight - currentBlock.background.getHeight());
 
-        healthBar.setPosition(5, Preference.windowHeight - healthBar.background.getHeight() - 5);
+        orthographicCamera = new OrthographicCamera();
+        orthographicCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        orthoCamera = new OrthographicCamera();
-        orthoCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        viewport = new FitViewport(renderWidth, renderHeight, orthographicCamera);
+        prefInst.inputListener.addListener(startMenuInst.gameButton);
+        prefInst.inputListener.addListener(startMenuInst.loadButton);
+        prefInst.inputListener.addListener(startMenuInst.exitButton);
 
-        viewport = new FitViewport(Preference.windowWidth, Preference.windowHeight, orthoCamera);
-        Preference.inputListener.addListener(menu.game);
-        Preference.inputListener.addListener(menu.load);
-        Preference.inputListener.addListener(menu.exit);
-
-        Gdx.input.setInputProcessor(Preference.inputListener);
+        Gdx.input.setInputProcessor(prefInst.inputListener);
     }
 
     @Override
     public void resize(int width, int height) {
-        if (deviceId == 1) {
-            leftStick.setJP();
-        }
-
-        orthoCamera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
+        orthographicCamera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
 
         viewport.update(width, height);
-        Preference.setWidth(viewport.getScreenWidth(), width);
-        Preference.setHeight(viewport.getScreenHeight(), height);
-        cursor.setProjectionMatrix(orthoCamera.combined);
+        prefInst.setWidth(viewport.getScreenWidth(), width);
+        prefInst.setHeight(viewport.getScreenHeight(), height);
     }
 
     @Override
     public void render() {
-        orthoCamera.update();
+        orthographicCamera.update();
+
         Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        screenList.get(screen).render(viewport);
+
+        screens.get(currentScreen).render(viewport);
     }
 
     @Override
     public void dispose() {
         currentBlock.dispose();
-        deathWin.dispose();
-        healthBar.dispose();
-        selectBoxs.dispose();
-        news.dispose();
-        menu.dispose();
-        explorer.dispose();
-        world.dispose();
+        blockSelector.dispose();
+        worldMapInst.dispose();
+        worldCreator.dispose();
+        startMenuInst.dispose();
+        fileExplorer.dispose();
     }
 }

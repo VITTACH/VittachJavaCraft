@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.ArrayList;
 
-public class Explorer extends InputListener {
+public class FileExplorer extends InputListener {
     private MyTimer scroll;
     private ColorImpl color;
     private SpriteBatch spriteBatch;
@@ -65,7 +65,7 @@ public class Explorer extends InputListener {
         }
     }
 
-    public Explorer() {
+    public FileExplorer() {
         scroll = new MyTimer();
         FontHandler buttonFont = new FontHandler();
         dirFont = new FontHandler();
@@ -101,8 +101,8 @@ public class Explorer extends InputListener {
 
         backButton.choice.load("ui/startChoice.png");
         backButton.background.load("ui/startButton.png");
-        backButton.backgroundHandler.blit(backButton.background);
-        backButton.setPosition(Preference.windowWidth / 2 - backButton.background.getWidth() / 2, 68);
+        backButton.screen.blit(backButton.background);
+        backButton.setPosition(JJEngine.getInstance().renderWidth / 2 - backButton.background.getWidth() / 2, 68);
         backButton.font = buttonFont;
         backButton.textY = 19;
         backButton.textX = 90;
@@ -110,8 +110,8 @@ public class Explorer extends InputListener {
 
         acceptButton.choice.load("ui/startChoice.png");
         acceptButton.background.load("ui/startButton.png");
-        acceptButton.backgroundHandler.blit(acceptButton.background);
-        acceptButton.setPosition(Preference.windowWidth / 2 - acceptButton.background.getWidth() / 2, 98);
+        acceptButton.screen.blit(acceptButton.background);
+        acceptButton.setPosition(JJEngine.getInstance().renderWidth / 2 - acceptButton.background.getWidth() / 2, 98);
         acceptButton.font = buttonFont;
         acceptButton.textY = 19;
         acceptButton.textX = 79;
@@ -119,16 +119,16 @@ public class Explorer extends InputListener {
 
         loadButton.choice.load("ui/startChoice.png");
         loadButton.background.load("ui/startButton.png");
-        loadButton.backgroundHandler.blit(loadButton.background);
-        loadButton.setPosition(Preference.windowWidth / 2 - loadButton.background.getWidth() / 2, 184);
+        loadButton.screen.blit(loadButton.background);
+        loadButton.setPosition(JJEngine.getInstance().renderWidth / 2 - loadButton.background.getWidth() / 2, 184);
         loadButton.font = buttonFont;
         loadButton.textY = 19;
         loadButton.textX = 74;
         loadButton.textMessage = "hadpshja";
 
-        selectSprite = selectedLine.flip();
+        selectSprite = selectedLine.render();
         selectSprite.setPosition(123, biasY - selectedLine.getHeight() + 1);
-        sprite = background.flip();
+        sprite = background.render();
         updateDir();
         getCurDir();
     }
@@ -136,18 +136,18 @@ public class Explorer extends InputListener {
     @Override
     public boolean
     touchDown(int x, int y, int id, int b) {
-        scaleY = Preference.screenHeight / (float) Preference.windowHeight;
-        scaleX = Preference.screenWidth / (float) Preference.windowWidth;
+        scaleY = Preference.getInstance().screenHeight / (float) JJEngine.getInstance().renderHeight;
+        scaleX = Preference.getInstance().screenWidth / (float) JJEngine.getInstance().renderWidth;
 
         if (savedFiles.size() > 0) {
-            if (acceptButton.MyTouch_Down(x, y)) delMaps();
-            if (loadButton.MyTouch_Down(x, y)) pressedKey = 1;
+            if (acceptButton.touchDown(x, y)) delMaps();
+            if (loadButton.touchDown(x, y)) pressedKey = 1;
         }
 
-        if (backButton.MyTouch_Down(x, y)) pressedKey = 2;
+        if (backButton.touchDown(x, y)) pressedKey = 2;
 
-        y = Preference.height - y - (Preference.height - Preference.screenHeight) / 2;
-        x -= (Preference.width - Preference.screenWidth) / 2;
+        y = Preference.getInstance().displayHeight - y - (Preference.getInstance().displayHeight - Preference.getInstance().screenHeight) / 2;
+        x -= (Preference.getInstance().displayWidth - Preference.getInstance().screenWidth) / 2;
         id = (countOfFiles <= 3) ? countOfFiles : 3;
 
         for (int i = 0; i < id; i++) {
@@ -164,8 +164,8 @@ public class Explorer extends InputListener {
 
     @Override
     public boolean touchDragged(int xpos, int ypos, int TID) {
-        ypos = Preference.height - ypos - (Preference.height - Preference.screenHeight) / 2;
-        xpos -= (Preference.width - Preference.screenWidth) / 2;
+        ypos = Preference.getInstance().displayHeight - ypos - (Preference.getInstance().displayHeight - Preference.getInstance().screenHeight) / 2;
+        xpos -= (Preference.getInstance().displayWidth - Preference.getInstance().screenWidth) / 2;
         if (xpos >= selectSprite.getX() * scaleX && xpos <= biasX + selectedLine.getWidth() * scaleX
                 && ypos <= biasY * scaleY && ypos >= biasY * scaleY - scaleY * selectedLine.getHeight() * 3) {
             positionY = ypos;
@@ -178,14 +178,14 @@ public class Explorer extends InputListener {
         int j = 0, i;
         for (i = start; i < countOfFiles; i++, j++) {
             imageHandler.fontPrint(dirFont, biasX, biasY - 2 - j * stepY, i + ") " + savedFiles.get(i).name().replace(".JJ", ""), color);
-            imageHandler.fontPrint(dirFont, Preference.windowWidth / 2, biasY - 2 - j * stepY, "~" + (System.currentTimeMillis() - savedFiles.
+            imageHandler.fontPrint(dirFont, JJEngine.getInstance().renderWidth / 2, biasY - 2 - j * stepY, "~" + (System.currentTimeMillis() - savedFiles.
                     get(i).lastModified()) / 3600000 + " hrs ago", color);
         }
         if (countOfFiles < 3 && old > 0) {
             i = --old - start;
             selectSprite.setPosition(123, (-i - 1) * stepY + biasY);
         }
-        dirSprite = imageHandler.flip();
+        dirSprite = imageHandler.render();
     }
 
     public void Display(Viewport iview) {
@@ -201,9 +201,9 @@ public class Explorer extends InputListener {
             selectSprite.draw(spriteBatch);
         }
         spriteBatch.end();
-        backButton.MyDisplay(iview);
-        loadButton.MyDisplay(iview);
-        acceptButton.MyDisplay(iview);
+        backButton.show(iview);
+        loadButton.show(iview);
+        acceptButton.show(iview);
     }
 
     public void scrol(int yPosition) {

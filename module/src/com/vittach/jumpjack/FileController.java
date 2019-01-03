@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector3;
 
 import java.io.*;
 
-public class LoadAndSave implements Serializable {
+public class FileController implements Serializable {
 
     private int healthValue;
     private char[][][] worldMap;
@@ -22,22 +22,24 @@ public class LoadAndSave implements Serializable {
     private float newPositionY;
     private float oldPositionY;
 
-    LoadAndSave(WorldMap worldMapObj) {
+    private transient JJEngine engineInst = JJEngine.getInstance();
+
+    public FileController(WorldMap worldMapObj) {
         map = worldMapObj;
     }
 
     public void saveWorld() {
         try {
             worldMap = map.worldMap;
-            upVector = JJEngine.human.camera.up;
-            healthValue = JJEngine.human.healthValue;
-            newPositionY = JJEngine.human.camNewPositionY;
-            oldPositionY = JJEngine.human.camOldPositionY;
+            upVector = engineInst.human.camera.up;
+            healthValue = engineInst.human.getHealthValue();
+            newPositionY = engineInst.human.camNewPositionY;
+            oldPositionY = engineInst.human.camOldPositionY;
             red = map.redColor;
             blue = map.blueColor;
             green = map.greenColor;
-            vectorHumanPosition = JJEngine.human.camera.position;
-            vectorCamDirection = JJEngine.human.camera.direction;
+            vectorHumanPosition = engineInst.human.camera.position;
+            vectorCamDirection = engineInst.human.camera.direction;
 
             ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName));
             outputStream.writeObject(this);
@@ -52,21 +54,21 @@ public class LoadAndSave implements Serializable {
     public void loadWorld() {
         try {
             ObjectInputStream objInputStream = new ObjectInputStream(new FileInputStream(fileName));
-            LoadAndSave world = (LoadAndSave) objInputStream.readObject();
+            FileController world = (FileController) objInputStream.readObject();
 
             map.worldMap = world.worldMap;
             map.mapLengthX = map.worldMap.length;
             map.mapLengthY = map.worldMap[1].length;
             map.mapLengthZ = map.worldMap[1][1].length;
-            JJEngine.human.healthValue = world.healthValue;
-            JJEngine.human.camera.up.set(world.upVector);
-            JJEngine.human.camOldPositionY = world.oldPositionY;
-            JJEngine.human.camNewPositionY = world.newPositionY;
+            engineInst.human.setHealthValue(world.healthValue);
+            engineInst.human.camera.up.set(world.upVector);
+            engineInst.human.camOldPositionY = world.oldPositionY;
+            engineInst.human.camNewPositionY = world.newPositionY;
             map.redColor = world.red;
             map.blueColor = world.blue;
             map.greenColor = world.green;
-            JJEngine.human.camera.direction.set(world.vectorCamDirection);
-            JJEngine.human.camera.position.set(world.vectorHumanPosition);
+            engineInst.human.camera.direction.set(world.vectorCamDirection);
+            engineInst.human.camera.position.set(world.vectorHumanPosition);
             map.build();
             objInputStream.close();
         } catch (IOException ioe) {
