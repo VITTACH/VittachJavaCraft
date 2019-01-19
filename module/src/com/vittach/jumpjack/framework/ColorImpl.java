@@ -13,7 +13,7 @@ public class ColorImpl {
         this(x, y, z, 1);
     }
 
-    public Color color() {
+    public Color getColor() {
         return color;
     }
 }

@@ -3,40 +3,31 @@ package com.vittach.jumpjack.framework;
 import java.io.Serializable;
 
 public class MyTimer implements Serializable {
-    public boolean visible = false;
-    private long delay = 0;
-    private long start, currentTime;
+    private long endTime;
+    private long startTime;
+    private long currentTime;
 
-    public void start(long dela) {
-        delay = dela;
-        start = System.currentTimeMillis();
+    public void start(long timeOffset) {
+        this.endTime = timeOffset;
+        startTime = System.currentTimeMillis();
     }
 
     public boolean isActive() {
-        if (delay > 0) {
-            if ((currentTime = System.currentTimeMillis() - start) < delay) {
+        if (endTime > 0) {
+            if ((currentTime = System.currentTimeMillis() - startTime) < endTime) {
                 return true;
             } else {
-                visible = false;
                 stop();
             }
         }
         return false;
     }
 
-    public void set_Start(long start) {
-        this.start = start;
-    }
-
     public float getCurTime() {
-        return (delay == 0) ? 0 : currentTime / 1000f;
-    }
-
-    public long getMe_Start() {
-        return start;
+        return (endTime == 0) ? 0 : currentTime / 1000f;
     }
 
     public void stop() {
-        delay = 0;
+        endTime = 0;
     }
 }

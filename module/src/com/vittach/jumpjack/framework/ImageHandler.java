@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -13,21 +12,26 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.vittach.jumpjack.JJEngine;
 
 public class ImageHandler {
-    private int rotateAngle = 0;
+    private int rotationAngle = 0;
     private FrameBuffer frameBuffer;
     private SpriteBatch spriteBatch = new SpriteBatch();
     private OrthographicCamera orthographicCamera = new OrthographicCamera();
 
+    public void dispose() {
+        frameBuffer.dispose();
+        spriteBatch.dispose();
+    }
+
     public ImageHandler() {
-        int displayWidth = (int) JJEngine.getInstance().renderWidth;
-        int displayHeight = (int) JJEngine.getInstance().renderHeight;
-        frameBuffer = new FrameBuffer(Format.RGBA4444, displayWidth, displayHeight, true);
-        setCamera(displayWidth, displayHeight);
+        int renderWidth = (int) JJEngine.getInstance().renderWidth;
+        int renderHeight = (int) JJEngine.getInstance().renderHeight;
+        frameBuffer = new FrameBuffer(Format.RGBA4444, renderWidth, renderHeight, true);
+        setCamera(renderWidth, renderHeight);
     }
 
     public ImageHandler clone(ImageHandler img) {
         frameBuffer = img.frameBuffer;
-        rotateAngle = img.rotateAngle;
+        rotationAngle = img.rotationAngle;
         spriteBatch = img.spriteBatch;
         return this;
     }
@@ -40,20 +44,18 @@ public class ImageHandler {
         blit(0, 0, img);
     }
 
-    public void blit(float x, float y, ImageHandler image, int m, int n, int w, int h) {
-        TextureRegion textureRegion;
+    public void blit(float x, float y, ImageHandler img, int m, int n, int w, int h) {
         Sprite sprite;
         frameBuffer.begin();
         spriteBatch.begin();
         if (w != 0 && h != 0) {
-            textureRegion = new TextureRegion(image.render().getTexture(), m, n, w, h);
-            sprite = new Sprite(textureRegion);
+            sprite = new Sprite(img.getTexture(), m, n, w, h);
             sprite.setPosition(x, y);
-            sprite.rotate(image.rotateAngle);
+            sprite.rotate(img.rotationAngle);
             sprite.flip(false, true);
             sprite.draw(spriteBatch);
         } else {
-            sprite = image.render();
+            sprite = img.render();
             sprite.setPosition(x, y);
             sprite.draw(spriteBatch);
         }
@@ -67,7 +69,7 @@ public class ImageHandler {
         setCamera(blankTexture.getWidth(), blankTexture.getHeight());
         frameBuffer.begin();
         spriteBatch.begin();
-        spriteBatch.draw(blankTexture, 0.0f, 0);
+        spriteBatch.draw(blankTexture, 0.f, 0.f);
         spriteBatch.end();
         frameBuffer.end();
         blankTexture.dispose();
@@ -76,14 +78,18 @@ public class ImageHandler {
 
     public Sprite render() {
         Sprite buffer = new Sprite(frameBuffer.getColorBufferTexture());
-        buffer.rotate(rotateAngle);
+        buffer.rotate(rotationAngle);
         buffer.flip(false, true);
         return buffer;
     }
 
+    public Texture getTexture() {
+        return frameBuffer.getColorBufferTexture();
+    }
+
     public void fontPrint(FontHandler font, float x, float y, String text, ColorImpl color) {
-        BitmapFont fnt = font.getFont();
-        fnt.setColor(color.color());
+        BitmapFont fnt = font.getBitmapFont();
+        fnt.setColor(color.getColor());
         frameBuffer.begin();
         spriteBatch.begin();
         fnt.draw(spriteBatch, text, x, y);
@@ -95,7 +101,7 @@ public class ImageHandler {
         ShapeRenderer shape = new ShapeRenderer();
         frameBuffer.begin();
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.setColor(clr.color());
+        shape.setColor(clr.getColor());
         shape.rect(0, 0, frameBuffer.getWidth(), frameBuffer.getHeight());
         shape.end();
         frameBuffer.end();
@@ -108,17 +114,17 @@ public class ImageHandler {
     }
 
     public void clear() {
-        createEmpty(this.frameBuffer.getWidth(), frameBuffer.getHeight());
+        setEmpty(this.frameBuffer.getWidth(), this.frameBuffer.getHeight());
     }
 
-    public void createEmpty(int width, int height) {
-        setCamera(width, height);
+    public void setEmpty(int width, int height) {
         frameBuffer.dispose();
-        frameBuffer = new FrameBuffer(Format.RGBA4444, width,height,true);
+        frameBuffer = new FrameBuffer(Format.RGBA4444, width, height, true);
+        setCamera(width, height);
     }
 
     public void rotate(int degree) {
-        rotateAngle = degree;
+        rotationAngle = degree;
     }
 
     public int getHeight() {
@@ -127,10 +133,5 @@ public class ImageHandler {
 
     public int getWidth() {
         return frameBuffer.getWidth();
-    }
-
-    public void dispose() {
-        frameBuffer.dispose();
-        spriteBatch.dispose();
     }
 }

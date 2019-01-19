@@ -13,238 +13,248 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import java.util.ArrayList;
 
 public class FileExplorer extends InputListener {
-    private MyTimer scroll;
     private ColorImpl color;
-    private SpriteBatch spriteBatch;
-    private ImageHandler background;
-
-    public ScreenButton acceptButton;
-    public ScreenButton backButton;
-    public ScreenButton loadButton;
-
-    private int oldY = -1;
-    private int positionY = -1;
-    public int pressedKey = -1;
-    private int countOfFiles = -1;
-    private ArrayList<FileHandle> savedFiles;
-    private float scaleX;
-    private float scaleY;
-    private int start;
-    private int stepY;
-    private int old;
-    private int biasX = 126;
-    private int biasY = 183;
-
+    private MyTimer scrollTimer;
+    
     private Sprite sprite;
     private Sprite dirSprite;
     private Sprite selectSprite;
-    private FontHandler dirFont;
-    private ImageHandler dirGoBack;
-    private ImageHandler selectedLine;
-    private ImageHandler imageHandler;
+    private SpriteBatch spriteBatch;
+
+    public ScreenButton sartButton;
+    public ScreenButton backButton;
+    public ScreenButton loadButton;
+
+    public int pressedKey = -1;
+
+    private ArrayList<FileHandle> fileHandles;
+    private int stepY;
+    private int oldIndex;
+    private int startIndex;
+    private int positionY = -1;
+    private int oldPositionY = -1;
+    private int countOfFiles = -1;
+    private int offsetX = 126;
+    private int offsetY = 183;
+
+    private float scaleX;
+    private float scaleY;
+    
+    private FontHandler arcadepixFont;
+
+    private ImageHandler screen;
+    private ImageHandler dirBackgroundImage;
+    private ImageHandler dirForegroundImage;
     private ImageHandler backgroundImage;
+    private ImageHandler foregroundImage;
+    
+    private Preference prefInst = Preference.getInstance();
+    private JJEngine engineInst = JJEngine.getInstance();
 
     @Override
     public boolean keyDown(int ikey) {
-        if (ikey == 19) scrol(oldY++);
-        if (ikey == 20) scrol(oldY--);
+        if (ikey == 19) scroll(oldPositionY++);
+        if (ikey == 20) scroll(oldPositionY--);
         return true;
     }
 
     public void updateDir() {
-        savedFiles.clear();
-        countOfFiles = (start = 0) - 1;
-        for (FileHandle file : Gdx.files.local("").list())
-            if (file.name().contains(".JJ"))
-                savedFiles.add(file);
+        fileHandles.clear();
+        countOfFiles = (startIndex = 0) - 1;
+        for (FileHandle file : Gdx.files.local("").list()) {
+            if (file.name().contains(".JJ")) {
+                fileHandles.add(file);
+            }
+        }
+
         if (countOfFiles < 0) {
-            countOfFiles = savedFiles.size();
+            countOfFiles = fileHandles.size();
             if (countOfFiles > 3) {
                 countOfFiles = 3;
             }
         }
     }
 
+    public void dispose() {
+        arcadepixFont.dispose();
+        dirBackgroundImage.dispose();
+        backgroundImage.dispose();
+        spriteBatch.dispose();
+        screen.dispose();
+        sartButton.dispose();
+        dirForegroundImage.dispose();
+        foregroundImage.dispose();
+        backButton.dispose();
+        loadButton.dispose();
+    }
+
     public FileExplorer() {
-        scroll = new MyTimer();
-        FontHandler buttonFont = new FontHandler();
-        dirFont = new FontHandler();
-        dirGoBack = new ImageHandler();
-        selectedLine = new ImageHandler();
-        imageHandler = new ImageHandler();
-        backgroundImage = new ImageHandler();
+        scrollTimer = new MyTimer();
+        arcadepixFont = new FontHandler();
+        foregroundImage = new ImageHandler().load("ui/foreground.png");
+        backgroundImage = new ImageHandler().load("ui/background.png");
+        dirBackgroundImage = new ImageHandler().load("ui/dirBackground.png");
+        dirForegroundImage = new ImageHandler().load("ui/dirForeground.png");
+        screen = new ImageHandler();
 
+        sartButton = new ScreenButton();
+        sartButton.choice = new ImageHandler();
         backButton = new ScreenButton();
-        loadButton = new ScreenButton();
-        acceptButton = new ScreenButton();
-
         backButton.choice = new ImageHandler();
+        loadButton = new ScreenButton();
         loadButton.choice = new ImageHandler();
-        acceptButton.choice = new ImageHandler();
 
-        background = new ImageHandler();
         color = new ColorImpl(1, 1, 1, 1);
-        savedFiles = new ArrayList<FileHandle>();
+        fileHandles = new ArrayList<FileHandle>();
         spriteBatch = new SpriteBatch();
-        dirFont.load("arcadepix.ttf");
-        buttonFont.load("jumpjack.ttf");
-        dirFont.setPixelSizes(14);
-        buttonFont.setPixelSizes(12);
-        backgroundImage.load("ui/foreground.png");
-        background.load("ui/background.png");
-        stepY = dirFont.getSize() + 2;
+        arcadepixFont.load("arcadepix.ttf");
+        arcadepixFont.setPixelSize(14);
+        stepY = arcadepixFont.getSize() + 2;
 
-        dirGoBack.load("ui/dirBackground.png");
-        selectedLine.load("ui/dirForeground.png");
-        backgroundImage.blit(66, 102, dirGoBack);
-        background.blit(54, 27, backgroundImage);
+        foregroundImage.blit(66, 102, dirBackgroundImage);
+        backgroundImage.blit(54, 27, foregroundImage);
 
+        FontHandler buttonsFont = new FontHandler();
+        buttonsFont.load("jumpjack.ttf");
+        buttonsFont.setPixelSize(12);
+        
         backButton.choice.load("ui/startChoice.png");
         backButton.background.load("ui/startButton.png");
         backButton.screen.blit(backButton.background);
-        backButton.setPosition(JJEngine.getInstance().renderWidth / 2 - backButton.background.getWidth() / 2, 68);
-        backButton.font = buttonFont;
+        backButton.setPosition(engineInst.renderWidth / 2 - backButton.getWidth() / 2f, 68);
+        backButton.font = buttonsFont;
         backButton.textY = 19;
         backButton.textX = 90;
-        backButton.textMessage = "mahae";
+        backButton.message = "mahae";
 
-        acceptButton.choice.load("ui/startChoice.png");
-        acceptButton.background.load("ui/startButton.png");
-        acceptButton.screen.blit(acceptButton.background);
-        acceptButton.setPosition(JJEngine.getInstance().renderWidth / 2 - acceptButton.background.getWidth() / 2, 98);
-        acceptButton.font = buttonFont;
-        acceptButton.textY = 19;
-        acceptButton.textX = 79;
-        acceptButton.textMessage = "seakiry";
+        sartButton.choice.load("ui/startChoice.png");
+        sartButton.background.load("ui/startButton.png");
+        sartButton.screen.blit(sartButton.background);
+        sartButton.setPosition(engineInst.renderWidth / 2 - sartButton.getWidth() / 2f, 98);
+        sartButton.font = buttonsFont;
+        sartButton.textY = 19;
+        sartButton.textX = 79;
+        sartButton.message = "seakiry";
 
         loadButton.choice.load("ui/startChoice.png");
         loadButton.background.load("ui/startButton.png");
         loadButton.screen.blit(loadButton.background);
-        loadButton.setPosition(JJEngine.getInstance().renderWidth / 2 - loadButton.background.getWidth() / 2, 184);
-        loadButton.font = buttonFont;
+        loadButton.setPosition(engineInst.renderWidth / 2 - loadButton.getWidth() / 2, 184);
+        loadButton.font = buttonsFont;
         loadButton.textY = 19;
         loadButton.textX = 74;
-        loadButton.textMessage = "hadpshja";
+        loadButton.message = "hadpshja";
 
-        selectSprite = selectedLine.render();
-        selectSprite.setPosition(123, biasY - selectedLine.getHeight() + 1);
-        sprite = background.render();
+        selectSprite = dirForegroundImage.render();
+        selectSprite.setPosition(123, offsetY - dirForegroundImage.getHeight() + 1);
+        sprite = backgroundImage.render();
         updateDir();
         getCurDir();
     }
 
     @Override
-    public boolean
-    touchDown(int x, int y, int id, int b) {
-        scaleY = Preference.getInstance().screenHeight / (float) JJEngine.getInstance().renderHeight;
-        scaleX = Preference.getInstance().screenWidth / (float) JJEngine.getInstance().renderWidth;
+    public boolean touchDown(int x, int y, int id, int button) {
+        scaleY = prefInst.screenHeight / engineInst.renderHeight;
+        scaleX = prefInst.screenWidth / engineInst.renderWidth;
 
-        if (savedFiles.size() > 0) {
-            if (acceptButton.touchDown(x, y)) delMaps();
-            if (loadButton.touchDown(x, y)) pressedKey = 1;
+        if (fileHandles.size() > 0) {
+            if (sartButton.touchDown(x, y)) delFile();
+            if (loadButton.touchDown(x, y)) {
+                pressedKey = 1;
+            }
         }
 
         if (backButton.touchDown(x, y)) pressedKey = 2;
 
-        y = Preference.getInstance().displayHeight - y - (Preference.getInstance().displayHeight - Preference.getInstance().screenHeight) / 2;
-        x -= (Preference.getInstance().displayWidth - Preference.getInstance().screenWidth) / 2;
+        y = prefInst.displayHeight - y - (prefInst.displayHeight - prefInst.screenHeight) / 2;
+        x -= (prefInst.displayWidth - prefInst.screenWidth) / 2;
         id = (countOfFiles <= 3) ? countOfFiles : 3;
 
         for (int i = 0; i < id; i++) {
-            if (y >= (-i - 1) * stepY * scaleY + biasY * scaleY && y <= -i * stepY * scaleY + biasY * scaleY &&
-                    x >= 64 * scaleX && x <= 416 * scaleX) {
-                selectSprite.setPosition(123, (-i - 1) * stepY + biasY);
-                old = i + start;
+            if (y >= (-i - 1) * stepY * scaleY + offsetY * scaleY
+                    && y <= -i * stepY * scaleY + offsetY * scaleY && x >= 64 * scaleX && x <= 416 * scaleX) {
+                selectSprite.setPosition(123, (-i - 1) * stepY + offsetY);
+                oldIndex = i + startIndex;
                 break;
             }
         }
-        positionY = oldY = y;
+        positionY = oldPositionY = y;
         return true;
     }
 
     @Override
     public boolean touchDragged(int xpos, int ypos, int TID) {
-        ypos = Preference.getInstance().displayHeight - ypos - (Preference.getInstance().displayHeight - Preference.getInstance().screenHeight) / 2;
-        xpos -= (Preference.getInstance().displayWidth - Preference.getInstance().screenWidth) / 2;
-        if (xpos >= selectSprite.getX() * scaleX && xpos <= biasX + selectedLine.getWidth() * scaleX
-                && ypos <= biasY * scaleY && ypos >= biasY * scaleY - scaleY * selectedLine.getHeight() * 3) {
+        ypos = prefInst.displayHeight - ypos - (prefInst.displayHeight - prefInst.screenHeight) / 2;
+        xpos -= (prefInst.displayWidth - prefInst.screenWidth) / 2;
+        if (xpos >= selectSprite.getX() * scaleX && xpos <= offsetX + dirForegroundImage.getWidth() * scaleX
+                && ypos <= offsetY * scaleY
+                && ypos >= offsetY * scaleY - scaleY * dirForegroundImage.getHeight() * 3) {
             positionY = ypos;
         }
         return true;
     }
 
     public void getCurDir() {
-        imageHandler.clear();
+        screen.clear();
         int j = 0, i;
-        for (i = start; i < countOfFiles; i++, j++) {
-            imageHandler.fontPrint(dirFont, biasX, biasY - 2 - j * stepY, i + ") " + savedFiles.get(i).name().replace(".JJ", ""), color);
-            imageHandler.fontPrint(dirFont, JJEngine.getInstance().renderWidth / 2, biasY - 2 - j * stepY, "~" + (System.currentTimeMillis() - savedFiles.
-                    get(i).lastModified()) / 3600000 + " hrs ago", color);
+        for (i = startIndex; i < countOfFiles; i++, j++) {
+            screen.fontPrint(arcadepixFont, offsetX,
+                    offsetY - 2 - j * stepY, i + ") "+ fileHandles.get(i).name().replace(".JJ", ""), color);
+            screen.fontPrint(arcadepixFont, engineInst.renderWidth / 2, offsetY - 2 - j * stepY,
+                    "~" + (System.currentTimeMillis() - fileHandles.get(i).lastModified()) / 3600000
+                            + " hrs ago", color);
         }
-        if (countOfFiles < 3 && old > 0) {
-            i = --old - start;
-            selectSprite.setPosition(123, (-i - 1) * stepY + biasY);
+        if (countOfFiles < 3 && oldIndex > 0) {
+            i = --oldIndex - startIndex;
+            selectSprite.setPosition(123, (-i - 1) * stepY + offsetY);
         }
-        dirSprite = imageHandler.render();
+        dirSprite = screen.render();
     }
 
-    public void Display(Viewport iview) {
-        if (Math.abs(positionY - oldY) >= selectedLine.getHeight()) {
-            scrol(positionY);
+    public void display(Viewport viewport) {
+        if (Math.abs(positionY - oldPositionY) >= dirForegroundImage.getHeight()) {
+            scroll(positionY);
         }
-        iview.apply();
-        spriteBatch.setProjectionMatrix(iview.getCamera().combined);
+
+        viewport.apply();
+
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
         spriteBatch.begin();
         sprite.draw(spriteBatch);
         dirSprite.draw(spriteBatch);
-        if (selectSprite.getY() < biasY && selectSprite.getY() >= selectedLine.getHeight() * -3 + biasY) {
+        if (selectSprite.getY() < offsetY && selectSprite.getY() >= dirForegroundImage.getHeight() * -3 + offsetY) {
             selectSprite.draw(spriteBatch);
         }
         spriteBatch.end();
-        backButton.show(iview);
-        loadButton.show(iview);
-        acceptButton.show(iview);
+
+        sartButton.show(viewport);
+        backButton.show(viewport);
+        loadButton.show(viewport);
     }
 
-    public void scrol(int yPosition) {
-        if (!scroll.isActive()) {
-            if (yPosition > oldY) {
-                if (countOfFiles < savedFiles.size()) {
-                    start += 1;
+    public void scroll(int yPosition) {
+        if (!scrollTimer.isActive()) {
+            if (yPosition > oldPositionY) {
+                if (countOfFiles < fileHandles.size()) {
+                    startIndex += 1;
                     countOfFiles += 1;
                     selectSprite.setPosition(123, selectSprite.getY() + selectSprite.getHeight());
                 }
-            } else if (start > 0) {
-                start -= 1;
+            } else if (startIndex > 0) {
+                startIndex -= 1;
                 countOfFiles -= 1;
                 selectSprite.setPosition(123, selectSprite.getY() - selectSprite.getHeight());
             }
-            scroll.start(200);
-            oldY = yPosition;
+
+            scrollTimer.start(200);
+            oldPositionY = yPosition;
             getCurDir();
         }
     }
 
-    public String getName() {
-        return savedFiles.get(old).name();
-    }
-
-    public void delMaps() {
-        savedFiles.get(old).delete();
+    public void delFile() {
+        fileHandles.get(oldIndex).delete();
         updateDir();
         getCurDir();
-    }
-
-    public void dispose() {
-        imageHandler.dispose();
-        dirFont.dispose();
-        dirGoBack.dispose();
-        background.dispose();
-        spriteBatch.dispose();
-        selectedLine.dispose();
-        backgroundImage.dispose();
-        backButton.dispose();
-        loadButton.dispose();
-        acceptButton.dispose();
     }
 }

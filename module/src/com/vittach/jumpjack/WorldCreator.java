@@ -1,8 +1,8 @@
 package com.vittach.jumpjack;
 
+import com.badlogic.gdx.graphics.Color;
 import com.vittach.jumpjack.framework.FontHandler;
 import com.vittach.jumpjack.framework.ImageHandler;
-import com.vittach.jumpjack.framework.ColorImpl;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -12,36 +12,40 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 public class WorldCreator extends Stage implements ProcessorInput {
     public Sprite sprite;
-    public ScreenButton goBackButton;
-    public ScreenButton createButton;
+    public ScreenButton backButton;
+    public ScreenButton sartButton;
+    public TextField textField;
+
     private FontHandler arcadepixFont;
     private FontHandler jumpjackFont;
-    public TextField textField;
     private SpriteBatch spriteBatch;
-    private ImageHandler cursor;
-    private ImageHandler logoImage;
-    private ImageHandler selectorImage;
-    private ImageHandler backgroundImahe;
-    private ImageHandler paperImage;
+
+    private ImageHandler backgroundImage;
     private ImageHandler textFieldImage;
+    private ImageHandler selectorImage;
+    private ImageHandler paperImage;
+    private ImageHandler cursor;
+
     public int pressedKey = -1;
-    private ColorImpl color;
 
     @Override
     public void setIDOffset(int id) {
     }
 
     @Override
-    public boolean
-    touchUp(int x, int y, int id, int btn) {
-        if (createButton.touchDown(x, y))
+    public boolean touchUp(int x, int y, int id, int btn) {
+        if (sartButton.touchDown(x, y))
             if (getName().length() > 3) pressedKey = 1;
-            else textField.setMessageText(" input correct name");
-        if (goBackButton.touchDown(x, y)) pressedKey = 2;
+            else {
+                textField.setMessageText(" input correct name");
+            }
+        if (backButton.touchDown(x, y)) {
+            pressedKey = 2;
+        }
         return true;
     }
 
-    void display(Viewport view) {
+    public void display(Viewport view) {
         view.apply();
         spriteBatch.setProjectionMatrix(view.getCamera().combined);
         spriteBatch.begin();
@@ -50,39 +54,45 @@ public class WorldCreator extends Stage implements ProcessorInput {
         setViewport(view);
         act();
         draw();
-        createButton.show(view);
-        goBackButton.show(view);
+        sartButton.show(view);
+        backButton.show(view);
     }
 
-    WorldCreator() {
+    public void dispose() {
+        cursor.dispose();
+        paperImage.dispose();
+        spriteBatch.dispose();
+        backButton.dispose();
+        selectorImage.dispose();
+        textFieldImage.dispose();
+        backgroundImage.dispose();
+        sartButton.dispose();
+        jumpjackFont.dispose();
+        arcadepixFont.dispose();
+    }
+
+    public WorldCreator() {
         arcadepixFont = new FontHandler();
         jumpjackFont = new FontHandler();
-        logoImage = new ImageHandler();
-        backgroundImahe = new ImageHandler();
-        sprite = new Sprite();
-        cursor = new ImageHandler();
-        paperImage = new ImageHandler();
-        createButton = new ScreenButton();
-        goBackButton = new ScreenButton();
-        selectorImage = new ImageHandler();
-        textFieldImage = new ImageHandler();
+        sartButton = new ScreenButton();
+        backButton = new ScreenButton();
         spriteBatch = new SpriteBatch();
+
         arcadepixFont.load("arcadepix.ttf");
-        arcadepixFont.setPixelSizes(14);
+        arcadepixFont.setPixelSize(14);
         jumpjackFont.load("jumpjack.ttf");
-        jumpjackFont.setPixelSizes(12);
-        backgroundImahe.load("ui/background.png");
+        jumpjackFont.setPixelSize(12);
+        sprite = new Sprite();
 
-        color = new ColorImpl(1, 1, 1, 1);
-        cursor.load("ui/cursor.png");
-        selectorImage.load("ui/cursorElement.png");
-        textFieldImage.load("ui/textField.png");
-        paperImage.load("ui/foreground.png");
-        logoImage.load("ui/jumpJackLogo.png");
+        backgroundImage = new ImageHandler().load("ui/background.png");
 
-        TextField.TextFieldStyle
-                textFieldStyle = new TextField.TextFieldStyle(
-                arcadepixFont.getFont(), color.color(),
+        cursor = new ImageHandler().load("ui/cursor.png");
+        selectorImage = new ImageHandler().load("ui/cursorElement.png");
+        textFieldImage = new ImageHandler().load("ui/textField.png");
+        paperImage = new ImageHandler().load("ui/foreground.png");
+
+        TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(
+                arcadepixFont.getBitmapFont(), new Color(1, 1, 1, 1),
                 new TextureRegionDrawable(cursor.render()),
                 new TextureRegionDrawable(selectorImage.render()),
                 new TextureRegionDrawable(textFieldImage.render())
@@ -96,38 +106,39 @@ public class WorldCreator extends Stage implements ProcessorInput {
                     textField.setText(" " + key);
                     textField.setCursorPosition(2);
                 }
-                if (key == '\n')
+                if (key == '\n') {
                     textField1.getOnscreenKeyboard().show(false);
+                }
             }
         });
 
         textField.setMaxLength(9);
-        backgroundImahe.blit(54, 27, paperImage);
-        backgroundImahe.blit(120, 164, logoImage);
+        backgroundImage.blit(54, 27, paperImage);
+        backgroundImage.blit(120, 164, new ImageHandler().load("ui/jumpJackLogo.png"));
         addActor(textField);
-        sprite = backgroundImahe.render();
+        sprite = backgroundImage.render();
 
-        createButton = new ScreenButton();
-        createButton.choice = new ImageHandler();
-        createButton.choice.load("ui/startChoice.png");
-        createButton.background.load("ui/startButton.png");
-        createButton.screen.blit(createButton.background);
-        createButton.setPosition(JJEngine.getInstance().renderWidth / 2 - createButton.background.getWidth() / 2, 98);
-        createButton.font = jumpjackFont;
-        createButton.textMessage = "qnheary";
-        createButton.textY = 19;
-        createButton.textX = 80;
+        sartButton = new ScreenButton();
+        sartButton.choice = new ImageHandler();
+        sartButton.choice.load("ui/startChoice.png");
+        sartButton.background.load("ui/startButton.png");
+        sartButton.screen.blit(sartButton.background);
+        sartButton.setPosition(JJEngine.getInstance().renderWidth / 2 - sartButton.getWidth() / 2, 98);
+        sartButton.font = jumpjackFont;
+        sartButton.message = "qnheary";
+        sartButton.textY = 19;
+        sartButton.textX = 80;
 
-        goBackButton = new ScreenButton();
-        goBackButton.choice = new ImageHandler();
-        goBackButton.choice.load("ui/startChoice.png");
-        goBackButton.background.load("ui/startButton.png");
-        goBackButton.screen.blit(goBackButton.background);
-        goBackButton.setPosition(JJEngine.getInstance().renderWidth / 2 - goBackButton.background.getWidth() / 2, 68);
-        goBackButton.font = jumpjackFont;
-        goBackButton.textMessage = "mahae";
-        goBackButton.textY = 19;
-        goBackButton.textX = 90;
+        backButton = new ScreenButton();
+        backButton.choice = new ImageHandler();
+        backButton.choice.load("ui/startChoice.png");
+        backButton.background.load("ui/startButton.png");
+        backButton.screen.blit(backButton.background);
+        backButton.setPosition(JJEngine.getInstance().renderWidth / 2 - backButton.getWidth() / 2, 68);
+        backButton.font = jumpjackFont;
+        backButton.message = "mahae";
+        backButton.textY = 19;
+        backButton.textX = 90;
 
         textField.setOnlyFontChars(true);
         textField.setMessageText(" Hi!");
@@ -136,20 +147,7 @@ public class WorldCreator extends Stage implements ProcessorInput {
     }
 
     public String getName() {
-        int length = textField.getText().length();
-        return length > 0 ? textField.getText().substring(1, length) + ".JJ" : "";
-    }
-
-    public void dispose() {
-        selectorImage.dispose();
-        textFieldImage.dispose();
-        spriteBatch.dispose();
-        paperImage.dispose();
-        cursor.dispose();
-        goBackButton.dispose();
-        createButton.dispose();
-        backgroundImahe.dispose();
-        arcadepixFont.dispose();
-        jumpjackFont.dispose();
+        String text = textField.getText();
+        return text.length() > 0 ? text.substring(1, text.length()) + ".JJ" : "";
     }
 }

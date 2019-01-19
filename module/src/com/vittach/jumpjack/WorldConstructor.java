@@ -1,26 +1,27 @@
 package com.vittach.jumpjack;
 
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-public class GameStop implements GameScreen {
+public class WorldConstructor implements GameScreen {
     private JJEngine engineInst = JJEngine.getInstance();
     private Preference prefInst = Preference.getInstance();
 
     public void display(Viewport view) {
-        engineInst.pauseMenu.display(view);
+        engineInst.worldCreator.display(view);
 
-        if (engineInst.pauseMenu.pressedKey > 0) {
+        if (engineInst.worldCreator.pressedKey >= 0) {
             prefInst.listener.cleanProcesses();
-            switch (engineInst.pauseMenu.pressedKey) {
-                case Input.Keys.ESCAPE:
+            switch (engineInst.worldCreator.pressedKey) {
+                case 1:
+                    engineInst.mainGameLoop.genWorld();
+
                     prefInst.listener.addListener(engineInst.inventoryButton);
                     prefInst.listener.addListener(engineInst.controller);
 
                     engineInst.currentScreen = 0;
                     break;
 
-                case 67:
+                case 2:
                     prefInst.listener.addListener(engineInst.startMenu.gameButton);
                     prefInst.listener.addListener(engineInst.startMenu.loadButton);
                     prefInst.listener.addListener(engineInst.startMenu.exitButton);
@@ -30,7 +31,8 @@ public class GameStop implements GameScreen {
                     break;
             }
 
-            engineInst.pauseMenu.pressedKey = -1;
+            engineInst.worldCreator.textField.setText(" ");
+            engineInst.worldCreator.pressedKey = -1;
         }
     }
 }

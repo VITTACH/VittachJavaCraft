@@ -1,40 +1,27 @@
 package com.vittach.jumpjack;
 
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 public class GamePlay implements GameScreen {
-    private final ShapeRenderer mouseCursor = new ShapeRenderer();
+    private JJEngine engineInst = JJEngine.getInstance();
+    private Preference prefInst = Preference.getInstance();
 
-    public void render(Viewport view) {
-        JJEngine instance = JJEngine.getInstance();
-        instance.worldMapInst.render(view);
+    public void display(Viewport view) {
+        engineInst.mainGameLoop.display(view);
+        // engineInst.inventoryButton.display(view);
 
-        instance.currentBlock.display(view);
+        if (engineInst.controller.pressedKeys.contains(Input.Keys.ESCAPE)) {
+            prefInst.listener.cleanProcesses();
 
-        // вызов меню выбора нового игрового блока
-        if (instance.human.pressedKey.contains(131)) {
-            Preference.getInstance().inputListener.cleanProcesses();
-            Preference.getInstance().inputListener.addListener(instance.blockSelector.saveButton);
-            Preference.getInstance().inputListener.addListener(instance.blockSelector.exitButton);
-            Preference.getInstance().inputListener.addListener(instance.blockSelector.loadButton);
-            Preference.getInstance().inputListener.addListener(instance.blockSelector.startButton);
-            Preference.getInstance().inputListener.addListener(instance.blockSelector);
+            prefInst.listener.addListener(engineInst.pauseMenu.saveButton);
+            prefInst.listener.addListener(engineInst.pauseMenu.exitButton);
+            prefInst.listener.addListener(engineInst.pauseMenu.loadButton);
+            prefInst.listener.addListener(engineInst.pauseMenu.playButton);
+            prefInst.listener.addListener(engineInst.pauseMenu);
 
-            if (instance.human.pressedKey.contains(instance.human.FLY)) {
-                instance.human.pressedKey.clear();
-                instance.human.pressedKey.add(instance.human.FLY);
-            } else {
-                instance.human.pressedKey.clear();
-            }
-
-            instance.currentScreen = 1;
+            engineInst.controller.pressedKeys.clear();
+            engineInst.currentScreen = 1;
         }
-
-        mouseCursor.setProjectionMatrix(view.getCamera().combined);
-        mouseCursor.begin(ShapeType.Filled);
-        mouseCursor.circle(JJEngine.getInstance().renderWidth / 2f, JJEngine.getInstance().renderHeight / 2f, 2);
-        mouseCursor.end();
     }
 }

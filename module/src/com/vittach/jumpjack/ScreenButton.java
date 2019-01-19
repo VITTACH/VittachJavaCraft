@@ -14,7 +14,7 @@ import com.vittach.jumpjack.framework.ImageHandler;
 public class ScreenButton extends InputListener {
     public FontHandler font = new FontHandler();
     private SpriteBatch spriteBatch = new SpriteBatch();
-    public String textMessage;
+    public String message;
     private boolean hasBackground;
     public int textX;
     public int textY;
@@ -29,8 +29,7 @@ public class ScreenButton extends InputListener {
     private JJEngine engineInst = JJEngine.getInstance();
 
     @Override
-    public boolean
-    mouseMoved(int screenX, int screenY) {
+    public boolean mouseMoved(int screenX, int screenY) {
         if (choice != null) {
             if (touchDown(screenX, screenY, -1)) {
                 if (hasBackground) {
@@ -48,7 +47,7 @@ public class ScreenButton extends InputListener {
     }
 
     @Override
-    public boolean touchDragged(int xPosition, int yPosition, int id) {
+    public boolean touchDragged(int xPosition, int yPosition, int pointer) {
         mouseMoved(xPosition, yPosition);
         return true;
     }
@@ -75,10 +74,9 @@ public class ScreenButton extends InputListener {
                 && yPosition <= (prefInst.screenHeight - y * scaleY);
     }
 
-    //отображение кнопки на экране
     public void show(Viewport viewport) {
-        if (textMessage != null) {
-            screen.fontPrint(font, textX, textY, textMessage, color);
+        if (message != null) {
+            screen.fontPrint(font, textX, textY, message, color);
         }
 
         Sprite sprite = screen.render();
@@ -92,15 +90,22 @@ public class ScreenButton extends InputListener {
         spriteBatch.end();
     }
 
-    // становка позиции кнопки
     void setPosition(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
+    public int getWidth() {
+        return background.getWidth();
+    }
+
+    public int getHeight() {
+        return background.getHeight();
+    }
+
     void dispose() {
-        screen.dispose();
         spriteBatch.dispose();
         background.dispose();
+        screen.dispose();
     }
 }

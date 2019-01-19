@@ -18,11 +18,19 @@ public class StartMenu extends InputListener {
     private ImageHandler paperImage;
 
     @Override
-    public boolean
-    touchDown(int x, int y, int id, int b) {
+    public boolean touchDown(int x, int y, int id, int b) {
         if (loadButton.touchDown(x, y)) pressedKey = 2;
         if (gameButton.touchDown(x, y)) pressedKey = 1;
         return true;
+    }
+
+    public void dispose() {
+        background.dispose();
+        spriteWindow.dispose();
+        paperImage.dispose();
+        gameButton.dispose();
+        loadButton.dispose();
+        exitButton.dispose();
     }
 
     public StartMenu() {
@@ -34,34 +42,34 @@ public class StartMenu extends InputListener {
         gameButton.choice.load("ui/startChoice.png");
         gameButton.background.load("ui/startButton.png");
         gameButton.screen.blit(gameButton.background);
-        gameButton.setPosition(JJEngine.getInstance().renderWidth / 2 - gameButton.background.getWidth() / 2, 128);
+        gameButton.setPosition(JJEngine.getInstance().renderWidth / 2 - gameButton.getWidth() / 2, 128);
         gameButton.font.load("jumpjack.ttf");
         gameButton.textY = 19;
         gameButton.textX = 84;
-        gameButton.textMessage = "idpary";
-        gameButton.font.setPixelSizes(12);
+        gameButton.message = "idpary";
+        gameButton.font.setPixelSize(12);
 
         loadButton = new ScreenButton();
         loadButton.choice = new ImageHandler();
         loadButton.choice.load("ui/startChoice.png");
         loadButton.background.load("ui/startButton.png");
         loadButton.screen.blit(loadButton.background);
-        loadButton.setPosition(JJEngine.getInstance().renderWidth / 2 - loadButton.background.getWidth() / 2, 98);
+        loadButton.setPosition(JJEngine.getInstance().renderWidth / 2 - loadButton.getWidth() / 2, 98);
         loadButton.font = gameButton.font;
         loadButton.textY = 19;
         loadButton.textX = 74;
-        loadButton.textMessage = "hadpshja";
+        loadButton.message = "hadpshja";
 
         exitButton = new ScreenButton();
         exitButton.choice = new ImageHandler();
         exitButton.choice.load("ui/startChoice.png");
         exitButton.background.load("ui/startButton.png");
         exitButton.screen.blit(exitButton.background);
-        exitButton.setPosition(JJEngine.getInstance().renderWidth / 2 - exitButton.background.getWidth() / 2, 68);
+        exitButton.setPosition(JJEngine.getInstance().renderWidth / 2 - exitButton.getWidth() / 2, 68);
         exitButton.font = gameButton.font;
         exitButton.textY = 19;
         exitButton.textX = 74;
-        exitButton.textMessage = "n acrnpf";
+        exitButton.message = "n acrnpf";
 
         paperImage = new ImageHandler();
         paperImage.load("ui/foreground.png");
@@ -75,7 +83,7 @@ public class StartMenu extends InputListener {
         sprite = background.render();
     }
 
-    public void Display(Viewport viewport) {
+    public void display(Viewport viewport) {
         viewport.apply();
         spriteWindow.setProjectionMatrix(viewport.getCamera().combined);
         spriteWindow.begin();
@@ -84,14 +92,5 @@ public class StartMenu extends InputListener {
         gameButton.show(viewport);
         loadButton.show(viewport);
         exitButton.show(viewport);
-    }
-
-    public void dispose() {
-        background.dispose();
-        spriteWindow.dispose();
-        paperImage.dispose();
-        gameButton.dispose();
-        loadButton.dispose();
-        exitButton.dispose();
     }
 }

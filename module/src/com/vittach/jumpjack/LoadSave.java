@@ -3,29 +3,33 @@ package com.vittach.jumpjack;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class LoadSave implements GameScreen {
-    public void
-    render(Viewport view) {
-        JJEngine.getInstance().fileExplorer.Display(view);
-        if (JJEngine.getInstance().fileExplorer.pressedKey >= 0) {
-            Preference.getInstance().inputListener.cleanProcesses();
-            switch (JJEngine.getInstance().fileExplorer.pressedKey) {
-                case 1:
-                    JJEngine.getInstance().currentScreen = 0;
+    private JJEngine engineInst = JJEngine.getInstance();
+    private Preference prefInst = Preference.getInstance();
 
-                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().human);
-                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().currentBlock);
-                    JJEngine.getInstance().fileController.setFileName(JJEngine.getInstance().fileExplorer.getName());
-                    JJEngine.getInstance().fileController.loadWorld();
+    public void display(Viewport view) {
+        engineInst.fileExplorer.display(view);
+
+        if (engineInst.fileExplorer.pressedKey >= 0) {
+            prefInst.listener.cleanProcesses();
+            switch (engineInst.fileExplorer.pressedKey) {
+                case 1:
+                    prefInst.listener.addListener(engineInst.controller);
+                    prefInst.listener.addListener(engineInst.inventoryButton);
+
+                    engineInst.currentScreen = 0;
                     break;
+
                 case 2:
-                    JJEngine.getInstance().currentScreen = 2;
-                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().startMenuInst.gameButton);
-                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().startMenuInst.loadButton);
-                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().startMenuInst.exitButton);
-                    Preference.getInstance().inputListener.addListener(JJEngine.getInstance().startMenuInst);
+                    prefInst.listener.addListener(engineInst.startMenu.gameButton);
+                    prefInst.listener.addListener(engineInst.startMenu.loadButton);
+                    prefInst.listener.addListener(engineInst.startMenu.exitButton);
+                    prefInst.listener.addListener(engineInst.startMenu);
+
+                    engineInst.currentScreen = 2;
                     break;
             }
-            JJEngine.getInstance().fileExplorer.pressedKey = -1;
+
+            engineInst.fileExplorer.pressedKey = -1;
         }
     }
 }

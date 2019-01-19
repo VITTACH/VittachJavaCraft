@@ -9,7 +9,7 @@ public class InputListener implements InputProcessor, ProcessorInput {
     private int idCounter = 0;
     private ArrayList<ProcessorInput> processes = new ArrayList<ProcessorInput>();
 
-    void cleanProcesses() {
+    public void cleanProcesses() {
         processes.clear();
     }
 
@@ -18,12 +18,12 @@ public class InputListener implements InputProcessor, ProcessorInput {
         return true;
     }
 
-    void addListener(ProcessorInput processorInput) {
+    public void addListener(ProcessorInput processorInput) {
         processorInput.setIDOffset(idCounter++);
         processes.add(processorInput);
     }
 
-    void delProces(ProcessorInput processorInput) {
+    public void delProces(ProcessorInput processorInput) {
         processes.remove(processorInput);
     }
 
