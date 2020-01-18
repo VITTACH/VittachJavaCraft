@@ -28,9 +28,12 @@ public class MainGameLoop {
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     private Vector3 camPosition;
+    private Vector3 lightPosition = new Vector3(0f, 96f, 0f);
+
+    private Texture texture;
 
     private final Map<Vector3, Mesh> meshMap = new HashMap<Vector3, Mesh>();
-    private final Map<String, Texture> textureMap = new HashMap<String, Texture>();
+    private final Map<String, TextureRegion> textureMap = new HashMap<String, TextureRegion>();
     private final Map<Vector3, Chunk> chunkMap = new ConcurrentHashMap<Vector3, Chunk>();
 
     private final JJEngine engineInst = JJEngine.getInstance();
@@ -62,7 +65,7 @@ public class MainGameLoop {
     }
 
     private void setTextures(FileHandle path) {
-        Texture texture = new Texture(path);
+        texture = new Texture(path);
         TextureRegion tmp[][] = TextureRegion.split(texture, texture.getWidth() / 8, texture.getHeight() / 8);
 
         OrthographicCamera camera = new OrthographicCamera();
@@ -70,19 +73,10 @@ public class MainGameLoop {
         SpriteBatch batch = new SpriteBatch();
         batch.setProjectionMatrix(camera.combined);
 
-        for (int i = 6; i < 8; i++) {
+        for (int i = 5; i < 7; i++) {
             String symbol = i % 2 == 0 ? "a" : "b";
-
-            FrameBuffer buffer = new FrameBuffer(Pixmap.Format.RGBA4444, 16, 16, true);
-            buffer.begin();
-            batch.begin();
-            batch.draw(tmp[i][0], 0, 0);
-            batch.end();
-            buffer.end();
-
-            textureMap.put(symbol, buffer.getColorBufferTexture());
+            textureMap.put(symbol, tmp[i][0]);
         }
-
     }
 
     public void genWorld() {
@@ -132,16 +126,18 @@ public class MainGameLoop {
 
     private Mesh compressMesh(List<MeshObj> meshObjects) {
         List<Mesh> meshes = new ArrayList<Mesh>();
-        List<Matrix4> transactionList = new ArrayList<Matrix4>();
+        List<Matrix4> transactions = new ArrayList<Matrix4>();
+        List<TextureRegion> regionList = new ArrayList<TextureRegion>();
         for (MeshObj meshObject : meshObjects) {
             meshes.add(meshObject.getMesh());
-            transactionList.add(new Matrix4().setToTranslation(meshObject.getPosition()));
+            transactions.add(new Matrix4().setToTranslation(meshObject.getPosition()));
+            regionList.add(textureMap.get(meshObject.getSymbol()));
         }
-        return MeshCompress.mergeMeshes(meshes, transactionList);
+        return MeshCompress.mergeMeshes(meshes, regionList, transactions);
     }
 
     public void display(Viewport viewport) {
-        System.out.println("fps count " + graphics.getFramesPerSecond());
+        System.out.println("FPS count: " + graphics.getFramesPerSecond());
 
         viewport.apply();
         PerspectiveCamera fpcCamera = engineInst.controller.getCamera();
@@ -154,14 +150,15 @@ public class MainGameLoop {
         shapeRenderer.end();
         //
 
-        for (Map.Entry<String, Texture> texture : textureMap.entrySet()) {
-            texture.getValue().bind(texture.getKey().hashCode());
-        }
+        texture.bind(0);
+        lightPosition.set(camPosition.x, lightPosition.y, camPosition.z);
 
         Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 
         shader.begin();
         shader.setUniformMatrix("modelView", fpcCamera.combined);
+        shader.setUniformf("uCameraFar", fpcCamera.far);
+        shader.setUniformf("uLightPosition", lightPosition);
         Matrix4 model = new Matrix4();
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
             Vector3 pos = chunkEntry.getKey();
@@ -178,7 +175,7 @@ public class MainGameLoop {
             }
 
             shader.setUniformMatrix("model", model.setToTranslation(pos));
-            shader.setUniformi("u_texture", "a".hashCode());
+            shader.setUniformi("u_texture", 0);
             mergedMesh.render(shader, GL20.GL_TRIANGLES);
         }
         shader.end();

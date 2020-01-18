@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 class FirstPersonController implements ProcessorInput, HumanHealth {
     private final float MOVE_VELOCITY = 0.1f;
-    private final float RUN_VELOCITY = 1f;
+    private final float FAST_VELOCITY = 1.0f;
     private final Preference prefInst = Preference.getInstance();
 
     private int deviceId;
@@ -170,7 +170,7 @@ class FirstPersonController implements ProcessorInput, HumanHealth {
             }
         }
 
-        if (pressedKeys.contains(RUN)) velocity = RUN_VELOCITY;
+        if (pressedKeys.contains(RUN)) velocity = FAST_VELOCITY;
 
         if (pressedKeys.contains(LEFT)) {
             move.add(normal.set(camera.direction.x, 0, camera.direction.z)

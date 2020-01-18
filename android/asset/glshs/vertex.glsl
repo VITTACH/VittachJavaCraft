@@ -5,8 +5,10 @@ uniform mat4 model;
 uniform mat4 modelView;
 
 varying vec2 vTexCoord;
+varying vec4 vPosition;
 
 void main() {
+    vPosition = model * vec4(a_Position, 1.0);
 	vTexCoord = a_TexCoord;
-    gl_Position = modelView * model * vec4(a_Position, 1.0);
+    gl_Position = modelView * vPosition;
 }
