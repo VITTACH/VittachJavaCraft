@@ -12,7 +12,6 @@ import com.vittach.jumpjack.framework.MeshCompress;
 import com.vittach.jumpjack.framework.MeshObj;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -33,7 +32,7 @@ public class MainGameLoop {
     private Texture texture;
 
     private final Map<Vector3, Mesh> meshMap = new HashMap<Vector3, Mesh>();
-    private final Map<String, TextureRegion> textureMap = new HashMap<String, TextureRegion>();
+    private final Map<String, List<TextureRegion>> textureMap = new HashMap<String, List<TextureRegion>>();
     private final Map<Vector3, Chunk> chunkMap = new ConcurrentHashMap<Vector3, Chunk>();
 
     private final JJEngine engineInst = JJEngine.getInstance();
@@ -50,12 +49,19 @@ public class MainGameLoop {
         camPosition = new Vector3(0, 0, 0);
         shapeRenderer.setColor(0.4f, 0.69f, 0.9f, 1);
         setTextures(Gdx.files.internal("3d/blocksSprite.png"));
-        shader = new ShaderProgram(Gdx.files.internal("glshs/vertex.glsl"), Gdx.files.internal("glshs/fragment.glsl"));
+        shader = new ShaderProgram(
+            Gdx.files.internal("glshs/vertex.glsl"),
+            Gdx.files.internal("glshs/fragment.glsl")
+        );
+        if (!shader.isCompiled()) {
+            throw new GdxRuntimeException(shader.getLog());
+        }
 
         MeshBuilder builder = new MeshBuilder();
         VertexAttributes attributes = new VertexAttributes(
-                new VertexAttribute(Usage.Position, 3, "a_Position"), new VertexAttribute(Usage.Normal, 3, "a_Normal"),
-                new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "a_TexCoord")
+            new VertexAttribute(Usage.Position, 3, "a_Position"),
+            new VertexAttribute(Usage.Normal, 3, "a_Normal"),
+            new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "a_TexCoord")
         );
 
         builder.begin(attributes, GL20.GL_TRIANGLES);
@@ -75,7 +81,9 @@ public class MainGameLoop {
 
         for (int i = 5; i < 7; i++) {
             String symbol = i % 2 == 0 ? "a" : "b";
-            textureMap.put(symbol, tmp[i][0]);
+            List<TextureRegion> regions = new ArrayList<TextureRegion>();
+            regions.add(tmp[i][0]);
+            textureMap.put(symbol, regions);
         }
     }
 
@@ -125,15 +133,11 @@ public class MainGameLoop {
     }
 
     private Mesh compressMesh(List<MeshObj> meshObjects) {
-        List<Mesh> meshes = new ArrayList<Mesh>();
-        List<Matrix4> transactions = new ArrayList<Matrix4>();
-        List<TextureRegion> regionList = new ArrayList<TextureRegion>();
+        List<Matrix4> positions = new ArrayList<Matrix4>();
         for (MeshObj meshObject : meshObjects) {
-            meshes.add(meshObject.getMesh());
-            transactions.add(new Matrix4().setToTranslation(meshObject.getPosition()));
-            regionList.add(textureMap.get(meshObject.getSymbol()));
+            positions.add(new Matrix4().setToTranslation(meshObject.getPosition()));
         }
-        return MeshCompress.mergeMeshes(meshes, regionList, transactions);
+        return MeshCompress.mergeMeshes(meshObjects, textureMap, positions);
     }
 
     public void display(Viewport viewport) {

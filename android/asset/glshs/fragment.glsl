@@ -11,7 +11,7 @@ varying vec2 vTexCoord;
 
 void main() {
     vec4 uTexture = texture2D(u_texture, vTexCoord);
-    if (uTexture.a < 0.5f) {
+    if (uTexture.a < 0.5) {
         discard;
     }
 
