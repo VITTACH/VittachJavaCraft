@@ -2,11 +2,12 @@ package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.files.FileHandle;
 import com.vittach.jumpjack.framework.Chunk;
 import com.vittach.jumpjack.framework.MeshCompress;
 import com.vittach.jumpjack.framework.MeshObj;
