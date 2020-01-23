@@ -15,7 +15,7 @@ public class WorldConstructor implements GameScreen {
                 case 1:
                     engineInst.mainGameLoop.genWorld();
 
-                    prefInst.listener.addListener(engineInst.inventoryButton);
+                    prefInst.listener.addListener(engineInst.inventoryBtn);
                     prefInst.listener.addListener(engineInst.controller);
 
                     engineInst.currentScreen = 0;

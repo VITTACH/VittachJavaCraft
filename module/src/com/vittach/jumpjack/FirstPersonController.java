@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 
 import java.util.HashSet;
 
-class FirstPersonController implements ProcessorInput, HumanHealth {
+class FirstPersonController implements ProcessorInput {
     private final float MOVE_VELOCITY = 0.1f;
     private final float FAST_VELOCITY = 1.0f;
     private final Preference prefInst = Preference.getInstance();

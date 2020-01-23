@@ -10,11 +10,15 @@ public class GameStop implements GameScreen {
     public void display(Viewport view) {
         engineInst.pauseMenu.display(view);
 
+        listenInput();
+    }
+
+    private void listenInput() {
         if (engineInst.pauseMenu.pressedKey > 0) {
             prefInst.listener.cleanProcesses();
             switch (engineInst.pauseMenu.pressedKey) {
                 case Input.Keys.ESCAPE:
-                    prefInst.listener.addListener(engineInst.inventoryButton);
+                    prefInst.listener.addListener(engineInst.inventoryBtn);
                     prefInst.listener.addListener(engineInst.controller);
 
                     engineInst.currentScreen = 0;

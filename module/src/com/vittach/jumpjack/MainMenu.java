@@ -9,6 +9,10 @@ public class MainMenu implements GameScreen {
     public void display(Viewport view) {
         engineInst.startMenu.display(view);
 
+        listenInput();
+    }
+
+    private void listenInput() {
         if (engineInst.startMenu.pressedKey >= 0) {
             prefInst.listener.cleanProcesses();
             switch (engineInst.startMenu.pressedKey) {

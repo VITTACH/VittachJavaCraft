@@ -1,4 +1,6 @@
-package com.vittach.jumpjack.framework;
+package com.vittach.jumpjack.domain;
+
+import com.vittach.jumpjack.mesh.MeshObj;
 
 import java.util.List;
 

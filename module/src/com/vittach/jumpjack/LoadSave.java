@@ -9,12 +9,16 @@ public class LoadSave implements GameScreen {
     public void display(Viewport view) {
         engineInst.fileExplorer.display(view);
 
+        listenInput();
+    }
+
+    private void listenInput() {
         if (engineInst.fileExplorer.pressedKey >= 0) {
             prefInst.listener.cleanProcesses();
             switch (engineInst.fileExplorer.pressedKey) {
                 case 1:
                     prefInst.listener.addListener(engineInst.controller);
-                    prefInst.listener.addListener(engineInst.inventoryButton);
+                    prefInst.listener.addListener(engineInst.inventoryBtn);
 
                     engineInst.currentScreen = 0;
                     break;

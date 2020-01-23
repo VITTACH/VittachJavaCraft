@@ -21,12 +21,12 @@ public class JJEngine extends ApplicationAdapter {
     public MainGameLoop mainGameLoop;
 
     public PauseMenu pauseMenu;
-    public InventoryButton inventoryButton;
+    public InventoryButton inventoryBtn;
     public FileExplorer fileExplorer;
     public WorldCreator worldCreator;
     public StartMenu startMenu;
 
-    private Viewport view;
+    private Viewport viewport;
     private OrthographicCamera orthographicCamera;
 
     private ArrayList<GameScreen> gameState;
@@ -52,19 +52,19 @@ public class JJEngine extends ApplicationAdapter {
     public void dispose() {
         pauseMenu.dispose();
         mainGameLoop.dispose();
-        inventoryButton.dispose();
+        inventoryBtn.dispose();
         worldCreator.dispose();
-        startMenu.dispose();
         fileExplorer.dispose();
+        startMenu.dispose();
     }
 
     @Override
     public void resize(int width, int height) {
-        orthographicCamera.setToOrtho(false, view.getWorldWidth(), view.getWorldHeight());
+        orthographicCamera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
 
-        view.update(width, height);
-        prefsInst.setWidth(view.getScreenWidth(), width);
-        prefsInst.setHeight(view.getScreenHeight(), height);
+        viewport.update(width, height);
+        prefsInst.setWidth(viewport.getScreenWidth(), width);
+        prefsInst.setHeight(viewport.getScreenHeight(), height);
         orthographicCamera.update();
     }
 
@@ -72,12 +72,25 @@ public class JJEngine extends ApplicationAdapter {
     public void render() {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        gameState.get(currentScreen).display(view);
+        gameState.get(currentScreen).display(viewport);
     }
 
     @Override
     public void create() {
+
+        startMenu = new StartMenu();
+
         prefsInst = Preference.getInstance();
+
+        prefsInst.listener.addListener(startMenu);
+        prefsInst.listener.addListener(startMenu.gameButton);
+        prefsInst.listener.addListener(startMenu.loadButton);
+        prefsInst.listener.addListener(startMenu.exitButton);
+
+        prefsInst.playerMusic.load("1.ogg");
+        prefsInst.playerMusic.setLoop(true);
+        prefsInst.playerMusic.setVolume(1f);
+        prefsInst.playerMusic.play();
 
         gameState = new ArrayList<GameScreen>() {{
             add(new GamePlay());
@@ -92,26 +105,16 @@ public class JJEngine extends ApplicationAdapter {
         mainGameLoop = new MainGameLoop();
         fileExplorer = new FileExplorer();
         worldCreator = new WorldCreator();
-        startMenu = new StartMenu();
         pauseMenu = new PauseMenu();
 
-        inventoryButton = new InventoryButton();
-        inventoryButton.setPosition(renderWidth - inventoryButton.getWidth(), renderHeight - inventoryButton.getHeight());
-
-        prefsInst.playerMusic.load("1.ogg");
-        prefsInst.playerMusic.setLoop(true);
-        prefsInst.playerMusic.setVolume(1f);
-        prefsInst.playerMusic.play();
+        inventoryBtn = new InventoryButton();
+        inventoryBtn.setPosition(renderWidth - inventoryBtn.getWidth(), renderHeight - inventoryBtn.getHeight());
 
         orthographicCamera = new OrthographicCamera();
         orthographicCamera.setToOrtho(false, graphics.getWidth(), graphics.getHeight());
         orthographicCamera.update();
 
-        view = new FitViewport(renderWidth, renderHeight, orthographicCamera);
-        prefsInst.listener.addListener(startMenu);
-        prefsInst.listener.addListener(startMenu.gameButton);
-        prefsInst.listener.addListener(startMenu.loadButton);
-        prefsInst.listener.addListener(startMenu.exitButton);
+        viewport = new FitViewport(renderWidth, renderHeight, orthographicCamera);
 
         Gdx.input.setInputProcessor(prefsInst.listener);
     }

@@ -10,7 +10,7 @@ public class DesktopLauncher {
         LwjglApplicationConfiguration config0 = new LwjglApplicationConfiguration();
         config0.width = 960;
         config0.height= 544;
-        config0.title = "JumpJacker";
+        config0.title = "VITTACH Craft";
         new LwjglApplication(JJEngine.getInstance(0), config0);
     }
 }

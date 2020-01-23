@@ -9,8 +9,12 @@ public class GamePlay implements GameScreen {
 
     public void display(Viewport view) {
         engineInst.mainGameLoop.display(view);
-        // engineInst.inventoryButton.display(view);
+        engineInst.inventoryBtn.display(view);
 
+        listenInput();
+    }
+
+    private void listenInput() {
         if (engineInst.controller.pressedKeys.contains(Input.Keys.ESCAPE)) {
             prefInst.listener.cleanProcesses();
 
