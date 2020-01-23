@@ -29,7 +29,7 @@ class FirstPersonController implements ProcessorInput {
     private float velocity = MOVE_VELOCITY;
     private float cameraNewDelta;
 
-    public int viewDistance = 99;
+    public int viewDistance = 256;
 
     public HashSet<Integer> pressedKeys;
 
@@ -42,6 +42,7 @@ class FirstPersonController implements ProcessorInput {
 
         camera.position.set(0, 0, 0);
         camera.near = 0.1f;
+        camera.far = 2.f * viewDistance;
         camera.update();
     }
 
@@ -171,25 +172,25 @@ class FirstPersonController implements ProcessorInput {
         }
 
         if (pressedKeys.contains(FORWARD)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).scl(velocity));
+            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength(1).scl(velocity));
         } else if (pressedKeys.contains(BACK)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).scl(-velocity));
+            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength(1).scl(-velocity));
         }
 
         if (pressedKeys.contains(RUN)) velocity = FAST_VELOCITY;
 
         if (pressedKeys.contains(LEFT)) {
             move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                    .crs(0, 1, 0).scl(-velocity));
+                    .setLength(1).crs(0, 1, 0).scl(-velocity));
         } else if (pressedKeys.contains(RIGHT)) {
             move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                    .crs(0, 1, 0).scl(velocity));
+                .setLength(1).crs(0, 1, 0).scl(velocity));
         }
 
         // движение перса по диагонали
         if ((pressedKeys.contains(RIGHT) || pressedKeys.contains(LEFT))
                 && (pressedKeys.contains(BACK) || pressedKeys.contains(FORWARD))) {
-            move.scl(velocity);
+            move.setLength(1).scl(velocity);
         }
 
         camera.translate(move);

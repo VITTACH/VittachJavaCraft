@@ -27,9 +27,6 @@ public class MainGameLoop {
     private final ShaderProgram shader;
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
-    private Vector3 camPosition;
-    private Vector3 lightPosition = new Vector3(0f, 50f, 0f);
-
     private Texture texture;
 
     private final Map<Vector3, Mesh> meshMap = new HashMap<Vector3, Mesh>();
@@ -39,7 +36,10 @@ public class MainGameLoop {
     private final JJEngine engineInst = JJEngine.getInstance();
     private final int distance = engineInst.controller.viewDistance;
     private final int chunkSize = 32;
-    private final int mapHeight = 32;
+    private final int mapHeight = 256;
+
+    private Vector3 camPosition;
+    private Vector3 lightPosition = new Vector3(0f, distance * 0.7f, 0f);
 
     public void dispose() {
         textureMap.clear();
@@ -59,15 +59,15 @@ public class MainGameLoop {
             throw new GdxRuntimeException(shader.getLog());
         }
 
-        MeshBuilder builder = new MeshBuilder();
         VertexAttributes attributes = new VertexAttributes(
             new VertexAttribute(Usage.Position, 3, "a_Position"),
             new VertexAttribute(Usage.Normal, 3, "a_Normal"),
             new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "a_TexCoord")
         );
 
+        float blockSize = 1.0f;
+        MeshBuilder builder = new MeshBuilder();
         builder.begin(attributes, GL20.GL_TRIANGLES);
-        float blockSize = 1f;
         builder.box(blockSize, blockSize, blockSize);
         blockMesh = builder.end();
     }
@@ -163,7 +163,7 @@ public class MainGameLoop {
 
         shader.begin();
         shader.setUniformMatrix("modelView", fpcCamera.combined);
-        shader.setUniformf("uCameraFar", 50f);
+        shader.setUniformf("uCameraFar", distance * 0.7f);
         shader.setUniformf("uLightPosition", lightPosition);
         Matrix4 model = new Matrix4();
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
