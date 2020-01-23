@@ -28,7 +28,7 @@ public class MainGameLoop {
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     private Vector3 camPosition;
-    private Vector3 lightPosition = new Vector3(0f, 96f, 0f);
+    private Vector3 lightPosition = new Vector3(0f, 50f, 0f);
 
     private Texture texture;
 
@@ -54,6 +54,7 @@ public class MainGameLoop {
             Gdx.files.internal("glshs/vertex.glsl"),
             Gdx.files.internal("glshs/fragment.glsl")
         );
+        ShaderProgram.pedantic = false;
         if (!shader.isCompiled()) {
             throw new GdxRuntimeException(shader.getLog());
         }
@@ -162,7 +163,7 @@ public class MainGameLoop {
 
         shader.begin();
         shader.setUniformMatrix("modelView", fpcCamera.combined);
-        shader.setUniformf("uCameraFar", fpcCamera.far);
+        shader.setUniformf("uCameraFar", 50f);
         shader.setUniformf("uLightPosition", lightPosition);
         Matrix4 model = new Matrix4();
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
