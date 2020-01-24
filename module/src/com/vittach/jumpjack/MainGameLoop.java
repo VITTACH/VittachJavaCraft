@@ -35,8 +35,8 @@ public class MainGameLoop {
 
     private final JJEngine engineInst = JJEngine.getInstance();
     private final int distance = engineInst.controller.viewDistance;
-    private final int chunkSize = 32;
-    private final int mapHeight = 256;
+    private final int chunkSize = 53;
+    private final int mapHeight = 64;
 
     private Vector3 camPosition;
     private Vector3 lightPosition = new Vector3(0f, distance * 0.7f, 0f);
