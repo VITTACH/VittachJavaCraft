@@ -45,8 +45,16 @@ public class MeshCompress {
             // Experimental culling invisible surface
             int oneSideVertices = 4 * vertexSize;
             for (int j = 0, k = 0; j < length; j++) {
-                // top surface
+                boolean isNeedVertices = false;
                 if (j >= 2 * oneSideVertices && j < 3 * oneSideVertices) {
+                    // bottom surface
+                    isNeedVertices = true;
+                } else if (j >= 3 * oneSideVertices && j < 4 * oneSideVertices) {
+                    // top surface
+                    isNeedVertices = true;
+                }
+
+                if (isNeedVertices) {
                     vertexList.add(destOffset + k, vertices[j]);
                     k++;
                 } else if (j % vertexSize == 0) {
@@ -59,7 +67,14 @@ public class MeshCompress {
             int oneSideIndices = numIndices / 6;
             length = numIndices;
             for (int j = 0, k = 0; j < length; j++) {
+                boolean isNeedIndices = false;
                 if (j >= 0 && j < oneSideIndices) {
+                    isNeedIndices = true;
+                } else if (j >= oneSideIndices && j < 2 * oneSideIndices) {
+                    isNeedIndices = true;
+                }
+
+                if (isNeedIndices) {
                     indices[j] += vertexOffset;
                     indiceList.add(indexOffset + k, indices[j]);
                     k++;

@@ -35,7 +35,7 @@ public class MainGameLoop {
 
     private final JJEngine engineInst = JJEngine.getInstance();
     private final int distance = engineInst.controller.viewDistance;
-    private final int chunkSize = 128;
+    private final int chunkSize = 64;
     private final int mapHeight = 128;
 
     private Vector3 camPosition;
@@ -117,7 +117,9 @@ public class MainGameLoop {
                     List<MeshObj> meshes = new ArrayList<MeshObj>();
 
                     for (int positionY = 0; positionY < chunkSize; positionY++) {
-                        if (positionY > 0) continue;
+                        if (positionY > 0 || y > 0) {
+                            continue;
+                        }
                         for (int positionX = 0; positionX < chunkSize; positionX++) {
                             for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
                                 symbol = new Random().nextInt() % 2 == 0 ? "a" : "b";
@@ -177,6 +179,7 @@ public class MainGameLoop {
             Mesh mergedMesh = meshMap.get(pos);
             if (mergedMesh == null) {
                 mergedMesh = compressMesh(blockObjs);
+                if (mergedMesh == null) continue;
                 meshMap.put(pos, mergedMesh);
             }
 
