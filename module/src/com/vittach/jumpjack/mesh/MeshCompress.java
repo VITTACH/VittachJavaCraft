@@ -13,9 +13,9 @@ import java.util.Map;
 public class MeshCompress {
 
     public static Mesh mergeMeshes(
-            List<MeshObj> meshObjs,
-            Map<String, List<TextureRegion>> textureRegions,
-            List<Matrix4> translates
+        List<MeshObj> meshObjs,
+        Map<String, List<TextureRegion>> textureRegions,
+        List<Matrix4> translates
     ) {
         if (meshObjs == null || meshObjs.isEmpty()) return null;
 
@@ -29,51 +29,50 @@ public class MeshCompress {
         for (int i = 0; i < meshObjs.size(); i++) {
             Mesh mesh = meshObjs.get(i).getMesh();
             VertexAttribute positionCoordinates = mesh.getVertexAttribute(VertexAttributes.Usage.Position);
+            int dimension = positionCoordinates.numComponents;
+            int offset = positionCoordinates.offset / 4;
+
             int numIndices = mesh.getNumIndices();
             int numberVertices = mesh.getNumVertices();
             int vertexSize = mesh.getVertexSize() / 4;
             int length = numberVertices * vertexSize;
 
-            float vertices[] = new float[length];
+            float[] vertices = new float[length];
             mesh.getVertices(0, length, vertices);
+
+            Mesh.transform(translates.get(i), vertices, vertexSize, offset, dimension, 0, numberVertices);
 
             // Experimental culling invisible surface
             int oneSideVertices = 4 * vertexSize;
-            for (int j = 0; j < length; j++) {
+            for (int j = 0, k = 0; j < length; j++) {
                 // top surface
                 if (j >= 2 * oneSideVertices && j < 3 * oneSideVertices) {
-                    continue;
+                    vertexList.add(destOffset + k, vertices[j]);
+                    k++;
+                } else if (j % vertexSize == 0) {
+                    numberVertices--;
                 }
-                vertices[j] = 0;
             }
 
-            int offset = positionCoordinates.offset / 4;
-            int dimension = positionCoordinates.numComponents;
-            Mesh.transform(translates.get(i), vertices, vertexSize, offset, dimension, 0, numberVertices);
-
-            List<Float> vertexes = new ArrayList<Float>();
-            for (float v : vertices) {
-                vertexes.add(v);
-            }
-            vertexList.addAll(destOffset, vertexes);
-
-            short indices[] = new short[numIndices];
+            short[] indices = new short[numIndices];
             mesh.getIndices(indices);
-            for (int index = 0; index < numIndices; index++) {
-                indices[index] += vertexOffset;
+            int oneSideIndices = numIndices / 6;
+            length = numIndices;
+            for (int j = 0, k = 0; j < length; j++) {
+                if (j >= 0 && j < oneSideIndices) {
+                    indices[j] += vertexOffset;
+                    indiceList.add(indexOffset + k, indices[j]);
+                    k++;
+                } else {
+                    numIndices--;
+                }
             }
-
-            List<Short> indexes = new ArrayList<Short>();
-            for (short v : indices) {
-                indexes.add(v);
-            }
-            indiceList.addAll(indexOffset, indexes);
 
             reInitTextures(mesh, textureRegions.get(meshObjs.get(i).getSymbol()));
 
-            indexOffset += numIndices;
+            destOffset += numberVertices * vertexSize;
             vertexOffset += numberVertices;
-            destOffset += length;
+            indexOffset += numIndices;
         }
 
         VertexAttributes vertexAttributes = meshObjs.get(0).getMesh().getVertexAttributes();
