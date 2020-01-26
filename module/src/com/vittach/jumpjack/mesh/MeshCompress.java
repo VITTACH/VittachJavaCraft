@@ -13,11 +13,13 @@ import java.util.Map;
 public class MeshCompress {
 
     public static Mesh mergeMeshes(
-        List<MeshObj> meshObjs,
-        Map<String, List<TextureRegion>> textureRegions,
+        List<MeshObj> meshes,
+        Map<String, List<TextureRegion>> regions,
         List<Matrix4> translates
     ) {
-        if (meshObjs == null || meshObjs.isEmpty()) return null;
+        if (meshes == null || meshes.isEmpty()) {
+            return null;
+        }
 
         final List<Float> vertexList = new ArrayList<Float>();
         final List<Short> indiceList = new ArrayList<Short>();
@@ -26,30 +28,32 @@ public class MeshCompress {
         int indexOffset = 0;
         int vertexOffset = 0;
 
-        for (int i = 0; i < meshObjs.size(); i++) {
-            Mesh mesh = meshObjs.get(i).getMesh();
+        for (int i = 0; i < meshes.size(); i++) {
+            final Mesh mesh = meshes.get(i).getMesh();
             VertexAttribute positionCoordinates = mesh.getVertexAttribute(VertexAttributes.Usage.Position);
-            int dimension = positionCoordinates.numComponents;
+            int dimensions = positionCoordinates.numComponents;
             int offset = positionCoordinates.offset / 4;
 
-            int numIndices = mesh.getNumIndices();
+            int numberIndices = mesh.getNumIndices();
             int numberVertices = mesh.getNumVertices();
             int vertexSize = mesh.getVertexSize() / 4;
             int length = numberVertices * vertexSize;
 
             float[] vertices = new float[length];
-            mesh.getVertices(0, length, vertices);
+            short[] indices = new short[numberIndices];
+            mesh.getIndices(indices);
+            mesh.getVertices(vertices);
 
-            Mesh.transform(translates.get(i), vertices, vertexSize, offset, dimension, 0, numberVertices);
+            Mesh.transform(translates.get(i), vertices, vertexSize, offset, dimensions, 0, numberVertices);
 
             // Experimental culling invisible surface
-            int oneSideVertices = 4 * vertexSize;
+            int  sideLength = 4 * vertexSize;
             for (int j = 0, k = 0; j < length; j++) {
                 boolean isNeedVertices = false;
-                if (j >= 2 * oneSideVertices && j < 3 * oneSideVertices) {
+                if (j >= 2 * sideLength && j < 3 * sideLength) {
                     // bottom surface
                     isNeedVertices = true;
-                } else if (j >= 3 * oneSideVertices && j < 4 * oneSideVertices) {
+                } else if (j >= 3 * sideLength && j < 4 * sideLength) {
                     // top surface
                     isNeedVertices = true;
                 }
@@ -62,15 +66,13 @@ public class MeshCompress {
                 }
             }
 
-            short[] indices = new short[numIndices];
-            mesh.getIndices(indices);
-            int oneSideIndices = numIndices / 6;
-            length = numIndices;
+            length = numberIndices;
+            sideLength = numberIndices / 6;
             for (int j = 0, k = 0; j < length; j++) {
                 boolean isNeedIndices = false;
-                if (j >= 0 && j < oneSideIndices) {
+                if (j >= 0 * sideLength && j < 1 * sideLength) {
                     isNeedIndices = true;
-                } else if (j >= oneSideIndices && j < 2 * oneSideIndices) {
+                } else if (j >= 1 * sideLength && j < 2 * sideLength) {
                     isNeedIndices = true;
                 }
 
@@ -79,59 +81,65 @@ public class MeshCompress {
                     indiceList.add(indexOffset + k, indices[j]);
                     k++;
                 } else {
-                    numIndices--;
+                    numberIndices--;
                 }
             }
 
-            reInitTextures(mesh, textureRegions.get(meshObjs.get(i).getSymbol()));
+            remapTexture(mesh, regions.get(meshes.get(i).getSymbol()));
 
             destOffset += numberVertices * vertexSize;
             vertexOffset += numberVertices;
-            indexOffset += numIndices;
+            indexOffset += numberIndices;
         }
 
-        VertexAttributes vertexAttributes = meshObjs.get(0).getMesh().getVertexAttributes();
-        Mesh mesh = new Mesh(true, vertexList.size(), indiceList.size(), vertexAttributes);
-
-        float vertices[] = new float[vertexList.size()];
-        for (int i = 0; i < vertexList.size(); i++) {
-            vertices[i] = vertexList.get(i);
-        }
-        mesh.setVertices(vertices);
-
-        short indices[] = new short[indiceList.size()];
-        for (int i = 0; i < indiceList.size(); i++) {
-            indices[i] = indiceList.get(i);
-        }
-        mesh.setIndices(indices);
-
-        return mesh;
+        return mergeMesh(vertexList, indiceList, meshes);
     }
 
-    static void reInitTextures(Mesh mergeMesh, List<TextureRegion> regions) {
+    private static Mesh mergeMesh(List<Float> vertexList, List<Short> indiceList, List<MeshObj> meshes) {
+        Mesh mergedMesh = new Mesh(
+            true,
+            vertexList.size(),
+            indiceList.size(),
+            meshes.get(0).getMesh().getVertexAttributes()
+        );
+
+        int i = 0;
+        float[] vertices = new float[vertexList.size()];
+        for (float val : vertexList) vertices[i++] = val;
+        mergedMesh.setVertices(vertices);
+
+        i = 0;
+        short[] indices = new short[indiceList.size()];
+        for (short val : indiceList) indices[i++] = val;
+        mergedMesh.setIndices(indices);
+
+        return mergedMesh;
+    }
+
+    private static void remapTexture(Mesh mergeMesh, List<TextureRegion> regions) {
         int texture = mergeMesh.getVertexAttributes().getOffset(VertexAttributes.Usage.TextureCoordinates);
         int vertexSize = mergeMesh.getVertexSize() / 4; // divide to convert bytes to floats
         int length = vertexSize * mergeMesh.getNumVertices();
         float[] vertices = new float[length];
 
         mergeMesh.getVertices(vertices);
-        for (int i = texture, corner = 0, side = 0; i < length; i += vertexSize) {
+        for (int i = texture, corner = 0, sides = 0; i < length; i += vertexSize) {
             if (corner == 0) {
-                vertices[i] = regions.get(side).getU();
-                vertices[i + 1] = regions.get(side).getV();
+                vertices[i] = regions.get(sides).getU();
+                vertices[i + 1] = regions.get(sides).getV();
             } else if (corner == 1) {
-                vertices[i] = regions.get(side).getU();
-                vertices[i + 1] = regions.get(side).getV2();
+                vertices[i] = regions.get(sides).getU();
+                vertices[i + 1] = regions.get(sides).getV2();
             } else if (corner == 2) {
-                vertices[i] = regions.get(side).getU2();
-                vertices[i + 1] = regions.get(side).getV2();
+                vertices[i] = regions.get(sides).getU2();
+                vertices[i + 1] = regions.get(sides).getV2();
             } else if (corner == 3) {
-                vertices[i] = regions.get(side).getU2();
-                vertices[i + 1] = regions.get(side).getV();
+                vertices[i] = regions.get(sides).getU2();
+                vertices[i + 1] = regions.get(sides).getV();
                 corner = 0;
-                side++;
-                if (side >= regions.size()) {
-                    side = 0;
+                sides++;
+                if (sides >= regions.size()) {
+                    sides = 0;
                 }
                 continue;
             }

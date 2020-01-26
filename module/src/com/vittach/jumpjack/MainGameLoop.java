@@ -50,10 +50,8 @@ public class MainGameLoop {
         camPosition = new Vector3(0, 0, 0);
         shapeRenderer.setColor(0.4f, 0.69f, 0.9f, 1);
         setTextures(Gdx.files.internal("3d/blocksSprite.png"));
-        shader = new ShaderProgram(
-            Gdx.files.internal("glshs/vertex.glsl"),
-            Gdx.files.internal("glshs/fragment.glsl")
-        );
+
+        shader = new ShaderProgram(Gdx.files.internal("glshs/vertex.glsl"), Gdx.files.internal("glshs/fragment.glsl"));
         ShaderProgram.pedantic = false;
         if (!shader.isCompiled()) {
             throw new GdxRuntimeException(shader.getLog());
@@ -74,7 +72,7 @@ public class MainGameLoop {
 
     private void setTextures(FileHandle path) {
         texture = new Texture(path);
-        TextureRegion tmp[][] = TextureRegion.split(texture, texture.getWidth() / 8, texture.getHeight() / 8);
+        TextureRegion[][] imageRegions = TextureRegion.split(texture, texture.getWidth() / 8, texture.getHeight() / 8);
 
         OrthographicCamera camera = new OrthographicCamera();
         camera.setToOrtho(false, 16, 16);
@@ -84,7 +82,7 @@ public class MainGameLoop {
         for (int i = 5; i < 7; i++) {
             String symbol = i % 2 == 0 ? "a" : "b";
             List<TextureRegion> regions = new ArrayList<TextureRegion>();
-            regions.add(tmp[i][0]);
+            regions.add(imageRegions[i][0]);
             textureMap.put(symbol, regions);
         }
     }
@@ -137,11 +135,11 @@ public class MainGameLoop {
     }
 
     private Mesh compressMesh(List<MeshObj> meshObjects) {
-        List<Matrix4> positions = new ArrayList<Matrix4>();
-        for (MeshObj meshObject : meshObjects) {
-            positions.add(new Matrix4().setToTranslation(meshObject.getPosition()));
+        List<Matrix4> matrix4s = new ArrayList<Matrix4>();
+        for (MeshObj obj : meshObjects) {
+            matrix4s.add(new Matrix4().setToTranslation(obj.getPosition()));
         }
-        return MeshCompress.mergeMeshes(meshObjects, textureMap, positions);
+        return MeshCompress.mergeMeshes(meshObjects, textureMap, matrix4s);
     }
 
     public void display(Viewport viewport) {
