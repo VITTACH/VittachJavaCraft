@@ -29,7 +29,7 @@ class FirstPersonController implements ProcessorInput {
     private float velocity = MOVE_VELOCITY;
     private float cameraNewDelta;
 
-    public int viewDistance = 256;
+    public int viewDistance = 32;
 
     public HashSet<Integer> pressedKeys;
 

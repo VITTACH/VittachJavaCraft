@@ -35,11 +35,10 @@ public class MainGameLoop {
 
     private final JJEngine engineInst = JJEngine.getInstance();
     private final int distance = engineInst.controller.viewDistance;
-    private final int chunkSize = 64;
-    private final int mapHeight = 128;
+    private final int chunkSize = 16;
+    private final int mapHeight = 32;
 
     private Vector3 camPosition;
-    private Vector3 lightPosition = new Vector3(0f, distance * 0.7f, 0f);
 
     public void dispose() {
         textureMap.clear();
@@ -115,9 +114,6 @@ public class MainGameLoop {
                     List<MeshObj> meshes = new ArrayList<MeshObj>();
 
                     for (int positionY = 0; positionY < chunkSize; positionY++) {
-                        if (positionY > 0 || y > 0) {
-                            continue;
-                        }
                         for (int positionX = 0; positionX < chunkSize; positionX++) {
                             for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
                                 symbol = new Random().nextInt() % 2 == 0 ? "a" : "b";
@@ -157,14 +153,13 @@ public class MainGameLoop {
         //
 
         texture.bind(0);
-        lightPosition.set(camPosition.x, lightPosition.y, camPosition.z);
 
         Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 
         shader.begin();
         shader.setUniformMatrix("modelView", fpcCamera.combined);
         shader.setUniformf("uCameraFar", distance * 0.7f);
-        shader.setUniformf("uLightPosition", lightPosition);
+        shader.setUniformf("uLightPosition", camPosition);
         Matrix4 model = new Matrix4();
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
             Vector3 pos = chunkEntry.getKey();

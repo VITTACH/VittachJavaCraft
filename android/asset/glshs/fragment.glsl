@@ -31,5 +31,5 @@ void main() {
 
     uAmbiant = vec4(length(vPosition.xyz - uLightPosition) / uCameraFar);
 
-    gl_FragColor = uTexture * uAmbiant;
+    gl_FragColor = uTexture;
 }
