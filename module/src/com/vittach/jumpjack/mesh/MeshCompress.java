@@ -12,10 +12,15 @@ import java.util.Map;
 
 public class MeshCompress {
 
-    public static Mesh mergeMeshes(
-        List<MeshObj> meshes,
-        Map<String, List<TextureRegion>> regions,
-        List<Matrix4> translates
+    private static boolean hasBlock(List<MeshObj> meshes, Integer index) {
+        return !"".equals(meshes.get(index).getSymbol());
+    }
+
+    public static Mesh compressMeshes(
+            List<MeshObj> meshes,
+            Map<String, List<TextureRegion>> regions,
+            List<Matrix4> translates,
+            Integer chunkSize
     ) {
         if (meshes == null || meshes.isEmpty()) {
             return null;
@@ -27,6 +32,7 @@ public class MeshCompress {
         int destOffset = 0;
         int indexOffset = 0;
         int vertexOffset = 0;
+        int floorSize = chunkSize * chunkSize;
 
         for (int i = 0; i < meshes.size(); i++) {
             final Mesh mesh = meshes.get(i).getMesh();
@@ -47,15 +53,28 @@ public class MeshCompress {
             Mesh.transform(translates.get(i), vertices, vertexSize, offset, dimensions, 0, numberVertices);
 
             // Experimental culling invisible surface
-            int  sideLength = 4 * vertexSize;
+            int sideLength = 4 * vertexSize;
+            boolean isNeedVertices = false;
             for (int j = 0, k = 0; j < length; j++) {
-                boolean isNeedVertices = false;
-                if (j >= 2 * sideLength && j < 3 * sideLength) {
-                    // bottom surface
-                    isNeedVertices = true;
+
+                if (j >= 0 * sideLength && j < 1 * sideLength) {
+                    int index = i - (floorSize * (i / floorSize)); // front
+                    isNeedVertices = ((index - 1) % chunkSize == 0) || !hasBlock(meshes, index);
+                } else if (j >= 1 * sideLength && j < 2 * sideLength) {
+                    int index = i - (floorSize * (i / floorSize)); // back
+                    isNeedVertices = index % chunkSize == 0 || !hasBlock(meshes, index);
+                } else if (j >= 2 * sideLength && j < 3 * sideLength) {
+                    int index = i - floorSize; // bottom
+                    isNeedVertices = index < 0 || !hasBlock(meshes, index);
                 } else if (j >= 3 * sideLength && j < 4 * sideLength) {
-                    // top surface
-                    isNeedVertices = true;
+                    int index = i + floorSize; // top
+                    isNeedVertices = index >= meshes.size() || !hasBlock(meshes, index);
+                } else if (j >= 4 * sideLength && j < 5 * sideLength) {
+                    int index = i - (floorSize * (i / floorSize)); // left
+                    isNeedVertices = index < chunkSize || !hasBlock(meshes, index);
+                } else if (j >= 5 * sideLength && j < 6 * sideLength) {
+                    int index = i - (floorSize * (i / floorSize)); // right
+                    isNeedVertices = index >= floorSize - chunkSize || !hasBlock(meshes, index);
                 }
 
                 if (isNeedVertices) {
@@ -97,10 +116,10 @@ public class MeshCompress {
 
     private static Mesh mergeMesh(List<Float> vertexList, List<Short> indiceList, List<MeshObj> meshes) {
         Mesh mergedMesh = new Mesh(
-            true,
-            vertexList.size(),
-            indiceList.size(),
-            meshes.get(0).getMesh().getVertexAttributes()
+                true,
+                vertexList.size(),
+                indiceList.size(),
+                meshes.get(0).getMesh().getVertexAttributes()
         );
 
         int i = 0;

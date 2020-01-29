@@ -131,11 +131,11 @@ public class MainGameLoop {
     }
 
     private Mesh compressMesh(List<MeshObj> meshObjects) {
-        List<Matrix4> matrix4s = new ArrayList<Matrix4>();
+        List<Matrix4> matrix = new ArrayList<Matrix4>();
         for (MeshObj obj : meshObjects) {
-            matrix4s.add(new Matrix4().setToTranslation(obj.getPosition()));
+            matrix.add(new Matrix4().setToTranslation(obj.getPosition()));
         }
-        return MeshCompress.mergeMeshes(meshObjects, textureMap, matrix4s);
+        return MeshCompress.compressMeshes(meshObjects, textureMap, matrix, chunkSize);
     }
 
     public void display(Viewport viewport) {
