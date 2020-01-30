@@ -12,14 +12,14 @@ import java.util.Map;
 
 public class MeshCompress {
 
-    private static boolean hasBlock(List<MeshObj> meshes, Integer index) {
+    private static boolean isEmptyAtIndex(List<MeshObj> meshes, Integer index) {
         if (index < 0 || index >= meshes.size()) {
-            return false;
+            return true;
         }
-        return !"".equals(meshes.get(index).getSymbol());
+        return "".equals(meshes.get(index).getSymbol());
     }
 
-    private static boolean isNeedCullingSurface(
+    private static boolean hasSurface(
         List<MeshObj> meshes,
         Integer i,
         Integer j,
@@ -27,21 +27,32 @@ public class MeshCompress {
         Integer chunkLength
     ) {
 
+        int floorSize = chunkLength * chunkLength;
         boolean result;
         if (j >= 0 && j < sideLength) {
-            result = !hasBlock(meshes, i + 1); // front
+            int index = i - (floorSize * (i / floorSize)) - 1;
+            result = index % chunkLength == 0 || isEmptyAtIndex(meshes, i + 1); // front
         } else if (j >= sideLength && j < 2 * sideLength) {
-            result = !hasBlock(meshes, i - 1); // back
+            int index = i - (floorSize * (i / floorSize));
+            result = index % chunkLength == 0 || isEmptyAtIndex(meshes, i - 1); // back
         } else if (j >= 2 * sideLength && j < 3 * sideLength) {
-            int index = i - chunkLength * chunkLength; // bottom
-            result = index < 0 || !hasBlock(meshes, index);
+            result = isEmptyAtIndex(meshes, i - floorSize); // bottom
         } else if (j >= 3 * sideLength && j < 4 * sideLength) {
-            int index = i + chunkLength * chunkLength; // top
-            result = index >= meshes.size() || !hasBlock(meshes, index);
+            result = isEmptyAtIndex(meshes, i + floorSize); // top
         } else if (j >= 4 * sideLength && j < 5 * sideLength) {
-            result = !hasBlock(meshes, i - chunkLength); // left;
+            int index = i - (floorSize * (i / floorSize));
+            if (index < chunkLength) {
+                result = true;
+            } else {
+                result = isEmptyAtIndex(meshes, i - chunkLength); // left;
+            }
         } else {
-            result = !hasBlock(meshes, i + chunkLength); // right
+            int index = i - (floorSize * (i / floorSize));
+            if (index >= floorSize - chunkLength) {
+                result = true;
+            } else {
+                result = isEmptyAtIndex(meshes, i + chunkLength); // right
+            }
         }
 
         return result;
@@ -88,7 +99,7 @@ public class MeshCompress {
             // Experimental culling invisible surface
             int sideLength = 4 * vertexSize;
             for (int j = 0, k = 0; j < length; j++) {
-                if (isNeedCullingSurface(meshes, i, j, sideLength, chunkLength)) {
+                if (hasSurface(meshes, i, j, sideLength, chunkLength)) {
                     vertexList.add(destOffset + k, vertices[j]);
                     k++;
                 } else if (j % vertexSize == 0) {
@@ -99,7 +110,7 @@ public class MeshCompress {
             length = numberIndices;
             sideLength = numberIndices / 6;
             for (int j = 0, k = 0; j < length; j++) {
-                if (isNeedCullingSurface(meshes, i, j, sideLength, chunkLength)) {
+                if (hasSurface(meshes, i, j, sideLength, chunkLength)) {
                     indices[j] += vertexOffset;
                     indiceList.add(indexOffset + k, indices[j]);
                     k++;
