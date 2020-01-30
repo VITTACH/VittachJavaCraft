@@ -116,7 +116,7 @@ public class MainGameLoop {
                     for (int positionY = 0; positionY < chunkSize; positionY++) {
                         for (int positionX = 0; positionX < chunkSize; positionX++) {
                             for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
-                                if (positionY == 0) {
+                                if (positionY == 0 && y == 0) {
                                     symbol = new Random().nextInt() % 2 == 0 ? "a" : "b";
                                 } else if (positionY == 4 && positionX == 4 && positionZ == 4) {
                                     symbol = "a";
