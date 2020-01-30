@@ -57,9 +57,9 @@ public class MainGameLoop {
         }
 
         VertexAttributes attributes = new VertexAttributes(
-            new VertexAttribute(Usage.Position, 3, "a_Position"),
-            new VertexAttribute(Usage.Normal, 3, "a_Normal"),
-            new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "a_TexCoord")
+                new VertexAttribute(Usage.Position, 3, "a_Position"),
+                new VertexAttribute(Usage.Normal, 3, "a_Normal"),
+                new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "a_TexCoord")
         );
 
         float blockSize = 1.0f;
@@ -116,7 +116,13 @@ public class MainGameLoop {
                     for (int positionY = 0; positionY < chunkSize; positionY++) {
                         for (int positionX = 0; positionX < chunkSize; positionX++) {
                             for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
-                                symbol = new Random().nextInt() % 17 == 0 ? "a" : "";
+                                if (positionY == 0) {
+                                    symbol = new Random().nextInt() % 2 == 0 ? "a" : "b";
+                                } else if (positionY == 4 && positionX == 4 && positionZ == 4) {
+                                    symbol = "a";
+                                } else {
+                                    symbol = "";
+                                }
 
                                 Vector3 position = new Vector3(positionX, positionY, positionZ);
                                 meshes.add(new MeshObj(blockMesh, symbol, position));

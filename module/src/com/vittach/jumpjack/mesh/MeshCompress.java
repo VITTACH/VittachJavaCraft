@@ -19,6 +19,34 @@ public class MeshCompress {
         return !"".equals(meshes.get(index).getSymbol());
     }
 
+    private static boolean isNeedCullingSurface(
+        List<MeshObj> meshes,
+        Integer i,
+        Integer j,
+        Integer sideLength,
+        Integer chunkLength
+    ) {
+
+        boolean result;
+        if (j >= 0 && j < sideLength) {
+            result = !hasBlock(meshes, i + 1); // front
+        } else if (j >= sideLength && j < 2 * sideLength) {
+            result = !hasBlock(meshes, i - 1); // back
+        } else if (j >= 2 * sideLength && j < 3 * sideLength) {
+            int index = i - chunkLength * chunkLength; // bottom
+            result = index < 0 || !hasBlock(meshes, index);
+        } else if (j >= 3 * sideLength && j < 4 * sideLength) {
+            int index = i + chunkLength * chunkLength; // top
+            result = index >= meshes.size() || !hasBlock(meshes, index);
+        } else if (j >= 4 * sideLength && j < 5 * sideLength) {
+            result = !hasBlock(meshes, i - chunkLength); // left;
+        } else {
+            result = !hasBlock(meshes, i + chunkLength); // right
+        }
+
+        return result;
+    }
+
     public static Mesh compressMeshes(
         List<MeshObj> meshes,
         Map<String, List<TextureRegion>> regions,
@@ -37,6 +65,9 @@ public class MeshCompress {
         int vertexOffset = 0;
 
         for (int i = 0; i < meshes.size(); i++) {
+            if ("".equals(meshes.get(i).getSymbol())) {
+                continue;
+            }
             final Mesh mesh = meshes.get(i).getMesh();
             VertexAttribute positionCoordinates = mesh.getVertexAttribute(VertexAttributes.Usage.Position);
             int dimensions = positionCoordinates.numComponents;
@@ -56,26 +87,8 @@ public class MeshCompress {
 
             // Experimental culling invisible surface
             int sideLength = 4 * vertexSize;
-            boolean isNeedVertices = false;
             for (int j = 0, k = 0; j < length; j++) {
-
-                if (j >= 0 * sideLength && j < 1 * sideLength) {
-                    isNeedVertices = !hasBlock(meshes, i + 1); // front
-                } else if (j >= 1 * sideLength && j < 2 * sideLength) {
-                    isNeedVertices = !hasBlock(meshes, i - 1); // back
-                } else if (j >= 2 * sideLength && j < 3 * sideLength) {
-                    int index = i - chunkLength * chunkLength; // bottom
-                    isNeedVertices = index < 0 || !hasBlock(meshes, index);
-                } else if (j >= 3 * sideLength && j < 4 * sideLength) {
-                    int index = i + chunkLength * chunkLength; // top
-                    isNeedVertices = index >= meshes.size() || !hasBlock(meshes, index);
-                } else if (j >= 4 * sideLength && j < 5 * sideLength) {
-                    isNeedVertices = !hasBlock(meshes, i - chunkLength); // left;
-                } else if (j >= 5 * sideLength && j < 6 * sideLength) {
-                    isNeedVertices = !hasBlock(meshes, i + chunkLength); // right
-                }
-
-                if (isNeedVertices) {
+                if (isNeedCullingSurface(meshes, i, j, sideLength, chunkLength)) {
                     vertexList.add(destOffset + k, vertices[j]);
                     k++;
                 } else if (j % vertexSize == 0) {
@@ -85,25 +98,8 @@ public class MeshCompress {
 
             length = numberIndices;
             sideLength = numberIndices / 6;
-            boolean isNeedIndices = false;
             for (int j = 0, k = 0; j < length; j++) {
-                if (j >= 0 * sideLength && j < 1 * sideLength) {
-                    isNeedIndices = !hasBlock(meshes, i + 1); // front
-                } else if (j >= 1 * sideLength && j < 2 * sideLength) {
-                    isNeedIndices = !hasBlock(meshes, i - 1); // back
-                } else if (j >= 2 * sideLength && j < 3 * sideLength) {
-                    int index = i - chunkLength * chunkLength; // bottom
-                    isNeedIndices = index < 0 || !hasBlock(meshes, index);
-                } else if (j >= 3 * sideLength && j < 4 * sideLength) {
-                    int index = i + chunkLength * chunkLength; // top
-                    isNeedIndices = index >= meshes.size() || !hasBlock(meshes, index);
-                } else if (j >= 4 * sideLength && j < 5 * sideLength) {
-                    isNeedIndices = !hasBlock(meshes, i - chunkLength); // left;
-                } else if (j >= 5 * sideLength && j < 6 * sideLength) {
-                    isNeedIndices = !hasBlock(meshes, i + chunkLength); // right
-                }
-
-                if (isNeedIndices) {
+                if (isNeedCullingSurface(meshes, i, j, sideLength, chunkLength)) {
                     indices[j] += vertexOffset;
                     indiceList.add(indexOffset + k, indices[j]);
                     k++;
