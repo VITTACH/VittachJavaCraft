@@ -13,9 +13,8 @@ import java.util.Map;
 public class MeshCompress {
 
     private static boolean isEmptyAtIndex(List<MeshObj> meshes, Integer index) {
-        if (index < 0 || index >= meshes.size()) {
-            return true;
-        }
+        if (index < 0 || index >= meshes.size()) return true;
+
         return "".equals(meshes.get(index).getSymbol());
     }
 
@@ -76,9 +75,8 @@ public class MeshCompress {
         int vertexOffset = 0;
 
         for (int i = 0; i < meshes.size(); i++) {
-            if ("".equals(meshes.get(i).getSymbol())) {
-                continue;
-            }
+            if (isEmptyAtIndex(meshes, i)) continue;
+
             final Mesh mesh = meshes.get(i).getMesh();
             VertexAttribute positionCoordinates = mesh.getVertexAttribute(VertexAttributes.Usage.Position);
             int dimensions = positionCoordinates.numComponents;
@@ -107,16 +105,8 @@ public class MeshCompress {
                 }
             }
 
-            length = numberIndices;
-            sideLength = numberIndices / 6;
-            for (int j = 0, k = 0; j < length; j++) {
-                if (hasSurface(meshes, i, j, sideLength, chunkLength)) {
-                    indices[j] += vertexOffset;
-                    indiceList.add(indexOffset + k, indices[j]);
-                    k++;
-                } else {
-                    numberIndices--;
-                }
+            for (int j = 0; j < numberIndices; j++) {
+                indiceList.add(indexOffset + j, (short) (indices[j] + vertexOffset));
             }
 
             remapTexture(mesh, regions.get(meshes.get(i).getSymbol()));
