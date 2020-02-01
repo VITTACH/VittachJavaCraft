@@ -29,11 +29,11 @@ public class MeshCompress {
         int floorSize = chunkLength * chunkLength;
         boolean result;
         if (j >= 0 && j < sideLength) {
-            int index = i - (floorSize * (i / floorSize)) - 1;
-            result = index % chunkLength == 0 || isEmptyAtIndex(meshes, i + 1); // front
-        } else if (j >= sideLength && j < 2 * sideLength) {
             int index = i - (floorSize * (i / floorSize));
-            result = index % chunkLength == 0 || isEmptyAtIndex(meshes, i - 1); // back
+            result = index % chunkLength == 0 || isEmptyAtIndex(meshes, i - 1); // front
+        } else if (j >= sideLength && j < 2 * sideLength) {
+            int index = i - (floorSize * (i / floorSize)) + 1;
+            result = index % chunkLength == 0 || isEmptyAtIndex(meshes, i + 1); // back
         } else if (j >= 2 * sideLength && j < 3 * sideLength) {
             result = isEmptyAtIndex(meshes, i - floorSize); // bottom
         } else if (j >= 3 * sideLength && j < 4 * sideLength) {
