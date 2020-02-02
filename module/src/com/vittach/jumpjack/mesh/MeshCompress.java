@@ -63,9 +63,7 @@ public class MeshCompress {
         List<Matrix4> translates,
         Integer chunkLength
     ) {
-        if (meshes == null || meshes.isEmpty()) {
-            return null;
-        }
+        if (meshes == null || meshes.isEmpty()) return null;
 
         final List<Float> vertexList = new ArrayList<Float>();
         final List<Short> indiceList = new ArrayList<Short>();
@@ -94,6 +92,8 @@ public class MeshCompress {
 
             Mesh.transform(translates.get(i), vertices, vertexSize, offset, dimensions, 0, numberVertices);
 
+            reMappingTexture(mesh, vertices, regions.get(meshes.get(i).getSymbol()));
+
             // Experimental culling invisible surface
             int sideLength = 4 * vertexSize;
             for (int j = 0, k = 0; j < length; j++) {
@@ -108,8 +108,6 @@ public class MeshCompress {
             for (int j = 0; j < numberIndices; j++) {
                 indiceList.add(indexOffset + j, (short) (indices[j] + vertexOffset));
             }
-
-            remapTexture(mesh, regions.get(meshes.get(i).getSymbol()));
 
             destOffset += numberVertices * vertexSize;
             vertexOffset += numberVertices;
@@ -128,49 +126,50 @@ public class MeshCompress {
         );
 
         int i = 0;
-        float[] vertices = new float[vertexList.size()];
-        for (float val : vertexList) vertices[i++] = val;
-        mergedMesh.setVertices(vertices);
+        float[] vertexArray = new float[vertexList.size()];
+        for (float val : vertexList) {
+            vertexArray[i++] = val;
+        }
+        mergedMesh.setVertices(vertexArray);
 
         i = 0;
-        short[] indices = new short[indiceList.size()];
-        for (short val : indiceList) indices[i++] = val;
-        mergedMesh.setIndices(indices);
+        short[] indiceArray = new short[indiceList.size()];
+        for (short val : indiceList) {
+            indiceArray[i++] = val;
+        }
+        mergedMesh.setIndices(indiceArray);
 
         return mergedMesh;
     }
 
-    private static void remapTexture(Mesh mergeMesh, List<TextureRegion> regions) {
+    private static void reMappingTexture(Mesh mesh, float[] vertices, List<TextureRegion> regions) {
         if (regions == null || regions.isEmpty()) return;
-        int texture = mergeMesh.getVertexAttributes().getOffset(VertexAttributes.Usage.TextureCoordinates);
-        int vertexSize = mergeMesh.getVertexSize() / 4; // divide to convert bytes to floats
-        int length = vertexSize * mergeMesh.getNumVertices();
-        float[] vertices = new float[length];
 
-        mergeMesh.getVertices(vertices);
-        for (int i = texture, corner = 0, sides = 0; i < length; i += vertexSize) {
+        VertexAttribute uvAttribute = mesh.getVertexAttribute(VertexAttributes.Usage.TextureCoordinates);
+        int vertexSize = mesh.getVertexSize() / 4; // divide to convert bytes to floats
+        int length = vertexSize * mesh.getNumVertices();
+
+        for (int i = uvAttribute.offset / 4, corner = 0, side = 0; i < length; i += vertexSize) {
             if (corner == 0) {
-                vertices[i] = regions.get(sides).getU();
-                vertices[i + 1] = regions.get(sides).getV();
+                vertices[i] = regions.get(side).getU();
+                vertices[i + 1] = regions.get(side).getV();
             } else if (corner == 1) {
-                vertices[i] = regions.get(sides).getU();
-                vertices[i + 1] = regions.get(sides).getV2();
+                vertices[i] = regions.get(side).getU();
+                vertices[i + 1] = regions.get(side).getV2();
             } else if (corner == 2) {
-                vertices[i] = regions.get(sides).getU2();
-                vertices[i + 1] = regions.get(sides).getV2();
+                vertices[i] = regions.get(side).getU2();
+                vertices[i + 1] = regions.get(side).getV2();
             } else if (corner == 3) {
-                vertices[i] = regions.get(sides).getU2();
-                vertices[i + 1] = regions.get(sides).getV();
+                vertices[i] = regions.get(side).getU2();
+                vertices[i + 1] = regions.get(side).getV();
                 corner = 0;
-                sides++;
-                if (sides >= regions.size()) {
-                    sides = 0;
+                side++;
+                if (side >= regions.size()) {
+                    side = 0;
                 }
                 continue;
             }
             corner++;
         }
-
-        mergeMesh.setVertices(vertices);
     }
 }
