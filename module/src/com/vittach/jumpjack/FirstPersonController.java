@@ -172,19 +172,33 @@ class FirstPersonController implements ProcessorInput {
         }
 
         if (pressedKeys.contains(FORWARD)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength(1).scl(velocity));
+            move.add(normal.set(camera.direction.x, 0, camera.direction.z)
+                .setLength(1)
+                .scl(velocity)
+            );
         } else if (pressedKeys.contains(BACK)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength(1).scl(-velocity));
+            move.add(normal.set(camera.direction.x, 0, camera.direction.z)
+                .setLength(1)
+                .scl(-velocity)
+            );
         }
 
-        if (pressedKeys.contains(RUN)) velocity = FAST_VELOCITY;
+        if (pressedKeys.contains(RUN)) {
+            velocity = FAST_VELOCITY;
+        }
 
         if (pressedKeys.contains(LEFT)) {
             move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                    .setLength(1).crs(0, 1, 0).scl(-velocity));
+                .setLength(1)
+                .crs(0, 1, 0)
+                .scl(-velocity)
+            );
         } else if (pressedKeys.contains(RIGHT)) {
             move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                .setLength(1).crs(0, 1, 0).scl(velocity));
+                .setLength(1)
+                .crs(0, 1, 0)
+                .scl(velocity)
+            );
         }
 
         // движение перса по диагонали
