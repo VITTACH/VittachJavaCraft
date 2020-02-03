@@ -120,7 +120,7 @@ public class MainGameLoop {
                                     symbol = "b";
                                 } else if (positionY == 1 && y == 0) {
                                     symbol = "a";
-                                } else if (positionY == 4 && positionX == 4 && positionZ == 4) {
+                                } else if (positionY >= 2 && positionX == 4 && positionZ == 4) {
                                     symbol = "a";
                                 } else {
                                     symbol = "";
