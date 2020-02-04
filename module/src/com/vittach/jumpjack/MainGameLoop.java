@@ -166,7 +166,7 @@ public class MainGameLoop {
 
         shader.begin();
         shader.setUniformMatrix("modelView", fpcCamera.combined);
-        shader.setUniformf("uCameraFar", distance * 0.7f);
+        shader.setUniformf("uCameraFar", distance * 0.6f);
         shader.setUniformf("uLightPosition", camPosition);
         Matrix4 model = new Matrix4();
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
