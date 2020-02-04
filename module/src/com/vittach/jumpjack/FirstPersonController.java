@@ -172,13 +172,11 @@ class FirstPersonController implements ProcessorInput {
         }
 
         if (pressedKeys.contains(FORWARD)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                .setLength(1)
+            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1)
                 .scl(velocity)
             );
         } else if (pressedKeys.contains(BACK)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                .setLength(1)
+            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1)
                 .scl(-velocity)
             );
         }
@@ -188,14 +186,12 @@ class FirstPersonController implements ProcessorInput {
         }
 
         if (pressedKeys.contains(LEFT)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                .setLength(1)
+            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1)
                 .crs(0, 1, 0)
                 .scl(-velocity)
             );
         } else if (pressedKeys.contains(RIGHT)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                .setLength(1)
+            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1)
                 .crs(0, 1, 0)
                 .scl(velocity)
             );
@@ -204,7 +200,7 @@ class FirstPersonController implements ProcessorInput {
         // движение перса по диагонали
         if ((pressedKeys.contains(RIGHT) || pressedKeys.contains(LEFT))
                 && (pressedKeys.contains(BACK) || pressedKeys.contains(FORWARD))) {
-            move.setLength(1).scl(velocity);
+            move.setLength2(1).scl(velocity);
         }
 
         camera.translate(move);
