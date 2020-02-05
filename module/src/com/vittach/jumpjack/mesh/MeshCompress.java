@@ -98,8 +98,7 @@ public class MeshCompress {
             int sideLength = 4 * vertexSize;
             for (int j = 0, k = 0; j < length; j++) {
                 if (hasSurface(meshes, i, j, sideLength, chunkLength)) {
-                    vertexList.add(destOffset + k, vertices[j]);
-                    k++;
+                    vertexList.add(destOffset + k++, vertices[j]);
                 } else if (j % vertexSize == 0) {
                     numberVertices--;
                 }
