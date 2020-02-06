@@ -101,7 +101,7 @@ public class MainGameLoop {
     private void perlinNoise(int cameraXPos, int cameraZPos) {
         Vector3 newPosition;
         String symbol;
-        for (int y = 0; y < mapHeight / chunkSize; y++) {
+        for (int y = 0; y < Math.max(mapHeight / chunkSize, 1); y++) {
             for (int x = (cameraXPos - distance) / chunkSize; x < (cameraXPos + distance) / chunkSize; x++) {
                 for (int z = (cameraZPos - distance) / chunkSize; z < (cameraZPos + distance) / chunkSize; z++) {
 
@@ -171,8 +171,10 @@ public class MainGameLoop {
         Matrix4 model = new Matrix4();
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
             Vector3 pos = chunkEntry.getKey();
-            if (Math.abs((int) camPosition.x - pos.x) > distance
-                    || Math.abs((int) camPosition.z - pos.z) > distance) {
+
+            if (Math.abs(camPosition.x - pos.x) > distance
+                    || Math.abs(camPosition.z - pos.z) > distance
+                    || Math.abs(camPosition.y - pos.y) > distance) {
                 continue;
             }
 
