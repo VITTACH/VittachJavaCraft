@@ -35,8 +35,8 @@ public class MainGameLoop {
 
     private final JJEngine engineInst = JJEngine.getInstance();
     private final int distance = engineInst.controller.viewDistance;
-    private final int chunkSize = 16;
-    private final int mapHeight = 32;
+    private final int chunkSize = 32;
+    private final int mapHeight = 8;
 
     private Vector3 camPosition;
 
@@ -113,7 +113,7 @@ public class MainGameLoop {
 
                     List<MeshObj> meshes = new ArrayList<MeshObj>();
 
-                    for (int positionY = 0; positionY < chunkSize; positionY++) {
+                    for (int positionY = 0; positionY < Math.min(chunkSize, mapHeight); positionY++) {
                         for (int positionX = 0; positionX < chunkSize; positionX++) {
                             for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
                                 if (positionY <= 1 && y == 0) {
