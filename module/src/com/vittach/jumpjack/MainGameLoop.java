@@ -47,7 +47,7 @@ public class MainGameLoop {
 
     public MainGameLoop() {
         camPosition = new Vector3(0, 0, 0);
-        shapeRenderer.setColor(0.4f, 0.69f, 0.9f, 1);
+        shapeRenderer.setColor(0.2f, 0.3f, 0.43f, 1);
         setTextures(Gdx.files.internal("3d/blocksSprite.png"));
 
         shader = new ShaderProgram(Gdx.files.internal("glshs/vertex.glsl"), Gdx.files.internal("glshs/fragment.glsl"));
@@ -118,8 +118,8 @@ public class MainGameLoop {
                             for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
                                 if (positionY == 0) {
                                     symbol = new Random().nextInt() % 2 == 0 ? "a" : "";
-                                } else if (positionY >= 1 && positionX == 4 && positionZ == 4) {
-                                    symbol = "a";
+                                } else if (positionX % 6 == 0 && positionZ % 4 == 0) {
+                                    symbol = new Random().nextInt() % 2 == 0 ? "b" : "";
                                 } else {
                                     symbol = "";
                                 }

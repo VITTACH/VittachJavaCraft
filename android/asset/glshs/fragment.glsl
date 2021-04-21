@@ -29,7 +29,7 @@ void main() {
         discard;
     }
 
-    uAmbiant = vec4(max(length(vPosition.xz - uLightPosition.xz) / uCameraFar, 0.5));
+    uAmbiant = vec4(max(0.7 - length(vPosition.xz - uLightPosition.xz) / uCameraFar, 0.1));
 
     gl_FragColor = uTexture * uAmbiant;
 }
