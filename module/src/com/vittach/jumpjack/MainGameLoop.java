@@ -69,6 +69,18 @@ public class MainGameLoop {
         blockMesh = builder.end();
     }
 
+    public void genWorld() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (engineInst.currentScreen == 0) {
+                    if (camPosition == null) continue;
+                    perlinNoise((int) camPosition.x, (int) camPosition.z);
+                }
+            }
+        }).start();
+    }
+
     private void setTextures(FileHandle path) {
         texture = new Texture(path);
         TextureRegion[][] imageRegions = TextureRegion.split(texture, texture.getWidth() / 8, texture.getHeight() / 8);
@@ -84,64 +96,6 @@ public class MainGameLoop {
             regions.add(imageRegions[i][0]);
             textureMap.put(symbol, regions);
         }
-    }
-
-    public void genWorld() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (engineInst.currentScreen == 0) {
-                    if (camPosition == null) continue;
-                    perlinNoise((int) camPosition.x, (int) camPosition.z);
-                }
-            }
-        }).start();
-    }
-
-    private void perlinNoise(int cameraXPos, int cameraZPos) {
-        Vector3 newPosition;
-        String symbol;
-        for (int y = 0; y < Math.max(mapHeight / chunkSize, 1); y++) {
-            for (int x = (cameraXPos - distance) / chunkSize; x < (cameraXPos + distance) / chunkSize; x++) {
-                for (int z = (cameraZPos - distance) / chunkSize; z < (cameraZPos + distance) / chunkSize; z++) {
-
-                    newPosition = new Vector3(x * chunkSize, y * chunkSize, z * chunkSize);
-
-                    if (chunkMap.keySet().contains(newPosition)) {
-                        continue;
-                    }
-
-                    List<MeshObj> meshes = new ArrayList<MeshObj>();
-
-                    for (int positionY = 0; positionY < Math.min(chunkSize, mapHeight); positionY++) {
-                        for (int positionX = 0; positionX < chunkSize; positionX++) {
-                            for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
-                                if (positionY == 0) {
-                                    symbol = new Random().nextInt() % 2 == 0 ? "a" : "";
-                                } else if (positionX % 6 == 0 && positionZ % 4 == 0) {
-                                    symbol = new Random().nextInt() % 2 == 0 ? "b" : "";
-                                } else {
-                                    symbol = "";
-                                }
-
-                                Vector3 position = new Vector3(positionX, positionY, positionZ);
-                                meshes.add(new MeshObj(blockMesh, symbol, position));
-                            }
-                        }
-                    }
-
-                    chunkMap.put(newPosition, new Chunk(meshes));
-                }
-            }
-        }
-    }
-
-    private Mesh compressMesh(List<MeshObj> meshObjects) {
-        List<Matrix4> matrix = new ArrayList<Matrix4>();
-        for (MeshObj obj : meshObjects) {
-            matrix.add(new Matrix4().setToTranslation(obj.getPosition()));
-        }
-        return MeshCompress.compressMeshes(meshObjects, textureMap, matrix, chunkSize);
     }
 
     public void display(Viewport viewport) {
@@ -191,5 +145,51 @@ public class MainGameLoop {
         shader.end();
 
         Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
+    }
+
+    private Mesh compressMesh(List<MeshObj> meshObjects) {
+        List<Matrix4> matrix = new ArrayList<Matrix4>();
+        for (MeshObj obj : meshObjects) {
+            matrix.add(new Matrix4().setToTranslation(obj.getPosition()));
+        }
+        return MeshCompress.compressMeshes(meshObjects, textureMap, matrix, chunkSize);
+    }
+
+    private void perlinNoise(int cameraXPos, int cameraZPos) {
+        Vector3 chunkPosition;
+        String symbol;
+        for (int y = 0; y < Math.max(mapHeight / chunkSize, 1); y++) {
+            for (int x = (cameraXPos - distance) / chunkSize; x < (cameraXPos + distance) / chunkSize; x++) {
+                for (int z = (cameraZPos - distance) / chunkSize; z < (cameraZPos + distance) / chunkSize; z++) {
+
+                    chunkPosition = new Vector3(x * chunkSize, y * chunkSize, z * chunkSize);
+
+                    if (chunkMap.keySet().contains(chunkPosition)) {
+                        continue;
+                    }
+
+                    List<MeshObj> meshes = new ArrayList<MeshObj>();
+
+                    for (int positionY = 0; positionY < Math.min(chunkSize, mapHeight); positionY++) {
+                        for (int positionX = 0; positionX < chunkSize; positionX++) {
+                            for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
+                                if (positionY == 0) {
+                                    symbol = new Random().nextInt() % 2 == 0 ? "a" : "";
+                                } else if (positionX % 6 == 0 && positionZ % 4 == 0) {
+                                    symbol = new Random().nextInt() % 2 == 0 ? "b" : "";
+                                } else {
+                                    symbol = "";
+                                }
+
+                                Vector3 vector = new Vector3(positionX, positionY, positionZ);
+                                meshes.add(new MeshObj(blockMesh, symbol, vector));
+                            }
+                        }
+                    }
+
+                    chunkMap.put(chunkPosition, new Chunk(meshes));
+                }
+            }
+        }
     }
 }
