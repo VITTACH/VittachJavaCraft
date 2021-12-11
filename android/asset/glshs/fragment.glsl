@@ -1,35 +1,50 @@
 #ifdef GL_ES
-uniform lowp sampler2D u_texture;
-uniform mediump float uCameraFar;
-uniform mediump vec3 uLightPosition;
-
 varying mediump vec4 vPosition;
 varying lowp vec2 vTexCoord;
-#else
-uniform sampler2D u_texture;
-uniform float uCameraFar;
-uniform vec3 uLightPosition;
 
+uniform lowp sampler2D uTexture;
+uniform lowp sampler2D uShadowMap;
+uniform mediump vec3 uLightPosition;
+
+uniform mediump vec4 uFogColor;
+uniform mediump float uFogNear;
+uniform mediump float uFogFar;
+#else
 varying vec4 vPosition;
 varying vec2 vTexCoord;
-#endif
 
+uniform sampler2D uTexture;
+uniform sampler2D uShadowMap;
+uniform vec3 uLightPosition;
+
+uniform vec4 uFogColor;
+uniform float uFogNear;
+uniform float uFogFar;
+#endif
 
 void main() {
     #ifdef GL_ES
-    lowp vec4 uTexture;
-    mediump vec4 uAmbiant;
+    lowp vec4 fogColor;
+    lowp vec4 textureColor;
+    mediump float fogValue;
+    mediump float distance;
     #else
-    vec4 uTexture;
-    vec4 uAmbiant;
+    vec4 fogColor;
+    vec4 textureColor;
+    float fogValue;
+    float distance;
     #endif
 
-    uTexture = texture2D(u_texture, vTexCoord);
-    if (uTexture.a < 0.5) {
+    textureColor = texture2D(uTexture, vTexCoord);
+    if (textureColor.a < 0.5) {
         discard;
     }
 
-    uAmbiant = vec4(max(0.7 - length(vPosition.xz - uLightPosition.xz) / uCameraFar, 0.1));
+    distance = length(vPosition.xz - uLightPosition.xz);
 
-    gl_FragColor = uTexture * uAmbiant;
+    // calculate fog
+    fogValue = smoothstep(uFogNear, uFogFar, distance) * 0.4;
+    fogColor = mix(textureColor, uFogColor, fogValue);
+
+    gl_FragColor = fogColor;
 }

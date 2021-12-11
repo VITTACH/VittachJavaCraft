@@ -1,21 +1,21 @@
 package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.viewport.Viewport;
-import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
-import com.vittach.jumpjack.domain.Chunk;
-import com.vittach.jumpjack.mesh.MeshCompress;
-import com.vittach.jumpjack.mesh.MeshObj;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.domain.Chunk;
+import com.vittach.jumpjack.mesh.MeshCompress;
+import com.vittach.jumpjack.mesh.MeshObj;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +28,7 @@ public class MainGameLoop {
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     private Texture texture;
+    private Vector3 camPosition;
 
     private final Map<Vector3, Mesh> meshMap = new HashMap<Vector3, Mesh>();
     private final Map<String, List<TextureRegion>> textureMap = new HashMap<String, List<TextureRegion>>();
@@ -37,8 +38,6 @@ public class MainGameLoop {
     private final int distance = engineInst.controller.viewDistance;
     private final int chunkSize = 16;
     private final int mapHeight = 96;
-
-    private Vector3 camPosition;
 
     public void dispose() {
         textureMap.clear();
@@ -118,8 +117,11 @@ public class MainGameLoop {
 
         shader.begin();
         shader.setUniformMatrix("modelView", fpcCamera.combined);
-        shader.setUniformf("uCameraFar", distance * 0.6f);
         shader.setUniformf("uLightPosition", camPosition);
+        shader.setUniform4fv("uFogColor", new float[]{0.8f, 0.9f, 1f, 1f}, 0, 4);
+        shader.setUniformf("uFogNear", distance * 0.2f);
+        shader.setUniformf("uFogFar", distance * 0.8f);
+
         Matrix4 model = new Matrix4();
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
             Vector3 pos = chunkEntry.getKey();
@@ -139,7 +141,7 @@ public class MainGameLoop {
             }
 
             shader.setUniformMatrix("model", model.setToTranslation(pos));
-            shader.setUniformi("u_texture", 0);
+            shader.setUniformi("uTexture", 0);
             mergedMesh.render(shader, GL20.GL_TRIANGLES);
         }
         shader.end();
