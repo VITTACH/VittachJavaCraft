@@ -59,7 +59,7 @@ public class MeshCompress {
 
     public static Mesh compressMeshes(
         List<MeshObj> meshes,
-        Map<String, List<TextureRegion>> regions,
+        Map<String, List<TextureRegion>> textureMap,
         List<Matrix4> translates,
         Integer chunkLength
     ) {
@@ -92,7 +92,7 @@ public class MeshCompress {
 
             Mesh.transform(translates.get(i), vertices, vertexSize, offset, dimensions, 0, numberVertices);
 
-            reMappingTexture(mesh, vertices, regions.get(meshes.get(i).getSymbol()));
+            reMappingTexture(mesh, vertices, textureMap.get(meshes.get(i).getSymbol()));
 
             // Experimental culling invisible surface
             int sideLength = 4 * vertexSize;
@@ -141,8 +141,8 @@ public class MeshCompress {
         return mergedMesh;
     }
 
-    private static void reMappingTexture(Mesh mesh, float[] vertices, List<TextureRegion> regions) {
-        if (regions == null || regions.isEmpty()) return;
+    private static void reMappingTexture(Mesh mesh, float[] vertices, List<TextureRegion> textures) {
+        if (textures == null || textures.isEmpty()) return;
 
         VertexAttribute uvAttribute = mesh.getVertexAttribute(VertexAttributes.Usage.TextureCoordinates);
         int vertexSize = mesh.getVertexSize() / 4; // divide to convert bytes to floats
@@ -150,20 +150,20 @@ public class MeshCompress {
 
         for (int i = uvAttribute.offset / 4, corner = 0, side = 0; i < length; i += vertexSize) {
             if (corner == 0) {
-                vertices[i] = regions.get(side).getU();
-                vertices[i + 1] = regions.get(side).getV();
+                vertices[i] = textures.get(side).getU();
+                vertices[i + 1] = textures.get(side).getV();
             } else if (corner == 1) {
-                vertices[i] = regions.get(side).getU();
-                vertices[i + 1] = regions.get(side).getV2();
+                vertices[i] = textures.get(side).getU();
+                vertices[i + 1] = textures.get(side).getV2();
             } else if (corner == 2) {
-                vertices[i] = regions.get(side).getU2();
-                vertices[i + 1] = regions.get(side).getV2();
+                vertices[i] = textures.get(side).getU2();
+                vertices[i + 1] = textures.get(side).getV2();
             } else if (corner == 3) {
-                vertices[i] = regions.get(side).getU2();
-                vertices[i + 1] = regions.get(side).getV();
+                vertices[i] = textures.get(side).getU2();
+                vertices[i + 1] = textures.get(side).getV();
                 corner = 0;
                 side++;
-                if (side >= regions.size()) {
+                if (side >= textures.size()) {
                     side = 0;
                 }
                 continue;

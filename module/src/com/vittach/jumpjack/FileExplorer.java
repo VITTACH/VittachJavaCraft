@@ -1,14 +1,14 @@
 package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Gdx;
-import com.vittach.jumpjack.framework.FontHandler;
-import com.vittach.jumpjack.framework.ColorImpl;
-import com.vittach.jumpjack.framework.ImageHandler;
-import com.vittach.jumpjack.framework.MyTimer;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.framework.ColorImpl;
+import com.vittach.jumpjack.framework.FontHandler;
+import com.vittach.jumpjack.framework.ImageHandler;
+import com.vittach.jumpjack.framework.MyTimer;
 
 import java.util.ArrayList;
 

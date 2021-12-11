@@ -1,9 +1,9 @@
 package com.vittach.jumpjack;
 
-import com.vittach.jumpjack.framework.ImageHandler;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.framework.ImageHandler;
 
 public class StartMenu extends InputListener {
     public ScreenButton gameButton;

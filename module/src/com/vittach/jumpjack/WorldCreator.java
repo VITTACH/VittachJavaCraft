@@ -1,14 +1,14 @@
 package com.vittach.jumpjack;
 
 import com.badlogic.gdx.graphics.Color;
-import com.vittach.jumpjack.framework.FontHandler;
-import com.vittach.jumpjack.framework.ImageHandler;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.framework.FontHandler;
+import com.vittach.jumpjack.framework.ImageHandler;
 
 public class WorldCreator extends Stage implements ProcessorInput {
     public Sprite sprite;

@@ -1,9 +1,9 @@
 package com.vittach.jumpjack;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.vittach.jumpjack.framework.ColorImpl;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.framework.ColorImpl;
 import com.vittach.jumpjack.framework.FontHandler;
 import com.vittach.jumpjack.framework.ImageHandler;
 

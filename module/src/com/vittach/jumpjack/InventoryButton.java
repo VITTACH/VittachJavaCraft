@@ -1,8 +1,8 @@
 package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Input;
-import com.vittach.jumpjack.framework.ImageHandler;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.framework.ImageHandler;
 
 public class InventoryButton extends ScreenButton {
     private ImageHandler cellBoxImage;

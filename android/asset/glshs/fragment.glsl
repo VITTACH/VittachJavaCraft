@@ -4,7 +4,7 @@ varying lowp vec2 vTexCoord;
 
 uniform lowp sampler2D uTexture;
 uniform lowp sampler2D uShadowMap;
-uniform mediump vec3 uLightPosition;
+uniform mediump vec3 uCamPosition;
 
 uniform mediump vec4 uFogColor;
 uniform mediump float uFogNear;
@@ -15,7 +15,7 @@ varying vec2 vTexCoord;
 
 uniform sampler2D uTexture;
 uniform sampler2D uShadowMap;
-uniform vec3 uLightPosition;
+uniform vec3 uCamPosition;
 
 uniform vec4 uFogColor;
 uniform float uFogNear;
@@ -40,7 +40,7 @@ void main() {
         discard;
     }
 
-    distance = length(vPosition.xz - uLightPosition.xz);
+    distance = length(vPosition.xz - uCamPosition.xz);
 
     // calculate fog
     fogValue = smoothstep(uFogNear, uFogFar, distance) * 0.4;

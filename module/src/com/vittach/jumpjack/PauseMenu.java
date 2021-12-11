@@ -1,10 +1,10 @@
 package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Input;
-import com.vittach.jumpjack.framework.ImageHandler;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.framework.ImageHandler;
 
 public class PauseMenu extends InputListener {
     private boolean isChecked;
