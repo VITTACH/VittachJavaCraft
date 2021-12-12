@@ -24,7 +24,6 @@ import static com.badlogic.gdx.Gdx.graphics;
 
 public class MainGameLoop {
     private final Mesh cubeMesh;
-    private final Mesh shadowMesh;
     private final ShaderProgram shader;
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
@@ -32,10 +31,8 @@ public class MainGameLoop {
     private Vector3 camPosition;
 
     private final Map<Vector3, Mesh> mergedCubeMap = new HashMap<Vector3, Mesh>();
-    private final Map<Vector3, Mesh> mergedShadowMap = new HashMap<Vector3, Mesh>();
     private final Map<String, List<TextureRegion>> textureMap = new HashMap<String, List<TextureRegion>>();
     private final Map<Vector3, Chunk> cubeMap = new ConcurrentHashMap<Vector3, Chunk>();
-    private final Map<Vector3, Chunk> shadowMap = new ConcurrentHashMap<Vector3, Chunk>();
 
     private final JJEngine engineInst = JJEngine.getInstance();
     private final int distance = engineInst.controller.viewDistance;
@@ -45,9 +42,7 @@ public class MainGameLoop {
     public void dispose() {
         textureMap.clear();
         mergedCubeMap.clear();
-        mergedShadowMap.clear();
         cubeMap.clear();
-        shadowMap.clear();
     }
 
     public MainGameLoop() {
@@ -70,12 +65,8 @@ public class MainGameLoop {
         MeshBuilder cubeBuilder = new MeshBuilder();
         cubeBuilder.begin(attributes, GL20.GL_TRIANGLES);
         cubeBuilder.box(1.0f, 1.0f, 1.0f);
-        MeshBuilder shadowBuilder = new MeshBuilder();
-        shadowBuilder.begin(attributes, GL20.GL_TRIANGLES);
-        shadowBuilder.box(1.1f, 1.1f, 1.1f);
 
         cubeMesh = cubeBuilder.end();
-        shadowMesh = shadowBuilder.end();
     }
 
     public void genWorld() {
@@ -139,38 +130,9 @@ public class MainGameLoop {
         shader.setUniformi("uTexture", 0);
 
         renderScene(cubeMap, mergedCubeMap, textureMap);
-        renderScene(shadowMap, mergedShadowMap, textureMap);
         shader.end();
 
         Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
-    }
-
-    private void renderScene(
-            Map<Vector3, Chunk> chunkMap,
-            Map<Vector3, Mesh> mergedCubeMap,
-            Map<String, List<TextureRegion>> textureMap
-    ) {
-        Matrix4 model = new Matrix4();
-        for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
-            Vector3 position = chunkEntry.getKey();
-
-            if (Math.abs(camPosition.x - position.x) > distance
-                    || Math.abs(camPosition.z - position.z) > distance
-                    || Math.abs(camPosition.y - position.y) > distance) {
-                continue;
-            }
-
-            List<MeshObj> nonCompressedMeshObjs = chunkEntry.getValue().getMeshObjs();
-            Mesh mergedMesh = mergedCubeMap.get(position);
-            if (mergedMesh == null) {
-                mergedMesh = compressedMesh(nonCompressedMeshObjs, textureMap);
-                if (mergedMesh == null) continue;
-                mergedCubeMap.put(position, mergedMesh);
-            }
-
-            shader.setUniformMatrix("model", model.setToTranslation(position));
-            mergedMesh.render(shader, GL20.GL_TRIANGLES);
-        }
     }
 
     private Mesh compressedMesh(List<MeshObj> meshObjects, Map<String, List<TextureRegion>> textureMap) {
@@ -190,42 +152,55 @@ public class MainGameLoop {
                     if (cubeMap.keySet().contains(chunkPosition)) continue;
 
                     List<MeshObj> cubeMeshes = new ArrayList<MeshObj>();
-                    List<MeshObj> shadowMeshes = new ArrayList<MeshObj>();
-                    generateChunk(cubeMeshes, cubeMesh, cubeMeshes);
-                    generateChunk(shadowMeshes, shadowMesh, cubeMeshes);
+                    generateChunk(cubeMeshes, cubeMesh);
 
                     cubeMap.put(chunkPosition, new Chunk(cubeMeshes));
-                    shadowMap.put(chunkPosition, new Chunk(shadowMeshes));
                 }
             }
         }
     }
 
-    private void generateChunk(List<MeshObj> meshList, Mesh mesh, List<MeshObj> cubeMeshes) {
+    private void generateChunk(List<MeshObj> meshList, Mesh mesh) {
         for (int positionY = 0; positionY < Math.min(chunkSize, mapHeight); positionY++) {
             for (int positionX = 0; positionX < chunkSize; positionX++) {
                 for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
                     String symbol = "";
 
-                    if (cubeMeshes.isEmpty()) {
-                        if (positionY == 0) {
-                            if (new Random().nextInt() % 2 == 0) symbol = "a";
-                        }
-                        if (positionX % 6 == 0 && positionZ % 4 == 0) {
-                            if (new Random().nextInt() % 2 == 0) symbol = "b";
-                        }
-                    } else {
-                        for (MeshObj cubeMesh: cubeMeshes) {
-                            if (cubeMesh.getPosition().x == positionX && cubeMesh.getPosition().z == positionZ) {
-
-                            }
-                        }
-                    }
+                    if (positionY == 0 && new Random().nextInt() % 2 == 0) symbol = "a";
+                    if (positionX % 6 == 0 && positionZ % 4 == 0 && new Random().nextInt() % 2 == 0) symbol = "b";
 
                     Vector3 meshPosition = new Vector3(positionX, positionY, positionZ);
                     meshList.add(new MeshObj(mesh, symbol, meshPosition));
                 }
             }
+        }
+    }
+
+    private void renderScene(
+            Map<Vector3, Chunk> chunkMap,
+            Map<Vector3, Mesh> meshMap,
+            Map<String, List<TextureRegion>> textureMap
+    ) {
+        Matrix4 model = new Matrix4();
+        for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
+            Vector3 position = chunkEntry.getKey();
+
+            if (Math.abs(camPosition.x - position.x) > distance
+                    || Math.abs(camPosition.z - position.z) > distance
+                    || Math.abs(camPosition.y - position.y) > distance) {
+                continue;
+            }
+
+            List<MeshObj> nonCompressedMeshObjs = chunkEntry.getValue().getMeshObjs();
+            Mesh mergedMesh = meshMap.get(position);
+            if (mergedMesh == null) {
+                mergedMesh = compressedMesh(nonCompressedMeshObjs, textureMap);
+                if (mergedMesh == null) continue;
+                meshMap.put(position, mergedMesh);
+            }
+
+            shader.setUniformMatrix("model", model.setToTranslation(position));
+            mergedMesh.render(shader, GL20.GL_TRIANGLES);
         }
     }
 }
