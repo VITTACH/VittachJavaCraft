@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.vittach.jumpjack.JJEngine;
+import com.vittach.jumpjack.MainEngine;
 
 public class ImageHandler {
     private int rotationAngle = 0;
@@ -22,8 +22,8 @@ public class ImageHandler {
     }
 
     public ImageHandler() {
-        int renderWidth = (int) JJEngine.getInstance().renderWidth;
-        int renderHeight = (int) JJEngine.getInstance().renderHeight;
+        int renderWidth = (int) MainEngine.getInstance().renderWidth;
+        int renderHeight = (int) MainEngine.getInstance().renderHeight;
         frameBuffer = new FrameBuffer(Format.RGBA4444, renderWidth, renderHeight, true);
         setCamera(renderWidth, renderHeight);
     }

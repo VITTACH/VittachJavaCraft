@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 public class FontHandler {
-    private int size;
+    private FreeTypeFontGenerator.FreeTypeFontParameter params;
     private BitmapFont bitmapFont;
     private FreeTypeFontGenerator font;
 
@@ -14,7 +14,9 @@ public class FontHandler {
     }
 
     public void setPixelSize(int size) {
-        bitmapFont = font.generateFont(this.size = size);
+        params = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        params.size = size;
+        bitmapFont = font.generateFont(params);
     }
 
     public void load(String path) {
@@ -26,6 +28,6 @@ public class FontHandler {
     }
 
     public int getSize() {
-        return size;
+        return params.size;
     }
 }

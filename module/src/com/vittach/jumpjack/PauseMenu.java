@@ -4,6 +4,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.engine.InputListener;
+import com.vittach.jumpjack.engine.Preference;
+import com.vittach.jumpjack.engine.ScreenButton;
 import com.vittach.jumpjack.framework.ImageHandler;
 
 public class PauseMenu extends InputListener {
@@ -26,17 +29,17 @@ public class PauseMenu extends InputListener {
     private ImageHandler blockImage;
     private ImageHandler screen;
 
-    private JJEngine engineInst = JJEngine.getInstance();
-    private Preference prefInst = Preference.getInstance();
+    private final MainEngine engineInstance = MainEngine.getInstance();
+    private final com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
 
-    public ScreenButton saveButton;
-    public ScreenButton loadButton;
-    public ScreenButton playButton;
-    public ScreenButton exitButton;
+    public com.vittach.jumpjack.engine.ScreenButton saveButton;
+    public com.vittach.jumpjack.engine.ScreenButton loadButton;
+    public com.vittach.jumpjack.engine.ScreenButton playButton;
+    public com.vittach.jumpjack.engine.ScreenButton exitButton;
 
     public int pressedKey;
 
-    void dispose() {
+    public void dispose() {
         screen.dispose();
         playButton.dispose();
         spriteWindow.dispose();
@@ -52,12 +55,12 @@ public class PauseMenu extends InputListener {
         cellBoxImage = new ImageHandler();
         cellSelectImage = new ImageHandler();
         
-        width = engineInst.renderWidth / 2f;
-        height = engineInst.renderHeight / 2f;
+        width = engineInstance.renderWidth / 2f;
+        height = engineInstance.renderHeight / 2f;
 
-        exitButton = new ScreenButton();
-        playButton = new ScreenButton();
-        loadButton = new ScreenButton();
+        exitButton = new com.vittach.jumpjack.engine.ScreenButton();
+        playButton = new com.vittach.jumpjack.engine.ScreenButton();
+        loadButton = new com.vittach.jumpjack.engine.ScreenButton();
         saveButton = new ScreenButton();
 
         backgroundImage = new ImageHandler();
@@ -146,18 +149,18 @@ public class PauseMenu extends InputListener {
 
     @Override
     public boolean mouseMoved(int x, int y) {
-        float scaleX = cellBoxImage.getWidth() * prefInst.screenWidth / engineInst.renderWidth;
-        float scaleY = cellBoxImage.getHeight() * prefInst.screenHeight / engineInst.renderHeight;
+        float scaleX = cellBoxImage.getWidth() * prefInstance.screenWidth / engineInstance.renderWidth;
+        float scaleY = cellBoxImage.getHeight() * prefInstance.screenHeight / engineInstance.renderHeight;
 
-        x = x - (prefInst.displayWidth - prefInst.screenWidth) / 2;
-        y = prefInst.displayHeight - y - (prefInst.displayHeight - prefInst.screenHeight) / 2;
+        x = x - (prefInstance.displayWidth - prefInstance.screenWidth) / 2;
+        y = prefInstance.displayHeight - y - (prefInstance.displayHeight - prefInstance.screenHeight) / 2;
 
         for (int i = 0; i < countColumns; i++)
             for (int j = 0; j < countRows; j++)
-                if (x > prefInst.screenWidth / 2 + (i - countColumns / 2) * scaleX
-                        && x <= prefInst.screenWidth / 2 + (i - countColumns / 2) * scaleX + scaleX
-                        && y > prefInst.screenHeight / 2 + (j - countRows / 2) * scaleY
-                        && y <= prefInst.screenHeight / 2 + (j - countRows / 2) * scaleY + scaleY) {
+                if (x > prefInstance.screenWidth / 2 + (i - countColumns / 2) * scaleX
+                        && x <= prefInstance.screenWidth / 2 + (i - countColumns / 2) * scaleX + scaleX
+                        && y > prefInstance.screenHeight / 2 + (j - countRows / 2) * scaleY
+                        && y <= prefInstance.screenHeight / 2 + (j - countRows / 2) * scaleY + scaleY) {
                     isChecked = true;
 
                     if (oldColumn != i || oldRow != j) {

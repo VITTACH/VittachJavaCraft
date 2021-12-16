@@ -1,21 +1,22 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.engine;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
+import com.vittach.jumpjack.MainEngine;
 
 import java.util.HashSet;
 
-class FirstPersonController implements ProcessorInput {
+public class FirstPersonController implements ProcessorInput {
     private final float MOVE_VELOCITY = 0.1f;
     private final float FAST_VELOCITY = 1.0f;
-    private final Preference prefInst = Preference.getInstance();
+    private final Preference prefInstance = Preference.getInstance();
 
     private int deviceId;
     private int idOffset = 0;
     private int health = 100;
-    private final PerspectiveCamera camera;
+    private final PerspectiveCamera fpCamera;
 
     private int FLY = Input.Keys.F;
     private int LEFT = Input.Keys.A;
@@ -36,14 +37,16 @@ class FirstPersonController implements ProcessorInput {
     public FirstPersonController(int deviceId) {
         this.deviceId = deviceId;
 
-        camera = new PerspectiveCamera(67, JJEngine.getInstance().renderWidth, JJEngine.getInstance().renderHeight);
+        fpCamera = new PerspectiveCamera(67, MainEngine.getInstance().renderWidth, MainEngine.getInstance().renderHeight);
 
         pressedKeys = new HashSet<Integer>();
 
-        camera.position.set(0, 0, 0);
-        camera.near = 0.1f;
-        camera.far = 2.f * viewDistance;
-        camera.update();
+        float[] position = new float[]{0, 0, 0};
+
+        fpCamera.near = 0.1f;
+        fpCamera.far = 2.f * viewDistance;
+        fpCamera.position.set(position);
+        fpCamera.update();
     }
 
     @Override
@@ -52,7 +55,7 @@ class FirstPersonController implements ProcessorInput {
     }
 
     @Override
-    public boolean scrolled(int amount) {
+    public boolean scrolled(float amountX, float amountY) {
         return false;
     }
 
@@ -85,51 +88,51 @@ class FirstPersonController implements ProcessorInput {
     public boolean mouseMoved(int screenX, int screenY) {
         float verticalSense = 1;
         float cameraDelta = -Gdx.input.getDeltaY() * verticalSense;
-        Vector3 right = new Vector3().set(camera.direction).crs(camera.up);
+        Vector3 right = new Vector3().set(fpCamera.direction).crs(fpCamera.up);
 
         if (cameraNewDelta + cameraDelta < 90 && cameraNewDelta + cameraDelta > -90) {
-            camera.rotate(right, cameraDelta);
+            fpCamera.rotate(right, cameraDelta);
             cameraNewDelta += cameraDelta;
         } else {
             if (cameraNewDelta + cameraDelta >= 90.0f) {
-                camera.rotate(right, 89.0f - cameraNewDelta);
+                fpCamera.rotate(right, 89.0f - cameraNewDelta);
                 cameraNewDelta = 89f;
             } else {
-                camera.rotate(right, -90.f - cameraNewDelta);
+                fpCamera.rotate(right, -90.f - cameraNewDelta);
                 cameraNewDelta = -90;
             }
         }
 
         float horizontalSense = 1;
-        Vector3 upVector = new Vector3().set(0, 1, 0);
-        camera.rotate(upVector, -Gdx.input.getDeltaX() * horizontalSense);
-        camera.update();
+        Vector3 up = new Vector3().set(0, 1, 0);
+        fpCamera.rotate(up, -Gdx.input.getDeltaX() * horizontalSense);
+        fpCamera.update();
         return true;
     }
 
     @Override
     public boolean touchUp(int x, int y, int pointer, int button) {
-        return prefInst.usedInputIdMap.remove(pointer + idOffset);
+        return prefInstance.usedInputIdMap.remove(pointer + idOffset);
     }
 
     @Override
     public boolean touchDown(int x, int y, int pointer, int button) {
-        boolean screenCornersLeft = x > 0 && x < prefInst.screenWidth / 4f
-                && y > prefInst.screenHeight - prefInst.screenHeight / 4.f
-                && y < prefInst.screenHeight;
+        boolean screenCornersLeft = x > 0 && x < prefInstance.screenWidth / 4f
+                && y > prefInstance.screenHeight - prefInstance.screenHeight / 4.f
+                && y < prefInstance.screenHeight;
 
-        boolean screenCornersRight = x > prefInst.screenWidth - prefInst.screenWidth / 4f
-                && x < prefInst.screenWidth
-                && y > prefInst.screenHeight - prefInst.screenHeight / 4.f
-                && y < prefInst.screenHeight;
+        boolean screenCornersRight = x > prefInstance.screenWidth - prefInstance.screenWidth / 4f
+                && x < prefInstance.screenWidth
+                && y > prefInstance.screenHeight - prefInstance.screenHeight / 4.f
+                && y < prefInstance.screenHeight;
 
         if (!(screenCornersLeft || screenCornersRight) || deviceId == 0) {
-            prefInst.usedInputIdMap.add(pointer + idOffset);
+            prefInstance.usedInputIdMap.add(pointer + idOffset);
 
             if (button == Input.Buttons.LEFT) {
-                deleteBlock();
+                deleteCube();
             } else if (button == Input.Buttons.RIGHT) {
-                detectBlock();
+                detectCube();
             }
         }
 
@@ -138,7 +141,7 @@ class FirstPersonController implements ProcessorInput {
 
     @Override
     public boolean touchDragged(int x, int y, int pointer) {
-        if (prefInst.usedInputIdMap.contains(pointer + idOffset)) {
+        if (prefInstance.usedInputIdMap.contains(pointer + idOffset)) {
             mouseMoved(x, y);
         }
         return true;
@@ -152,48 +155,50 @@ class FirstPersonController implements ProcessorInput {
         this.health = health;
     }
 
-    public PerspectiveCamera getCamera() {
-        controlCam();
-        detectBlock();
+    public PerspectiveCamera getFpCamera() {
+        moveCamera();
+        detectCube();
 
-        return camera;
+        return fpCamera;
     }
 
-    private void controlCam() {
+    private void detectCube() {
+    }
+
+    private void checkCollision() {
+    }
+
+    private void deleteCube() {
+    }
+
+    private void moveCamera() {
         Vector3 move = new Vector3();
         Vector3 normal = new Vector3();
 
         if (pressedKeys.contains(FLY)) {
-            if (pressedKeys.contains(DOWN)) {
-                move.add(normal.set(0, 1, 0).scl(-velocity));
-            } else if (pressedKeys.contains(JUMP)) {
-                move.add(normal.set(0, 1, 0).scl(velocity));
-            }
+            if (pressedKeys.contains(DOWN)) move.add(normal.set(0, 1, 0).scl(-velocity));
+            else if (pressedKeys.contains(JUMP)) move.add(normal.set(0, 1, 0).scl(velocity));
         }
 
         if (pressedKeys.contains(FORWARD)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1)
-                .scl(velocity)
-            );
+            move.add(normal.set(fpCamera.direction.x, 0, fpCamera.direction.z).setLength2(1).scl(velocity));
         } else if (pressedKeys.contains(BACK)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1)
-                .scl(-velocity)
-            );
+            move.add(normal.set(fpCamera.direction.x, 0, fpCamera.direction.z).setLength2(1).scl(-velocity));
         }
 
-        if (pressedKeys.contains(RUN)) {
-            velocity = FAST_VELOCITY;
-        }
+        if (pressedKeys.contains(RUN)) velocity = FAST_VELOCITY;
 
         if (pressedKeys.contains(LEFT)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1)
-                .crs(0, 1, 0)
-                .scl(-velocity)
+            move.add(normal.set(fpCamera.direction.x, 0, fpCamera.direction.z)
+                    .setLength2(1)
+                    .crs(0, 1, 0)
+                    .scl(-velocity)
             );
         } else if (pressedKeys.contains(RIGHT)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1)
-                .crs(0, 1, 0)
-                .scl(velocity)
+            move.add(normal.set(fpCamera.direction.x, 0, fpCamera.direction.z)
+                    .setLength2(1)
+                    .crs(0, 1, 0)
+                    .scl(velocity)
             );
         }
 
@@ -203,16 +208,7 @@ class FirstPersonController implements ProcessorInput {
             move.setLength2(1).scl(velocity);
         }
 
-        camera.translate(move);
-        camera.update();
-    }
-
-    private void detectBlock() {
-    }
-
-    private void checkCollision() {
-    }
-
-    private void deleteBlock() {
+        fpCamera.translate(move);
+        fpCamera.update();
     }
 }

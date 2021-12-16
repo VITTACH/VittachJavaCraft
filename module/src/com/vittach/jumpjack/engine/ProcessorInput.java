@@ -1,4 +1,4 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.engine;
 
 import com.badlogic.gdx.InputProcessor;
 

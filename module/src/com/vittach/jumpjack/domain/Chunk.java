@@ -1,6 +1,6 @@
 package com.vittach.jumpjack.domain;
 
-import com.vittach.jumpjack.mesh.MeshObj;
+import com.vittach.jumpjack.engine.render.MeshObj;
 
 import java.util.List;
 

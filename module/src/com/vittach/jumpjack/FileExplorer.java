@@ -5,6 +5,9 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.engine.InputListener;
+import com.vittach.jumpjack.engine.Preference;
+import com.vittach.jumpjack.engine.ScreenButton;
 import com.vittach.jumpjack.framework.ColorImpl;
 import com.vittach.jumpjack.framework.FontHandler;
 import com.vittach.jumpjack.framework.ImageHandler;
@@ -21,9 +24,9 @@ public class FileExplorer extends InputListener {
     private Sprite selectSprite;
     private SpriteBatch spriteBatch;
 
-    public ScreenButton sartButton;
-    public ScreenButton backButton;
-    public ScreenButton loadButton;
+    public com.vittach.jumpjack.engine.ScreenButton sartButton;
+    public com.vittach.jumpjack.engine.ScreenButton backButton;
+    public com.vittach.jumpjack.engine.ScreenButton loadButton;
 
     public int pressedKey = -1;
 
@@ -48,8 +51,8 @@ public class FileExplorer extends InputListener {
     private ImageHandler backgroundImage;
     private ImageHandler foregroundImage;
     
-    private Preference prefInst = Preference.getInstance();
-    private JJEngine engineInst = JJEngine.getInstance();
+    private com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
+    private MainEngine engineInstance = MainEngine.getInstance();
 
     @Override
     public boolean keyDown(int ikey) {
@@ -97,9 +100,9 @@ public class FileExplorer extends InputListener {
         dirForegroundImage = new ImageHandler().load("ui/dirForeground.png");
         screen = new ImageHandler();
 
-        sartButton = new ScreenButton();
+        sartButton = new com.vittach.jumpjack.engine.ScreenButton();
         sartButton.choice = new ImageHandler();
-        backButton = new ScreenButton();
+        backButton = new com.vittach.jumpjack.engine.ScreenButton();
         backButton.choice = new ImageHandler();
         loadButton = new ScreenButton();
         loadButton.choice = new ImageHandler();
@@ -121,7 +124,7 @@ public class FileExplorer extends InputListener {
         backButton.choice.load("ui/startChoice.png");
         backButton.background.load("ui/startButton.png");
         backButton.screen.blit(backButton.background);
-        backButton.setPosition(engineInst.renderWidth / 2 - backButton.getWidth() / 2f, 68);
+        backButton.setPosition(engineInstance.renderWidth / 2 - backButton.getWidth() / 2f, 68);
         backButton.font = buttonsFont;
         backButton.textY = 19;
         backButton.textX = 90;
@@ -130,7 +133,7 @@ public class FileExplorer extends InputListener {
         sartButton.choice.load("ui/startChoice.png");
         sartButton.background.load("ui/startButton.png");
         sartButton.screen.blit(sartButton.background);
-        sartButton.setPosition(engineInst.renderWidth / 2 - sartButton.getWidth() / 2f, 98);
+        sartButton.setPosition(engineInstance.renderWidth / 2 - sartButton.getWidth() / 2f, 98);
         sartButton.font = buttonsFont;
         sartButton.textY = 19;
         sartButton.textX = 79;
@@ -139,7 +142,7 @@ public class FileExplorer extends InputListener {
         loadButton.choice.load("ui/startChoice.png");
         loadButton.background.load("ui/startButton.png");
         loadButton.screen.blit(loadButton.background);
-        loadButton.setPosition(engineInst.renderWidth / 2 - loadButton.getWidth() / 2, 184);
+        loadButton.setPosition(engineInstance.renderWidth / 2 - loadButton.getWidth() / 2, 184);
         loadButton.font = buttonsFont;
         loadButton.textY = 19;
         loadButton.textX = 74;
@@ -154,8 +157,8 @@ public class FileExplorer extends InputListener {
 
     @Override
     public boolean touchDown(int x, int y, int id, int button) {
-        scaleY = prefInst.screenHeight / engineInst.renderHeight;
-        scaleX = prefInst.screenWidth / engineInst.renderWidth;
+        scaleY = prefInstance.screenHeight / engineInstance.renderHeight;
+        scaleX = prefInstance.screenWidth / engineInstance.renderWidth;
 
         if (fileHandles.size() > 0) {
             if (sartButton.touchDown(x, y)) delFile();
@@ -166,8 +169,8 @@ public class FileExplorer extends InputListener {
 
         if (backButton.touchDown(x, y)) pressedKey = 2;
 
-        y = prefInst.displayHeight - y - (prefInst.displayHeight - prefInst.screenHeight) / 2;
-        x -= (prefInst.displayWidth - prefInst.screenWidth) / 2;
+        y = prefInstance.displayHeight - y - (prefInstance.displayHeight - prefInstance.screenHeight) / 2;
+        x -= (prefInstance.displayWidth - prefInstance.screenWidth) / 2;
         id = (countOfFiles <= 3) ? countOfFiles : 3;
 
         for (int i = 0; i < id; i++) {
@@ -184,8 +187,8 @@ public class FileExplorer extends InputListener {
 
     @Override
     public boolean touchDragged(int xpos, int ypos, int TID) {
-        ypos = prefInst.displayHeight - ypos - (prefInst.displayHeight - prefInst.screenHeight) / 2;
-        xpos -= (prefInst.displayWidth - prefInst.screenWidth) / 2;
+        ypos = prefInstance.displayHeight - ypos - (prefInstance.displayHeight - prefInstance.screenHeight) / 2;
+        xpos -= (prefInstance.displayWidth - prefInstance.screenWidth) / 2;
         if (xpos >= selectSprite.getX() * scaleX && xpos <= offsetX + dirForegroundImage.getWidth() * scaleX
                 && ypos <= offsetY * scaleY
                 && ypos >= offsetY * scaleY - scaleY * dirForegroundImage.getHeight() * 3) {
@@ -200,7 +203,7 @@ public class FileExplorer extends InputListener {
         for (i = startIndex; i < countOfFiles; i++, j++) {
             screen.fontPrint(arcadepixFont, offsetX,
                     offsetY - 2 - j * stepY, i + ") "+ fileHandles.get(i).name().replace(".JJ", ""), color);
-            screen.fontPrint(arcadepixFont, engineInst.renderWidth / 2, offsetY - 2 - j * stepY,
+            screen.fontPrint(arcadepixFont, engineInstance.renderWidth / 2, offsetY - 2 - j * stepY,
                     "~" + (System.currentTimeMillis() - fileHandles.get(i).lastModified()) / 3600000
                             + " hrs ago", color);
         }

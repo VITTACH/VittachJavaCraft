@@ -2,16 +2,17 @@ package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.engine.ScreenButton;
 import com.vittach.jumpjack.framework.ImageHandler;
 
 public class InventoryButton extends ScreenButton {
-    private ImageHandler cellBoxImage;
-    private ImageHandler allBlocksImage;
+    private final ImageHandler cellBoxImage;
+    private final ImageHandler allBlocksImage;
 
     private int oldColumn = -1;
     private int oldRow = -1;
 
-    private JJEngine engineInst = JJEngine.getInstance();
+    private MainEngine engineInstance = MainEngine.getInstance();
 
     public InventoryButton() {
         cellBoxImage = new ImageHandler().load("ui/cellBox.png");
@@ -21,7 +22,7 @@ public class InventoryButton extends ScreenButton {
 
     public boolean touchDown(int x, int y, int pointer, int button) {
         if (touchDown(x, y, button)) {
-            engineInst.controller.pressedKeys.add(Input.Keys.ESCAPE);
+            engineInstance.fpController.pressedKeys.add(Input.Keys.ESCAPE);
         }
         return true;
     }

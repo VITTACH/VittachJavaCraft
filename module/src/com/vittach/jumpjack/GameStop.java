@@ -2,39 +2,40 @@ package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.engine.GameScreen;
+import com.vittach.jumpjack.engine.Preference;
 
 public class GameStop implements GameScreen {
-    private JJEngine engineInst = JJEngine.getInstance();
-    private Preference prefInst = Preference.getInstance();
+    private MainEngine engineInstance = MainEngine.getInstance();
+    private com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
 
     public void display(Viewport view) {
-        engineInst.pauseMenu.display(view);
+        engineInstance.pauseMenu.display(view);
 
         listenInput();
     }
 
     private void listenInput() {
-        if (engineInst.pauseMenu.pressedKey > 0) {
-            prefInst.listener.cleanProcesses();
-            switch (engineInst.pauseMenu.pressedKey) {
-                case Input.Keys.ESCAPE:
-                    prefInst.listener.addListener(engineInst.inventoryBtn);
-                    prefInst.listener.addListener(engineInst.controller);
+        if (engineInstance.pauseMenu.pressedKey <= 0) return;
+        prefInstance.inputListener.cleanProcesses();
+        switch (engineInstance.pauseMenu.pressedKey) {
+            case Input.Keys.ESCAPE:
+                prefInstance.inputListener.addListener(engineInstance.inventoryBtn);
+                prefInstance.inputListener.addListener(engineInstance.fpController);
 
-                    engineInst.currentScreen = 0;
-                    break;
+                engineInstance.currentScreen = 0;
+                break;
 
-                case 67:
-                    prefInst.listener.addListener(engineInst.startMenu.gameButton);
-                    prefInst.listener.addListener(engineInst.startMenu.loadButton);
-                    prefInst.listener.addListener(engineInst.startMenu.exitButton);
-                    prefInst.listener.addListener(engineInst.startMenu);
+            case 67:
+                prefInstance.inputListener.addListener(engineInstance.startMenu.gameButton);
+                prefInstance.inputListener.addListener(engineInstance.startMenu.loadButton);
+                prefInstance.inputListener.addListener(engineInstance.startMenu.exitButton);
+                prefInstance.inputListener.addListener(engineInstance.startMenu);
 
-                    engineInst.currentScreen = 2;
-                    break;
-            }
-
-            engineInst.pauseMenu.pressedKey = -1;
+                engineInstance.currentScreen = 2;
+                break;
         }
+
+        engineInstance.pauseMenu.pressedKey = -1;
     }
 }

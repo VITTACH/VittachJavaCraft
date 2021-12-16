@@ -1,42 +1,43 @@
 package com.vittach.jumpjack;
 
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.engine.GameScreen;
+import com.vittach.jumpjack.engine.Preference;
 
 public class MainMenu implements GameScreen {
-    private JJEngine engineInst = JJEngine.getInstance();
-    private Preference prefInst = Preference.getInstance();
+    private final MainEngine engineInstance = MainEngine.getInstance();
+    private final com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
 
     public void display(Viewport view) {
-        engineInst.startMenu.display(view);
+        engineInstance.startMenu.display(view);
 
         listenInput();
     }
 
     private void listenInput() {
-        if (engineInst.startMenu.pressedKey >= 0) {
-            prefInst.listener.cleanProcesses();
-            switch (engineInst.startMenu.pressedKey) {
-                case 2:
-                    prefInst.listener.addListener(engineInst.fileExplorer.backButton);
-                    prefInst.listener.addListener(engineInst.fileExplorer.loadButton);
-                    prefInst.listener.addListener(engineInst.fileExplorer.sartButton);
-                    prefInst.listener.addListener(engineInst.fileExplorer);
-                    engineInst.fileExplorer.updateDir();
-                    engineInst.fileExplorer.getCurDir();
+        if (engineInstance.startMenu.pressedKey < 0) return;
+        prefInstance.inputListener.cleanProcesses();
+        switch (engineInstance.startMenu.pressedKey) {
+            case 2:
+                prefInstance.inputListener.addListener(engineInstance.fileExplorer.backButton);
+                prefInstance.inputListener.addListener(engineInstance.fileExplorer.loadButton);
+                prefInstance.inputListener.addListener(engineInstance.fileExplorer.sartButton);
+                prefInstance.inputListener.addListener(engineInstance.fileExplorer);
+                engineInstance.fileExplorer.updateDir();
+                engineInstance.fileExplorer.getCurDir();
 
-                    engineInst.currentScreen = 4;
-                    break;
+                engineInstance.currentScreen = 4;
+                break;
 
-                case 1:
-                    prefInst.listener.addListener(engineInst.worldCreator.sartButton);
-                    prefInst.listener.addListener(engineInst.worldCreator.backButton);
-                    prefInst.listener.addListener(engineInst.worldCreator);
+            case 1:
+                prefInstance.inputListener.addListener(engineInstance.worldCreator.sartButton);
+                prefInstance.inputListener.addListener(engineInstance.worldCreator.backButton);
+                prefInstance.inputListener.addListener(engineInstance.worldCreator);
 
-                    engineInst.currentScreen = 3;
-                    break;
-            }
-
-            engineInst.startMenu.pressedKey = -1;
+                engineInstance.currentScreen = 3;
+                break;
         }
+
+        engineInstance.startMenu.pressedKey = -1;
     }
 }

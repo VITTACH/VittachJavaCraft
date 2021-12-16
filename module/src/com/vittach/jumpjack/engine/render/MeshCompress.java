@@ -1,4 +1,4 @@
-package com.vittach.jumpjack.mesh;
+package com.vittach.jumpjack.engine.render;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;

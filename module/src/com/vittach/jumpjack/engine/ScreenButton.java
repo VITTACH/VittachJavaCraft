@@ -1,8 +1,9 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.engine;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.MainEngine;
 import com.vittach.jumpjack.framework.ColorImpl;
 import com.vittach.jumpjack.framework.FontHandler;
 import com.vittach.jumpjack.framework.ImageHandler;
@@ -25,8 +26,8 @@ public class ScreenButton extends InputListener {
     public float x;
     public float y;
     
-    private Preference prefInst = Preference.getInstance();
-    private JJEngine engineInst = JJEngine.getInstance();
+    private final com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
+    private final MainEngine engineInstance = MainEngine.getInstance();
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
@@ -63,15 +64,15 @@ public class ScreenButton extends InputListener {
             hasBackground = true;
         }
 
-        float scaleX = prefInst.screenWidth / engineInst.renderWidth;
-        float scaleY = prefInst.screenHeight / engineInst.renderHeight;
-        xPosition -= (prefInst.displayWidth - prefInst.screenWidth) / 2;
-        yPosition -= (prefInst.displayHeight - prefInst.screenHeight) / 2;
+        float scaleX = prefInstance.screenWidth / engineInstance.renderWidth;
+        float scaleY = prefInstance.screenHeight / engineInstance.renderHeight;
+        xPosition -= (prefInstance.displayWidth - prefInstance.screenWidth) / 2;
+        yPosition -= (prefInstance.displayHeight - prefInstance.screenHeight) / 2;
 
         return xPosition >= x * scaleX
                 && xPosition <= x * scaleX + background.getWidth() * scaleX
-                && yPosition >= (prefInst.screenHeight - y * scaleY) - background.getHeight() * scaleY
-                && yPosition <= (prefInst.screenHeight - y * scaleY);
+                && yPosition >= (prefInstance.screenHeight - y * scaleY) - background.getHeight() * scaleY
+                && yPosition <= (prefInstance.screenHeight - y * scaleY);
     }
 
     public void show(Viewport viewport) {
@@ -90,7 +91,7 @@ public class ScreenButton extends InputListener {
         spriteBatch.end();
     }
 
-    void setPosition(float x, float y) {
+    public void setPosition(float x, float y) {
         this.x = x;
         this.y = y;
     }
@@ -103,7 +104,7 @@ public class ScreenButton extends InputListener {
         return background.getHeight();
     }
 
-    void dispose() {
+    public void dispose() {
         spriteBatch.dispose();
         background.dispose();
         screen.dispose();

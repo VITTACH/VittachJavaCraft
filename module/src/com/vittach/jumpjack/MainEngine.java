@@ -6,19 +6,27 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.engine.FirstPersonController;
+import com.vittach.jumpjack.engine.GameScreen;
+import com.vittach.jumpjack.engine.Preference;
+import com.vittach.jumpjack.engine.render.MainScreen;
 
 import java.util.ArrayList;
 
 import static com.badlogic.gdx.Gdx.graphics;
 
-public class JJEngine extends ApplicationAdapter {
+public class MainEngine extends ApplicationAdapter {
+    enum Screen {
+        GAME_STOP, GAME_PLAY,
+    }
+
     public int currentScreen = 2;
-    public float renderWidth = 480;
-    public float renderHeight = 272;
+    public int renderWidth = 480;
+    public int renderHeight = 272;
     private int deviceId;
 
-    public FirstPersonController controller;
-    public MainGameLoop mainGameLoop;
+    public FirstPersonController fpController;
+    public MainScreen mainScreen;
 
     public PauseMenu pauseMenu;
     public InventoryButton inventoryBtn;
@@ -29,29 +37,29 @@ public class JJEngine extends ApplicationAdapter {
     private Viewport viewport;
     private OrthographicCamera orthographicCamera;
 
-    private ArrayList<GameScreen> gameState;
-    private static JJEngine engineInst;
-    private Preference prefsInst;
+    private ArrayList<com.vittach.jumpjack.engine.GameScreen> gameState;
+    private static MainEngine engineInstance;
+    private com.vittach.jumpjack.engine.Preference prefsInstance;
 
-    private JJEngine(int deviceId) {
+    private MainEngine(int deviceId) {
         this.deviceId = deviceId;
     }
 
-    public static JJEngine getInstance() {
+    public static MainEngine getInstance() {
         return getInstance(0);
     }
 
-    public static synchronized JJEngine getInstance(int deviceId) {
-        if (engineInst == null) {
-            engineInst = new JJEngine(deviceId);
+    public static synchronized MainEngine getInstance(int deviceId) {
+        if (engineInstance == null) {
+            engineInstance = new MainEngine(deviceId);
         }
-        return engineInst;
+        return engineInstance;
     }
 
     @Override
     public void dispose() {
         pauseMenu.dispose();
-        mainGameLoop.dispose();
+        mainScreen.dispose();
         inventoryBtn.dispose();
         worldCreator.dispose();
         fileExplorer.dispose();
@@ -63,8 +71,8 @@ public class JJEngine extends ApplicationAdapter {
         orthographicCamera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
 
         viewport.update(width, height);
-        prefsInst.setWidth(viewport.getScreenWidth(), width);
-        prefsInst.setHeight(viewport.getScreenHeight(), height);
+        prefsInstance.setWidth(viewport.getScreenWidth(), width);
+        prefsInstance.setHeight(viewport.getScreenHeight(), height);
         orthographicCamera.update();
     }
 
@@ -77,20 +85,19 @@ public class JJEngine extends ApplicationAdapter {
 
     @Override
     public void create() {
-
         startMenu = new StartMenu();
 
-        prefsInst = Preference.getInstance();
+        prefsInstance = Preference.getInstance();
 
-        prefsInst.listener.addListener(startMenu);
-        prefsInst.listener.addListener(startMenu.gameButton);
-        prefsInst.listener.addListener(startMenu.loadButton);
-        prefsInst.listener.addListener(startMenu.exitButton);
+        prefsInstance.inputListener.addListener(startMenu);
+        prefsInstance.inputListener.addListener(startMenu.gameButton);
+        prefsInstance.inputListener.addListener(startMenu.loadButton);
+        prefsInstance.inputListener.addListener(startMenu.exitButton);
 
-        prefsInst.playerMusic.load("1.ogg");
-        prefsInst.playerMusic.setLoop(true);
-        prefsInst.playerMusic.setVolume(1f);
-        prefsInst.playerMusic.play();
+        prefsInstance.playerMusic.load("1.ogg");
+        prefsInstance.playerMusic.setLoop(true);
+        prefsInstance.playerMusic.setVolume(1f);
+        prefsInstance.playerMusic.play();
 
         gameState = new ArrayList<GameScreen>() {{
             add(new GamePlay());
@@ -100,9 +107,9 @@ public class JJEngine extends ApplicationAdapter {
             add(new LoadSave());
         }};
 
-        controller = new FirstPersonController(deviceId);
+        fpController = new FirstPersonController(deviceId);
 
-        mainGameLoop = new MainGameLoop();
+        mainScreen = new MainScreen();
         fileExplorer = new FileExplorer();
         worldCreator = new WorldCreator();
         pauseMenu = new PauseMenu();
@@ -116,6 +123,6 @@ public class JJEngine extends ApplicationAdapter {
 
         viewport = new FitViewport(renderWidth, renderHeight, orthographicCamera);
 
-        Gdx.input.setInputProcessor(prefsInst.listener);
+        Gdx.input.setInputProcessor(prefsInstance.inputListener);
     }
 }

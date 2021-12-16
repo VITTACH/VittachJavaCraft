@@ -17,10 +17,9 @@ allprojects {
 
     version = '1.0'
     ext {
-        appName = "JJAlpha0.0.2"
-        gdxVersion = '1.9.2'
-        roboVMVersion = '1.12.0'
-        box2DLightsVersion = '1.4'
+        appName = "Crafter3d"
+        gdxVersion = '1.10.0'
+        roboVMVersion = '2.3.12'
         ashleyVersion = '1.7.0'
         aiVersion = '1.8.0'
     }
@@ -73,7 +72,7 @@ project(":module") {
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-freetype:1.6.4"
+        compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
     }
 }
 

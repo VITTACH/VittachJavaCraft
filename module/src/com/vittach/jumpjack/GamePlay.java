@@ -2,30 +2,34 @@ package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.engine.GameScreen;
+import com.vittach.jumpjack.engine.Preference;
 
 public class GamePlay implements GameScreen {
-    private JJEngine engineInst = JJEngine.getInstance();
-    private Preference prefInst = Preference.getInstance();
+    private final MainEngine engineInstance = MainEngine.getInstance();
+    private final com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
 
     public void display(Viewport view) {
-        engineInst.mainGameLoop.display(view);
-        engineInst.inventoryBtn.display(view);
+        engineInstance.mainScreen.display(view);
+        engineInstance.inventoryBtn.display(view);
 
         listenInput();
     }
 
     private void listenInput() {
-        if (engineInst.controller.pressedKeys.contains(Input.Keys.ESCAPE)) {
-            prefInst.listener.cleanProcesses();
-
-            prefInst.listener.addListener(engineInst.pauseMenu.saveButton);
-            prefInst.listener.addListener(engineInst.pauseMenu.exitButton);
-            prefInst.listener.addListener(engineInst.pauseMenu.loadButton);
-            prefInst.listener.addListener(engineInst.pauseMenu.playButton);
-            prefInst.listener.addListener(engineInst.pauseMenu);
-
-            engineInst.controller.pressedKeys.clear();
-            engineInst.currentScreen = 1;
+        if (!engineInstance.fpController.pressedKeys.contains(Input.Keys.ESCAPE)) {
+            return;
         }
+
+        prefInstance.inputListener.cleanProcesses();
+
+        prefInstance.inputListener.addListener(engineInstance.pauseMenu.saveButton);
+        prefInstance.inputListener.addListener(engineInstance.pauseMenu.exitButton);
+        prefInstance.inputListener.addListener(engineInstance.pauseMenu.loadButton);
+        prefInstance.inputListener.addListener(engineInstance.pauseMenu.playButton);
+        prefInstance.inputListener.addListener(engineInstance.pauseMenu);
+
+        engineInstance.fpController.pressedKeys.clear();
+        engineInstance.currentScreen = 1;
     }
 }

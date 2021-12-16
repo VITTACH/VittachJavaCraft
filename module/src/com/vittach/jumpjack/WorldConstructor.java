@@ -1,38 +1,43 @@
 package com.vittach.jumpjack;
 
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.engine.GameScreen;
+import com.vittach.jumpjack.engine.Preference;
 
 public class WorldConstructor implements GameScreen {
-    private JJEngine engineInst = JJEngine.getInstance();
-    private Preference prefInst = Preference.getInstance();
+    private MainEngine engineInstance = MainEngine.getInstance();
+    private com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
 
     public void display(Viewport view) {
-        engineInst.worldCreator.display(view);
+        engineInstance.worldCreator.display(view);
 
-        if (engineInst.worldCreator.pressedKey >= 0) {
-            prefInst.listener.cleanProcesses();
-            switch (engineInst.worldCreator.pressedKey) {
-                case 1:
-                    engineInst.mainGameLoop.genWorld();
+        listenInput();
+    }
 
-                    prefInst.listener.addListener(engineInst.inventoryBtn);
-                    prefInst.listener.addListener(engineInst.controller);
+    private void listenInput() {
+        if (engineInstance.worldCreator.pressedKey < 0) return;
+        prefInstance.inputListener.cleanProcesses();
+        switch (engineInstance.worldCreator.pressedKey) {
+            case 1:
+                engineInstance.mainScreen.genWorld();
 
-                    engineInst.currentScreen = 0;
-                    break;
+                prefInstance.inputListener.addListener(engineInstance.inventoryBtn);
+                prefInstance.inputListener.addListener(engineInstance.fpController);
 
-                case 2:
-                    prefInst.listener.addListener(engineInst.startMenu.gameButton);
-                    prefInst.listener.addListener(engineInst.startMenu.loadButton);
-                    prefInst.listener.addListener(engineInst.startMenu.exitButton);
-                    prefInst.listener.addListener(engineInst.startMenu);
+                engineInstance.currentScreen = 0;
+                break;
 
-                    engineInst.currentScreen = 2;
-                    break;
-            }
+            case 2:
+                prefInstance.inputListener.addListener(engineInstance.startMenu.gameButton);
+                prefInstance.inputListener.addListener(engineInstance.startMenu.loadButton);
+                prefInstance.inputListener.addListener(engineInstance.startMenu.exitButton);
+                prefInstance.inputListener.addListener(engineInstance.startMenu);
 
-            engineInst.worldCreator.textField.setText(" ");
-            engineInst.worldCreator.pressedKey = -1;
+                engineInstance.currentScreen = 2;
+                break;
         }
+
+        engineInstance.worldCreator.textField.setText(" ");
+        engineInstance.worldCreator.pressedKey = -1;
     }
 }

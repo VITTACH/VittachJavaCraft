@@ -3,12 +3,14 @@ package com.vittach.jumpjack;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.engine.InputListener;
+import com.vittach.jumpjack.engine.ScreenButton;
 import com.vittach.jumpjack.framework.ImageHandler;
 
 public class StartMenu extends InputListener {
-    public ScreenButton gameButton;
-    public ScreenButton loadButton;
-    public ScreenButton exitButton;
+    public com.vittach.jumpjack.engine.ScreenButton gameButton;
+    public com.vittach.jumpjack.engine.ScreenButton loadButton;
+    public com.vittach.jumpjack.engine.ScreenButton exitButton;
 
     public int pressedKey = -1;
     private Sprite sprite;
@@ -37,24 +39,24 @@ public class StartMenu extends InputListener {
         ImageHandler logoImage = new ImageHandler();
         logoImage.load("ui/jumpJackLogo.png");
 
-        gameButton = new ScreenButton();
+        gameButton = new com.vittach.jumpjack.engine.ScreenButton();
         gameButton.choice = new ImageHandler();
         gameButton.choice.load("ui/startChoice.png");
         gameButton.background.load("ui/startButton.png");
         gameButton.screen.blit(gameButton.background);
-        gameButton.setPosition(JJEngine.getInstance().renderWidth / 2 - gameButton.getWidth() / 2, 128);
+        gameButton.setPosition(MainEngine.getInstance().renderWidth / 2 - gameButton.getWidth() / 2, 128);
         gameButton.font.load("jumpjack.ttf");
         gameButton.textY = 19;
         gameButton.textX = 84;
         gameButton.message = "idpary";
         gameButton.font.setPixelSize(12);
 
-        loadButton = new ScreenButton();
+        loadButton = new com.vittach.jumpjack.engine.ScreenButton();
         loadButton.choice = new ImageHandler();
         loadButton.choice.load("ui/startChoice.png");
         loadButton.background.load("ui/startButton.png");
         loadButton.screen.blit(loadButton.background);
-        loadButton.setPosition(JJEngine.getInstance().renderWidth / 2 - loadButton.getWidth() / 2, 98);
+        loadButton.setPosition(MainEngine.getInstance().renderWidth / 2 - loadButton.getWidth() / 2, 98);
         loadButton.font = gameButton.font;
         loadButton.textY = 19;
         loadButton.textX = 74;
@@ -65,7 +67,7 @@ public class StartMenu extends InputListener {
         exitButton.choice.load("ui/startChoice.png");
         exitButton.background.load("ui/startButton.png");
         exitButton.screen.blit(exitButton.background);
-        exitButton.setPosition(JJEngine.getInstance().renderWidth / 2 - exitButton.getWidth() / 2, 68);
+        exitButton.setPosition(MainEngine.getInstance().renderWidth / 2 - exitButton.getWidth() / 2, 68);
         exitButton.font = gameButton.font;
         exitButton.textY = 19;
         exitButton.textX = 74;
