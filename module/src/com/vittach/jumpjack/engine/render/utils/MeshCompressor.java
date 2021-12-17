@@ -1,16 +1,17 @@
-package com.vittach.jumpjack.engine.render;
+package com.vittach.jumpjack.engine.render.utils;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Matrix4;
+import com.vittach.jumpjack.engine.render.domain.MeshObj;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MeshCompress {
+public class MeshCompressor {
 
     private static boolean isEmptyAtIndex(List<MeshObj> meshes, Integer index) {
         if (index < 0 || index >= meshes.size()) return true;
@@ -19,11 +20,11 @@ public class MeshCompress {
     }
 
     private static boolean hasSurface(
-        List<MeshObj> meshes,
-        Integer i,
-        Integer j,
-        Integer sideLength,
-        Integer chunkLength
+            List<MeshObj> meshes,
+            Integer i,
+            Integer j,
+            Integer sideLength,
+            Integer chunkLength
     ) {
 
         int floorSize = chunkLength * chunkLength;
@@ -58,10 +59,10 @@ public class MeshCompress {
     }
 
     public static Mesh compressMeshes(
-        List<MeshObj> meshes,
-        Map<String, List<TextureRegion>> textureMap,
-        List<Matrix4> translates,
-        Integer chunkLength
+            List<MeshObj> meshes,
+            Map<String, List<TextureRegion>> textureMap,
+            List<Matrix4> translates,
+            Integer chunkLength
     ) {
         if (meshes == null || meshes.isEmpty()) return null;
 
@@ -118,10 +119,10 @@ public class MeshCompress {
 
     private static Mesh mergeMesh(List<Float> vertexList, List<Short> indiceList, List<MeshObj> meshes) {
         Mesh mergedMesh = new Mesh(
-            true,
-            vertexList.size(),
-            indiceList.size(),
-            meshes.get(0).getMesh().getVertexAttributes()
+                true,
+                vertexList.size(),
+                indiceList.size(),
+                meshes.get(0).getMesh().getVertexAttributes()
         );
 
         int i = 0;

@@ -6,10 +6,19 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.FirstPersonController;
-import com.vittach.jumpjack.engine.GameScreen;
-import com.vittach.jumpjack.engine.Preference;
+import com.vittach.jumpjack.ui.screen.WorldConstructor;
+import com.vittach.jumpjack.ui.buttons.InventoryButton;
+import com.vittach.jumpjack.ui.GameScreen;
+import com.vittach.jumpjack.engine.controller.FirstPersonController;
 import com.vittach.jumpjack.engine.render.MainScreen;
+import com.vittach.jumpjack.ui.screen.GamePlay;
+import com.vittach.jumpjack.ui.screen.GameStop;
+import com.vittach.jumpjack.ui.screen.LoadSave;
+import com.vittach.jumpjack.ui.screen.WorldCreator;
+import com.vittach.jumpjack.ui.screen.menu.FileMenu;
+import com.vittach.jumpjack.ui.screen.menu.MainMenu;
+import com.vittach.jumpjack.ui.screen.menu.PauseMenu;
+import com.vittach.jumpjack.ui.screen.menu.StartMenu;
 
 import java.util.ArrayList;
 
@@ -17,7 +26,7 @@ import static com.badlogic.gdx.Gdx.graphics;
 
 public class MainEngine extends ApplicationAdapter {
     enum Screen {
-        GAME_STOP, GAME_PLAY,
+        GAME_STOP, GAME_PLAY, GAME_MAIN_SCREEN
     }
 
     public int currentScreen = 2;
@@ -30,16 +39,16 @@ public class MainEngine extends ApplicationAdapter {
 
     public PauseMenu pauseMenu;
     public InventoryButton inventoryBtn;
-    public FileExplorer fileExplorer;
-    public WorldCreator worldCreator;
+    public FileMenu fileMenu;
+    public com.vittach.jumpjack.ui.screen.WorldCreator worldCreator;
     public StartMenu startMenu;
 
     private Viewport viewport;
     private OrthographicCamera orthographicCamera;
 
-    private ArrayList<com.vittach.jumpjack.engine.GameScreen> gameState;
+    private ArrayList<GameScreen> gameState;
     private static MainEngine engineInstance;
-    private com.vittach.jumpjack.engine.Preference prefsInstance;
+    private Preferences prefsInstance;
 
     private MainEngine(int deviceId) {
         this.deviceId = deviceId;
@@ -62,7 +71,7 @@ public class MainEngine extends ApplicationAdapter {
         mainScreen.dispose();
         inventoryBtn.dispose();
         worldCreator.dispose();
-        fileExplorer.dispose();
+        fileMenu.dispose();
         startMenu.dispose();
     }
 
@@ -87,7 +96,7 @@ public class MainEngine extends ApplicationAdapter {
     public void create() {
         startMenu = new StartMenu();
 
-        prefsInstance = Preference.getInstance();
+        prefsInstance = Preferences.getInstance();
 
         prefsInstance.inputListener.addListener(startMenu);
         prefsInstance.inputListener.addListener(startMenu.gameButton);
@@ -110,7 +119,7 @@ public class MainEngine extends ApplicationAdapter {
         fpController = new FirstPersonController(deviceId);
 
         mainScreen = new MainScreen();
-        fileExplorer = new FileExplorer();
+        fileMenu = new FileMenu();
         worldCreator = new WorldCreator();
         pauseMenu = new PauseMenu();
 

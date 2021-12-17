@@ -1,11 +1,12 @@
-package com.vittach.jumpjack.engine;
+package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Gdx;
 import com.vittach.jumpjack.framework.PlayerMusic;
+import com.vittach.jumpjack.ui.InputListener;
 
 import java.util.HashSet;
 
-public class Preference {
+public class Preferences {
     public PlayerMusic playerMusic = new PlayerMusic();
     public InputListener inputListener = new InputListener();
     public HashSet<Integer> usedInputIdMap = new HashSet<Integer>();
@@ -26,13 +27,13 @@ public class Preference {
         this.displayHeight = displayHeight;
     }
 
-    private Preference() { }
+    private Preferences() { }
 
-    private static Preference instance;
+    private static Preferences instance;
 
-    public synchronized static Preference getInstance() {
+    public synchronized static Preferences getInstance() {
         if (instance == null) {
-            instance = new Preference();
+            instance = new Preferences();
         }
         return instance;
     }

@@ -1,4 +1,4 @@
-package com.vittach.jumpjack.engine.render;
+package com.vittach.jumpjack.engine.render.domain;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.Vector3;

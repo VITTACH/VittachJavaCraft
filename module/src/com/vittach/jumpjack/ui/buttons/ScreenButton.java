@@ -1,12 +1,14 @@
-package com.vittach.jumpjack.engine;
+package com.vittach.jumpjack.ui.buttons;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.Preferences;
 import com.vittach.jumpjack.framework.ColorImpl;
 import com.vittach.jumpjack.framework.FontHandler;
 import com.vittach.jumpjack.framework.ImageHandler;
+import com.vittach.jumpjack.ui.InputListener;
 
 /**
  * Created by ZHARIKOV VITALIY at 12.02.2016.
@@ -26,7 +28,7 @@ public class ScreenButton extends InputListener {
     public float x;
     public float y;
     
-    private final com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
+    private final Preferences prefInstance = Preferences.getInstance();
     private final MainEngine engineInstance = MainEngine.getInstance();
 
     @Override

@@ -1,16 +1,17 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.ui.screen.menu;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.InputListener;
-import com.vittach.jumpjack.engine.ScreenButton;
+import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.ui.InputListener;
+import com.vittach.jumpjack.ui.buttons.ScreenButton;
 import com.vittach.jumpjack.framework.ImageHandler;
 
 public class StartMenu extends InputListener {
-    public com.vittach.jumpjack.engine.ScreenButton gameButton;
-    public com.vittach.jumpjack.engine.ScreenButton loadButton;
-    public com.vittach.jumpjack.engine.ScreenButton exitButton;
+    public ScreenButton gameButton;
+    public ScreenButton loadButton;
+    public ScreenButton exitButton;
 
     public int pressedKey = -1;
     private Sprite sprite;
@@ -39,7 +40,7 @@ public class StartMenu extends InputListener {
         ImageHandler logoImage = new ImageHandler();
         logoImage.load("ui/jumpJackLogo.png");
 
-        gameButton = new com.vittach.jumpjack.engine.ScreenButton();
+        gameButton = new ScreenButton();
         gameButton.choice = new ImageHandler();
         gameButton.choice.load("ui/startChoice.png");
         gameButton.background.load("ui/startButton.png");
@@ -51,7 +52,7 @@ public class StartMenu extends InputListener {
         gameButton.message = "idpary";
         gameButton.font.setPixelSize(12);
 
-        loadButton = new com.vittach.jumpjack.engine.ScreenButton();
+        loadButton = new ScreenButton();
         loadButton.choice = new ImageHandler();
         loadButton.choice.load("ui/startChoice.png");
         loadButton.background.load("ui/startButton.png");

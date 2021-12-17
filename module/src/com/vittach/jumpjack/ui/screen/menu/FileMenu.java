@@ -1,13 +1,14 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.ui.screen.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.InputListener;
-import com.vittach.jumpjack.engine.Preference;
-import com.vittach.jumpjack.engine.ScreenButton;
+import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.ui.InputListener;
+import com.vittach.jumpjack.Preferences;
+import com.vittach.jumpjack.ui.buttons.ScreenButton;
 import com.vittach.jumpjack.framework.ColorImpl;
 import com.vittach.jumpjack.framework.FontHandler;
 import com.vittach.jumpjack.framework.ImageHandler;
@@ -15,7 +16,7 @@ import com.vittach.jumpjack.framework.MyTimer;
 
 import java.util.ArrayList;
 
-public class FileExplorer extends InputListener {
+public class FileMenu extends InputListener {
     private ColorImpl color;
     private MyTimer scrollTimer;
     
@@ -24,9 +25,9 @@ public class FileExplorer extends InputListener {
     private Sprite selectSprite;
     private SpriteBatch spriteBatch;
 
-    public com.vittach.jumpjack.engine.ScreenButton sartButton;
-    public com.vittach.jumpjack.engine.ScreenButton backButton;
-    public com.vittach.jumpjack.engine.ScreenButton loadButton;
+    public ScreenButton sartButton;
+    public ScreenButton backButton;
+    public ScreenButton loadButton;
 
     public int pressedKey = -1;
 
@@ -51,7 +52,7 @@ public class FileExplorer extends InputListener {
     private ImageHandler backgroundImage;
     private ImageHandler foregroundImage;
     
-    private com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
+    private Preferences prefInstance = Preferences.getInstance();
     private MainEngine engineInstance = MainEngine.getInstance();
 
     @Override
@@ -91,7 +92,7 @@ public class FileExplorer extends InputListener {
         loadButton.dispose();
     }
 
-    public FileExplorer() {
+    public FileMenu() {
         scrollTimer = new MyTimer();
         arcadepixFont = new FontHandler();
         foregroundImage = new ImageHandler().load("ui/foreground.png");
@@ -100,9 +101,9 @@ public class FileExplorer extends InputListener {
         dirForegroundImage = new ImageHandler().load("ui/dirForeground.png");
         screen = new ImageHandler();
 
-        sartButton = new com.vittach.jumpjack.engine.ScreenButton();
+        sartButton = new ScreenButton();
         sartButton.choice = new ImageHandler();
-        backButton = new com.vittach.jumpjack.engine.ScreenButton();
+        backButton = new ScreenButton();
         backButton.choice = new ImageHandler();
         loadButton = new ScreenButton();
         loadButton.choice = new ImageHandler();

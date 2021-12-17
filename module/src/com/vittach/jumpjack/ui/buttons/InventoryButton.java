@@ -1,8 +1,8 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.ui.buttons;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.ScreenButton;
+import com.vittach.jumpjack.MainEngine;
 import com.vittach.jumpjack.framework.ImageHandler;
 
 public class InventoryButton extends ScreenButton {

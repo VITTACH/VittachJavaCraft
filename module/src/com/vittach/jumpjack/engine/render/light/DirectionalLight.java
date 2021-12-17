@@ -20,7 +20,7 @@ public class DirectionalLight extends Light {
 
     private final MainEngine engine = MainEngine.getInstance();
 
-    public DirectionalLight(final MainScreen mainScreen, final Vector3 position, final Vector3 direction) {
+    public DirectionalLight(MainScreen mainScreen, final Vector3 position, final Vector3 direction) {
         super(mainScreen);
         this.position = position;
         this.direction = direction;
@@ -36,27 +36,21 @@ public class DirectionalLight extends Light {
         super.init();
 
         camera = new PerspectiveCamera(120f, engine.renderWidth, engine.renderHeight);
-        camera.near = 1f;
-        camera.far = 70;
+        camera.near = 0.1f;
+        camera.far = engine.fpController.viewDistance;
         camera.position.set(position);
         camera.lookAt(direction);
         camera.update();
     }
 
     @Override
-    public void render(ModelInstance modelInstance, Matrix4 chunk) {
-        if (frameBuffer == null) {
-            frameBuffer = new FrameBuffer(Format.RGBA8888, engine.renderWidth, engine.renderHeight, true);
-        }
-
+    public void render(ModelInstance modelInstance, Matrix4 chunkTrans) {
+        frameBuffer = new FrameBuffer(Format.RGBA8888, engine.renderWidth, engine.renderHeight, true);
         frameBuffer.begin();
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        shaderProgram.bind();
-        shaderProgram.setUniformf("u_cameraFar", camera.far);
-        shaderProgram.setUniformf("u_lightPosition", camera.position);
-        shaderProgram.setUniformMatrix("u_chunkTrans", chunk);
+        applyShader(chunkTrans);
 
         modelBatch.begin(camera);
         modelBatch.render(modelInstance);
@@ -65,5 +59,12 @@ public class DirectionalLight extends Light {
         frameBuffer.end();
 
         depthMap = frameBuffer.getColorBufferTexture();
+    }
+
+    private void applyShader(Matrix4 chunkTrans) {
+        shaderProgram.bind();
+        shaderProgram.setUniformf("u_cameraFar", camera.far);
+        shaderProgram.setUniformf("u_lightPosition", camera.position);
+        shaderProgram.setUniformMatrix("u_chunkTrans", chunkTrans);
     }
 }

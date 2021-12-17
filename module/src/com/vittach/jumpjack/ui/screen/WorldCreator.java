@@ -1,4 +1,4 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.ui.screen;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -7,15 +7,16 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.ProcessorInput;
-import com.vittach.jumpjack.engine.ScreenButton;
+import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.ui.buttons.ScreenButton;
+import com.vittach.jumpjack.engine.controller.ProcessorInput;
 import com.vittach.jumpjack.framework.FontHandler;
 import com.vittach.jumpjack.framework.ImageHandler;
 
 public class WorldCreator extends Stage implements ProcessorInput {
     public Sprite sprite;
-    public com.vittach.jumpjack.engine.ScreenButton backButton;
-    public com.vittach.jumpjack.engine.ScreenButton sartButton;
+    public ScreenButton backButton;
+    public ScreenButton sartButton;
     public TextField textField;
 
     private FontHandler arcadepixFont;
@@ -76,8 +77,8 @@ public class WorldCreator extends Stage implements ProcessorInput {
     public WorldCreator() {
         arcadepixFont = new FontHandler();
         jumpjackFont = new FontHandler();
-        sartButton = new com.vittach.jumpjack.engine.ScreenButton();
-        backButton = new com.vittach.jumpjack.engine.ScreenButton();
+        sartButton = new ScreenButton();
+        backButton = new ScreenButton();
         spriteBatch = new SpriteBatch();
 
         arcadepixFont.load("arcadepix.ttf");
@@ -120,7 +121,7 @@ public class WorldCreator extends Stage implements ProcessorInput {
         addActor(textField);
         sprite = backgroundImage.render();
 
-        sartButton = new com.vittach.jumpjack.engine.ScreenButton();
+        sartButton = new ScreenButton();
         sartButton.choice = new ImageHandler();
         sartButton.choice.load("ui/startChoice.png");
         sartButton.background.load("ui/startButton.png");

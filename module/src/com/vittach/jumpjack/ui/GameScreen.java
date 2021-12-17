@@ -1,4 +1,4 @@
-package com.vittach.jumpjack.engine;
+package com.vittach.jumpjack.ui;
 
 import com.badlogic.gdx.utils.viewport.Viewport;
 

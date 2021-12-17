@@ -1,33 +1,33 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.ui.screen;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.GameScreen;
-import com.vittach.jumpjack.engine.Preference;
+import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.ui.GameScreen;
+import com.vittach.jumpjack.Preferences;
 
-public class WorldConstructor implements GameScreen {
+public class GameStop implements GameScreen {
     private MainEngine engineInstance = MainEngine.getInstance();
-    private com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
+    private Preferences prefInstance = Preferences.getInstance();
 
     public void display(Viewport view) {
-        engineInstance.worldCreator.display(view);
+        engineInstance.pauseMenu.display(view);
 
         listenInput();
     }
 
     private void listenInput() {
-        if (engineInstance.worldCreator.pressedKey < 0) return;
+        if (engineInstance.pauseMenu.pressedKey <= 0) return;
         prefInstance.inputListener.cleanProcesses();
-        switch (engineInstance.worldCreator.pressedKey) {
-            case 1:
-                engineInstance.mainScreen.genWorld();
-
+        switch (engineInstance.pauseMenu.pressedKey) {
+            case Input.Keys.ESCAPE:
                 prefInstance.inputListener.addListener(engineInstance.inventoryBtn);
                 prefInstance.inputListener.addListener(engineInstance.fpController);
 
                 engineInstance.currentScreen = 0;
                 break;
 
-            case 2:
+            case 67:
                 prefInstance.inputListener.addListener(engineInstance.startMenu.gameButton);
                 prefInstance.inputListener.addListener(engineInstance.startMenu.loadButton);
                 prefInstance.inputListener.addListener(engineInstance.startMenu.exitButton);
@@ -37,7 +37,6 @@ public class WorldConstructor implements GameScreen {
                 break;
         }
 
-        engineInstance.worldCreator.textField.setText(" ");
-        engineInstance.worldCreator.pressedKey = -1;
+        engineInstance.pauseMenu.pressedKey = -1;
     }
 }

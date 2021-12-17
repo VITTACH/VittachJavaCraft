@@ -16,10 +16,13 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.MainEngine;
-import com.vittach.jumpjack.domain.Chunk;
+import com.vittach.jumpjack.engine.render.domain.Chunk;
+import com.vittach.jumpjack.engine.render.domain.MeshObj;
+import com.vittach.jumpjack.engine.render.domain.ModelInstanceObj;
 import com.vittach.jumpjack.engine.render.light.DirectionalLight;
 import com.vittach.jumpjack.engine.render.light.Light;
 import com.vittach.jumpjack.engine.render.shader.SimpleTextureShader;
+import com.vittach.jumpjack.engine.render.utils.MeshCompressor;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +38,7 @@ public class MainScreen {
     private Texture texture;
     private Vector3 camPosition;
 
-    private final Map<Vector3, ModelInstance> chunkModelInstanceMap = new HashMap<Vector3, ModelInstance>();
+    private final Map<Vector3, ModelInstanceObj> modelInstanceObjMap = new HashMap<Vector3, ModelInstanceObj>();
     private final Map<String, List<TextureRegion>> textureMap = new HashMap<String, List<TextureRegion>>();
     private final Map<Vector3, Chunk> cubeChunkMap = new ConcurrentHashMap<Vector3, Chunk>();
 
@@ -47,11 +50,11 @@ public class MainScreen {
     private final Light sunLight = new DirectionalLight(this, new Vector3(-10, 10, 10), new Vector3(-10, 0, 0));
 
     private final ModelBuilder modelBuilder = new ModelBuilder();
-    private final Matrix4 chunkMatrix = new Matrix4();
+    private Matrix4 chunkTrans = new Matrix4();
 
     public void dispose() {
         textureMap.clear();
-        chunkModelInstanceMap.clear();
+        modelInstanceObjMap.clear();
         cubeChunkMap.clear();
     }
 
@@ -125,7 +128,7 @@ public class MainScreen {
         backgroundShape.rect(0, 0, graphics.getWidth(), graphics.getHeight());
         backgroundShape.end();
 
-        renderScene(cubeChunkMap, chunkModelInstanceMap, textureMap);
+        renderScene(cubeChunkMap, modelInstanceObjMap, textureMap);
     }
 
     public ShaderProgram setupShader(final String prefix) {
@@ -149,7 +152,7 @@ public class MainScreen {
         for (MeshObj meshObj : meshObjects) {
             matrix.add(new Matrix4().setToTranslation(meshObj.getPosition()));
         }
-        return MeshCompress.compressMeshes(meshObjects, textureMap, matrix, chunkSize);
+        return MeshCompressor.compressMeshes(meshObjects, textureMap, matrix, chunkSize);
     }
 
     private void generateWorld(int cameraXPos, int cameraZPos) {
@@ -187,7 +190,7 @@ public class MainScreen {
 
     private void renderScene(
             Map<Vector3, Chunk> chunkMap,
-            Map<Vector3, ModelInstance> chunkModelInstanceMap,
+            Map<Vector3, ModelInstanceObj> modelInstanceObjMap,
             Map<String, List<TextureRegion>> textureMap
     ) {
         PerspectiveCamera fpCamera = engineInstance.fpController.getFpCamera();
@@ -195,6 +198,7 @@ public class MainScreen {
 
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
             Vector3 position = chunkEntry.getKey();
+            chunkTrans = chunkTrans.setToTranslation(position);
 
             if (Math.abs(camPosition.x - position.x) > distance
                     || Math.abs(camPosition.z - position.z) > distance
@@ -203,32 +207,33 @@ public class MainScreen {
             }
 
             List<MeshObj> nonCompressedMeshObjs = chunkEntry.getValue().getMeshObjs();
-            ModelInstance chunkModelInstance = chunkModelInstanceMap.get(position);
-            if (chunkModelInstance == null) {
-                chunkModelInstance = meshToModel(getCompressedMesh(nonCompressedMeshObjs, textureMap));
-                if (chunkModelInstance == null) continue;
-                chunkModelInstanceMap.put(position, chunkModelInstance);
+            ModelInstanceObj modelInstanceObj = modelInstanceObjMap.get(position);
+            if (modelInstanceObj == null) {
+                Mesh compressedMesh = getCompressedMesh(nonCompressedMeshObjs, textureMap);
+                if (compressedMesh == null) continue;
+                ModelInstance modelInstance = meshToModelInst(compressedMesh);
+
+                sunLight.render(modelInstance, chunkTrans);
+
+                modelInstanceObj = new ModelInstanceObj(modelInstance, sunLight.getDepthMap());
+                modelInstanceObjMap.put(position, modelInstanceObj);
             }
 
-            sunLight.render(chunkModelInstance, chunkMatrix.setToTranslation(position));
-
-            applyShaders(fpCamera, chunkMatrix.setToTranslation(position));
+            applyShaders(fpCamera, modelInstanceObj.getDepthMap());
 
             modelBatch.begin(fpCamera);
-            modelBatch.render(chunkModelInstance);
+            modelBatch.render(modelInstanceObj.getModelInstance());
             modelBatch.end();
         }
     }
 
-    private ModelInstance meshToModel(Mesh compressedMesh) {
-        if (compressedMesh == null) return null;
+    private ModelInstance meshToModelInst(Mesh compressedMesh) {
         modelBuilder.begin();
         modelBuilder.part("", compressedMesh, GL20.GL_TRIANGLES, new Material());
-        Model model = modelBuilder.end();
-        return new ModelInstance(model);
+        return new ModelInstance(modelBuilder.end());
     }
 
-    private void applyShaders(PerspectiveCamera fpCamera, Matrix4 chunk) {
+    private void applyShaders(PerspectiveCamera fpCamera, Texture depthMap) {
         shaderProgram.bind();
 
         texture.bind(1);
@@ -241,9 +246,9 @@ public class MainScreen {
         shaderProgram.setUniformf("u_fogFar", distance * 0.8f);
         shaderProgram.setUniformf("u_fogNear", distance * 0.2f);
 
-        shaderProgram.setUniformMatrix("u_chunkTrans", chunk);
+        shaderProgram.setUniformMatrix("u_chunkTrans", chunkTrans);
 
-        sunLight.getDepthMap().bind(2);
+        depthMap.bind(2);
         shaderProgram.setUniformi("u_depthMap", 2);
 
         shaderProgram.setUniformf("u_cameraFar", sunLight.getCamera().far);

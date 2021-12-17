@@ -1,17 +1,18 @@
-package com.vittach.jumpjack.engine;
+package com.vittach.jumpjack.engine.controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.Preferences;
 
 import java.util.HashSet;
 
 public class FirstPersonController implements ProcessorInput {
     private final float MOVE_VELOCITY = 0.1f;
     private final float FAST_VELOCITY = 1.0f;
-    private final Preference prefInstance = Preference.getInstance();
+    private final Preferences prefInstance = Preferences.getInstance();
 
     private int deviceId;
     private int idOffset = 0;
@@ -44,7 +45,7 @@ public class FirstPersonController implements ProcessorInput {
         float[] position = new float[]{0, 0, 0};
 
         fpCamera.near = 0.1f;
-        fpCamera.far = 2.f * viewDistance;
+        fpCamera.far = viewDistance * 2f;
         fpCamera.position.set(position);
         fpCamera.update();
     }

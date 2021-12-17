@@ -1,26 +1,29 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.ui.screen;
 
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.GameScreen;
-import com.vittach.jumpjack.engine.Preference;
+import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.ui.GameScreen;
+import com.vittach.jumpjack.Preferences;
 
-public class LoadSave implements GameScreen {
+public class WorldConstructor implements GameScreen {
     private MainEngine engineInstance = MainEngine.getInstance();
-    private com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
+    private Preferences prefInstance = Preferences.getInstance();
 
     public void display(Viewport view) {
-        engineInstance.fileExplorer.display(view);
+        engineInstance.worldCreator.display(view);
 
         listenInput();
     }
 
     private void listenInput() {
-        if (engineInstance.fileExplorer.pressedKey < 0) return;
+        if (engineInstance.worldCreator.pressedKey < 0) return;
         prefInstance.inputListener.cleanProcesses();
-        switch (engineInstance.fileExplorer.pressedKey) {
+        switch (engineInstance.worldCreator.pressedKey) {
             case 1:
-                prefInstance.inputListener.addListener(engineInstance.fpController);
+                engineInstance.mainScreen.genWorld();
+
                 prefInstance.inputListener.addListener(engineInstance.inventoryBtn);
+                prefInstance.inputListener.addListener(engineInstance.fpController);
 
                 engineInstance.currentScreen = 0;
                 break;
@@ -35,6 +38,7 @@ public class LoadSave implements GameScreen {
                 break;
         }
 
-        engineInstance.fileExplorer.pressedKey = -1;
+        engineInstance.worldCreator.textField.setText(" ");
+        engineInstance.worldCreator.pressedKey = -1;
     }
 }

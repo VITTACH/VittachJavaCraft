@@ -1,13 +1,14 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.ui.screen;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.GameScreen;
-import com.vittach.jumpjack.engine.Preference;
+import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.ui.GameScreen;
+import com.vittach.jumpjack.Preferences;
 
 public class GamePlay implements GameScreen {
     private final MainEngine engineInstance = MainEngine.getInstance();
-    private final com.vittach.jumpjack.engine.Preference prefInstance = Preference.getInstance();
+    private final Preferences prefInstance = Preferences.getInstance();
 
     public void display(Viewport view) {
         engineInstance.mainScreen.display(view);
