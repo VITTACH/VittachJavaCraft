@@ -45,7 +45,7 @@ public class MainScreen {
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final int distance = engineInstance.fpController.viewDistance;
     private final int chunkSize = 16;
-    private final int mapHeight = 32;
+    private final int mapHeight = 48;
 
     private final Light sunLight = new DirectionalLight(this, new Vector3(-10, 10, 10), new Vector3(-10, 0, 0));
 
@@ -74,7 +74,7 @@ public class MainScreen {
         VertexAttributes attributes = new VertexAttributes(
                 new VertexAttribute(Usage.Position, 3, "a_position"),
                 new VertexAttribute(Usage.Normal, 3, "a_normal"),
-                new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "a_texCoord0")
+                new VertexAttribute(Usage.TextureCoordinates, 2, "a_texCoord0")
         );
 
         MeshBuilder cubeBuilder = new MeshBuilder();
@@ -87,7 +87,7 @@ public class MainScreen {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (engineInstance.currentScreen == 0) {
+                while (engineInstance.currentScreen == MainEngine.Screen.GAME_PLAY) {
                     if (camPosition == null) continue;
                     generateWorld((int) camPosition.x, (int) camPosition.z);
                 }

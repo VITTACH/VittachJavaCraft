@@ -11,7 +11,7 @@ import com.vittach.jumpjack.framework.ImageHandler;
 public class StartMenu extends InputListener {
     public ScreenButton gameButton;
     public ScreenButton loadButton;
-    public ScreenButton exitButton;
+    public ScreenButton moreButton;
 
     public int pressedKey = -1;
     private Sprite sprite;
@@ -33,7 +33,7 @@ public class StartMenu extends InputListener {
         paperImage.dispose();
         gameButton.dispose();
         loadButton.dispose();
-        exitButton.dispose();
+        moreButton.dispose();
     }
 
     public StartMenu() {
@@ -43,8 +43,8 @@ public class StartMenu extends InputListener {
         gameButton = new ScreenButton();
         gameButton.choice = new ImageHandler();
         gameButton.choice.load("ui/button_selected.png");
-        gameButton.background.load("ui/button_default.png");
-        gameButton.screen.blit(gameButton.background);
+        gameButton.selectedBoxImage.load("ui/button_default.png");
+        gameButton.screen.blit(gameButton.selectedBoxImage);
         gameButton.setPosition(MainEngine.getInstance().renderWidth / 2 - gameButton.getWidth() / 2, 128);
         gameButton.font.load("jumpjack.ttf");
         gameButton.textY = 19;
@@ -55,24 +55,24 @@ public class StartMenu extends InputListener {
         loadButton = new ScreenButton();
         loadButton.choice = new ImageHandler();
         loadButton.choice.load("ui/button_selected.png");
-        loadButton.background.load("ui/button_default.png");
-        loadButton.screen.blit(loadButton.background);
+        loadButton.selectedBoxImage.load("ui/button_default.png");
+        loadButton.screen.blit(loadButton.selectedBoxImage);
         loadButton.setPosition(MainEngine.getInstance().renderWidth / 2 - loadButton.getWidth() / 2, 98);
         loadButton.font = gameButton.font;
         loadButton.textY = 19;
         loadButton.textX = 74;
         loadButton.message = "hadpshja";
 
-        exitButton = new ScreenButton();
-        exitButton.choice = new ImageHandler();
-        exitButton.choice.load("ui/button_selected.png");
-        exitButton.background.load("ui/button_default.png");
-        exitButton.screen.blit(exitButton.background);
-        exitButton.setPosition(MainEngine.getInstance().renderWidth / 2 - exitButton.getWidth() / 2, 68);
-        exitButton.font = gameButton.font;
-        exitButton.textY = 19;
-        exitButton.textX = 74;
-        exitButton.message = "n acrnpf";
+        moreButton = new ScreenButton();
+        moreButton.choice = new ImageHandler();
+        moreButton.choice.load("ui/button_selected.png");
+        moreButton.selectedBoxImage.load("ui/button_default.png");
+        moreButton.screen.blit(moreButton.selectedBoxImage);
+        moreButton.setPosition(MainEngine.getInstance().renderWidth / 2 - moreButton.getWidth() / 2, 68);
+        moreButton.font = gameButton.font;
+        moreButton.textY = 19;
+        moreButton.textX = 74;
+        moreButton.message = "n acrnpf";
 
         paperImage = new ImageHandler();
         paperImage.load("ui/paper.png");
@@ -92,8 +92,8 @@ public class StartMenu extends InputListener {
         spriteWindow.begin();
         sprite.draw(spriteWindow);
         spriteWindow.end();
-        gameButton.show(viewport);
-        loadButton.show(viewport);
-        exitButton.show(viewport);
+        gameButton.draw(viewport);
+        loadButton.draw(viewport);
+        moreButton.draw(viewport);
     }
 }

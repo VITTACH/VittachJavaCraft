@@ -12,12 +12,13 @@ public class MyTimer implements Serializable {
         startTime = System.currentTimeMillis();
     }
 
-    public boolean isActive() {
+    public boolean isActive(TimerListener timerListener) {
         if (endTime > 0) {
             if ((currentTime = System.currentTimeMillis() - startTime) < endTime) {
                 return true;
             } else {
-                stop();
+                timerListener.onTimerStopped();
+                reset();
             }
         }
         return false;
@@ -27,7 +28,7 @@ public class MyTimer implements Serializable {
         return (endTime == 0) ? 0 : currentTime / 1000f;
     }
 
-    public void stop() {
+    public void reset() {
         endTime = 0;
     }
 }

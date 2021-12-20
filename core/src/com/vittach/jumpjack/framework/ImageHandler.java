@@ -22,8 +22,8 @@ public class ImageHandler {
     }
 
     public ImageHandler() {
-        int renderWidth = (int) MainEngine.getInstance().renderWidth;
-        int renderHeight = (int) MainEngine.getInstance().renderHeight;
+        int renderWidth = MainEngine.getInstance().renderWidth;
+        int renderHeight = MainEngine.getInstance().renderHeight;
         frameBuffer = new FrameBuffer(Format.RGBA4444, renderWidth, renderHeight, true);
         setCamera(renderWidth, renderHeight);
     }
@@ -52,12 +52,11 @@ public class ImageHandler {
             sprite.setPosition(x, y);
             sprite.rotate(img.rotationAngle);
             sprite.flip(false, true);
-            sprite.draw(spriteBatch);
         } else {
             sprite = img.render();
             sprite.setPosition(x, y);
-            sprite.draw(spriteBatch);
         }
+        sprite.draw(spriteBatch);
         spriteBatch.end();
         frameBuffer.end();
     }

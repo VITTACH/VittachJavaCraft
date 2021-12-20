@@ -7,29 +7,33 @@ import com.vittach.jumpjack.Preferences;
 
 public class GamePlay implements GameScreen {
     private final MainEngine engineInstance = MainEngine.getInstance();
-    private final Preferences prefInstance = Preferences.getInstance();
+    private final Preferences preferencesInstance = Preferences.getInstance();
 
     public void display(Viewport view) {
+        engineInstance.fpController.handleInput();
+        engineInstance.rightStick.handleInput();
+        engineInstance.leftStick.handleInput();
+
         engineInstance.mainScreen.display(view);
-        engineInstance.inventoryBtn.display(view);
+        engineInstance.rightStick.display(view);
+        engineInstance.leftStick.display(view);
+        engineInstance.boxBtn.display(view);
 
         listenInput();
     }
 
     private void listenInput() {
-        if (!engineInstance.fpController.pressedKeys.contains(Input.Keys.ESCAPE)) {
-            return;
-        }
+        if (!engineInstance.fpController.pressedKeys.contains(Input.Keys.ESCAPE)) return;
 
-        prefInstance.inputListener.cleanProcesses();
+        preferencesInstance.inputListener.cleanProcesses();
 
-        prefInstance.inputListener.addListener(engineInstance.pauseMenu.saveButton);
-        prefInstance.inputListener.addListener(engineInstance.pauseMenu.exitButton);
-        prefInstance.inputListener.addListener(engineInstance.pauseMenu.loadButton);
-        prefInstance.inputListener.addListener(engineInstance.pauseMenu.playButton);
-        prefInstance.inputListener.addListener(engineInstance.pauseMenu);
+        preferencesInstance.inputListener.addListener(engineInstance.pauseMenu.saveButton);
+        preferencesInstance.inputListener.addListener(engineInstance.pauseMenu.exitButton);
+        preferencesInstance.inputListener.addListener(engineInstance.pauseMenu.loadButton);
+        preferencesInstance.inputListener.addListener(engineInstance.pauseMenu.playButton);
+        preferencesInstance.inputListener.addListener(engineInstance.pauseMenu);
 
         engineInstance.fpController.pressedKeys.clear();
-        engineInstance.currentScreen = 1;
+        engineInstance.currentScreen = MainEngine.Screen.GAME_STOP;
     }
 }

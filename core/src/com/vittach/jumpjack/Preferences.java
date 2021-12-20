@@ -9,7 +9,7 @@ import java.util.HashSet;
 public class Preferences {
     public PlayerMusic playerMusic = new PlayerMusic();
     public InputListener inputListener = new InputListener();
-    public HashSet<Integer> usedInputIdMap = new HashSet<Integer>();
+    public HashSet<Integer> inputIdMap = new HashSet<Integer>();
 
     public int screenWidth = Gdx.graphics.getWidth();
     public int screenHeight = Gdx.graphics.getHeight();
@@ -27,7 +27,8 @@ public class Preferences {
         this.displayHeight = displayHeight;
     }
 
-    private Preferences() { }
+    private Preferences() {
+    }
 
     private static Preferences instance;
 

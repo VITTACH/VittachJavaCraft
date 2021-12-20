@@ -5,8 +5,8 @@ import com.vittach.jumpjack.MainEngine;
 import com.vittach.jumpjack.Preferences;
 
 public class WorldConstructor implements GameScreen {
-    private MainEngine engineInstance = MainEngine.getInstance();
-    private Preferences prefInstance = Preferences.getInstance();
+    private final MainEngine engineInstance = MainEngine.getInstance();
+    private final Preferences preferenceInstance = Preferences.getInstance();
 
     public void display(Viewport view) {
         engineInstance.worldCreator.display(view);
@@ -16,24 +16,26 @@ public class WorldConstructor implements GameScreen {
 
     private void listenInput() {
         if (engineInstance.worldCreator.pressedKey < 0) return;
-        prefInstance.inputListener.cleanProcesses();
+
+        preferenceInstance.inputListener.cleanProcesses();
+
         switch (engineInstance.worldCreator.pressedKey) {
             case 1:
                 engineInstance.mainScreen.genWorld();
+                preferenceInstance.inputListener.addListener(engineInstance.boxBtn);
+                preferenceInstance.inputListener.addListener(engineInstance.leftStick);
+                preferenceInstance.inputListener.addListener(engineInstance.rightStick);
+                preferenceInstance.inputListener.addListener(engineInstance.fpController);
 
-                prefInstance.inputListener.addListener(engineInstance.inventoryBtn);
-                prefInstance.inputListener.addListener(engineInstance.fpController);
-
-                engineInstance.currentScreen = 0;
+                engineInstance.currentScreen = MainEngine.Screen.GAME_PLAY;
                 break;
-
             case 2:
-                prefInstance.inputListener.addListener(engineInstance.startMenu.gameButton);
-                prefInstance.inputListener.addListener(engineInstance.startMenu.loadButton);
-                prefInstance.inputListener.addListener(engineInstance.startMenu.exitButton);
-                prefInstance.inputListener.addListener(engineInstance.startMenu);
+                preferenceInstance.inputListener.addListener(engineInstance.startMenu.gameButton);
+                preferenceInstance.inputListener.addListener(engineInstance.startMenu.loadButton);
+                preferenceInstance.inputListener.addListener(engineInstance.startMenu.moreButton);
+                preferenceInstance.inputListener.addListener(engineInstance.startMenu);
 
-                engineInstance.currentScreen = 2;
+                engineInstance.currentScreen = MainEngine.Screen.GAME_MAIN_SCREEN;
                 break;
         }
 

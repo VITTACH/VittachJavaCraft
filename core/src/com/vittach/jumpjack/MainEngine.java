@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.vittach.jumpjack.ui.buttons.JoystickController;
 import com.vittach.jumpjack.ui.screen.WorldConstructor;
 import com.vittach.jumpjack.ui.buttons.BoxButton;
 import com.vittach.jumpjack.ui.screen.GameScreen;
@@ -20,35 +21,40 @@ import com.vittach.jumpjack.ui.screen.menu.MainMenu;
 import com.vittach.jumpjack.ui.screen.menu.PauseMenu;
 import com.vittach.jumpjack.ui.screen.menu.StartMenu;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import static com.badlogic.gdx.Gdx.graphics;
 
 public class MainEngine extends ApplicationAdapter {
-    enum Screen {
-        GAME_STOP, GAME_PLAY, GAME_MAIN_SCREEN
+    public enum Screen {
+        GAME_PLAY, GAME_STOP, GAME_MAIN_SCREEN, WORLD_CONSTRUCT, LOAD_SAVE
     }
 
-    public int currentScreen = 2;
+    private static MainEngine engineInstance;
+
+    public Screen currentScreen = Screen.GAME_MAIN_SCREEN;
     public int renderWidth = 480;
     public int renderHeight = 272;
-    private int deviceId;
 
     public FirstPersonController fpController;
     public MainScreen mainScreen;
 
+    public JoystickController leftStick;
+    public JoystickController rightStick;
+
     public PauseMenu pauseMenu;
-    public BoxButton inventoryBtn;
+    public BoxButton boxBtn;
     public FileMenu fileMenu;
-    public com.vittach.jumpjack.ui.screen.WorldCreator worldCreator;
+    public WorldCreator worldCreator;
     public StartMenu startMenu;
+
+    private final int deviceId;
+
+    private HashMap<Screen, GameScreen> gameScreenMap;
+    private Preferences preferenceInstance;
 
     private Viewport viewport;
     private OrthographicCamera orthographicCamera;
-
-    private ArrayList<GameScreen> gameState;
-    private static MainEngine engineInstance;
-    private Preferences prefsInstance;
 
     private MainEngine(int deviceId) {
         this.deviceId = deviceId;
@@ -69,7 +75,7 @@ public class MainEngine extends ApplicationAdapter {
     public void dispose() {
         pauseMenu.dispose();
         mainScreen.dispose();
-        inventoryBtn.dispose();
+        boxBtn.dispose();
         worldCreator.dispose();
         fileMenu.dispose();
         startMenu.dispose();
@@ -80,51 +86,57 @@ public class MainEngine extends ApplicationAdapter {
         orthographicCamera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
 
         viewport.update(width, height);
-        prefsInstance.setWidth(viewport.getScreenWidth(), width);
-        prefsInstance.setHeight(viewport.getScreenHeight(), height);
+        preferenceInstance.setWidth(viewport.getScreenWidth(), width);
+        preferenceInstance.setHeight(viewport.getScreenHeight(), height);
         orthographicCamera.update();
+
+        leftStick.setJoystickPosition();
+        rightStick.setJoystickPosition();
     }
 
     @Override
     public void render() {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        gameState.get(currentScreen).display(viewport);
+        gameScreenMap.get(currentScreen).display(viewport);
     }
 
     @Override
     public void create() {
         startMenu = new StartMenu();
 
-        prefsInstance = Preferences.getInstance();
+        preferenceInstance = Preferences.getInstance();
 
-        prefsInstance.inputListener.addListener(startMenu);
-        prefsInstance.inputListener.addListener(startMenu.gameButton);
-        prefsInstance.inputListener.addListener(startMenu.loadButton);
-        prefsInstance.inputListener.addListener(startMenu.exitButton);
+        preferenceInstance.inputListener.addListener(startMenu);
+        preferenceInstance.inputListener.addListener(startMenu.gameButton);
+        preferenceInstance.inputListener.addListener(startMenu.loadButton);
+        preferenceInstance.inputListener.addListener(startMenu.moreButton);
 
-        prefsInstance.playerMusic.load("1.ogg");
-        prefsInstance.playerMusic.setLoop(true);
-        prefsInstance.playerMusic.setVolume(1f);
-        prefsInstance.playerMusic.play();
+        preferenceInstance.playerMusic.load("1.ogg");
+        preferenceInstance.playerMusic.setLoop(true);
+        preferenceInstance.playerMusic.setVolume(1f);
+        preferenceInstance.playerMusic.play();
 
-        gameState = new ArrayList<GameScreen>() {{
-            add(new GamePlay());
-            add(new GameStop());
-            add(new MainMenu());
-            add(new WorldConstructor());
-            add(new LoadSave());
+        gameScreenMap = new HashMap<Screen, GameScreen>() {{
+            put(Screen.GAME_PLAY, new GamePlay());
+            put(Screen.GAME_STOP, new GameStop());
+            put(Screen.GAME_MAIN_SCREEN, new MainMenu());
+            put(Screen.WORLD_CONSTRUCT, new WorldConstructor());
+            put(Screen.LOAD_SAVE, new LoadSave());
         }};
 
         fpController = new FirstPersonController(deviceId);
 
-        mainScreen = new MainScreen();
+        leftStick = new JoystickController(JoystickController.Stick.LEFT);
+        rightStick = new JoystickController(JoystickController.Stick.RIGHT);
+
         fileMenu = new FileMenu();
+        mainScreen = new MainScreen();
         worldCreator = new WorldCreator();
         pauseMenu = new PauseMenu();
 
-        inventoryBtn = new BoxButton();
-        inventoryBtn.setPosition(renderWidth - inventoryBtn.getWidth(), renderHeight - inventoryBtn.getHeight());
+        boxBtn = new BoxButton();
+        boxBtn.setPosition(renderWidth - boxBtn.getWidth(), renderHeight - boxBtn.getHeight());
 
         orthographicCamera = new OrthographicCamera();
         orthographicCamera.setToOrtho(false, graphics.getWidth(), graphics.getHeight());
@@ -132,6 +144,6 @@ public class MainEngine extends ApplicationAdapter {
 
         viewport = new FitViewport(renderWidth, renderHeight, orthographicCamera);
 
-        Gdx.input.setInputProcessor(prefsInstance.inputListener);
+        Gdx.input.setInputProcessor(preferenceInstance.inputListener);
     }
 }

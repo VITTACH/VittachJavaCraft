@@ -2,12 +2,12 @@ package com.vittach.jumpjack.ui.screen.menu;
 
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.MainEngine;
-import com.vittach.jumpjack.ui.screen.GameScreen;
 import com.vittach.jumpjack.Preferences;
+import com.vittach.jumpjack.ui.screen.GameScreen;
 
 public class MainMenu implements GameScreen {
     private final MainEngine engineInstance = MainEngine.getInstance();
-    private final Preferences prefInstance = Preferences.getInstance();
+    private final Preferences preferencesInstance = Preferences.getInstance();
 
     public void display(Viewport view) {
         engineInstance.startMenu.display(view);
@@ -17,25 +17,25 @@ public class MainMenu implements GameScreen {
 
     private void listenInput() {
         if (engineInstance.startMenu.pressedKey < 0) return;
-        prefInstance.inputListener.cleanProcesses();
+        preferencesInstance.inputListener.cleanProcesses();
         switch (engineInstance.startMenu.pressedKey) {
             case 2:
-                prefInstance.inputListener.addListener(engineInstance.fileMenu.backButton);
-                prefInstance.inputListener.addListener(engineInstance.fileMenu.loadButton);
-                prefInstance.inputListener.addListener(engineInstance.fileMenu.sartButton);
-                prefInstance.inputListener.addListener(engineInstance.fileMenu);
+                preferencesInstance.inputListener.addListener(engineInstance.fileMenu.backButton);
+                preferencesInstance.inputListener.addListener(engineInstance.fileMenu.loadButton);
+                preferencesInstance.inputListener.addListener(engineInstance.fileMenu.startButton);
+                preferencesInstance.inputListener.addListener(engineInstance.fileMenu);
                 engineInstance.fileMenu.updateDir();
                 engineInstance.fileMenu.getCurDir();
 
-                engineInstance.currentScreen = 4;
+                engineInstance.currentScreen = MainEngine.Screen.LOAD_SAVE;
                 break;
 
             case 1:
-                prefInstance.inputListener.addListener(engineInstance.worldCreator.sartButton);
-                prefInstance.inputListener.addListener(engineInstance.worldCreator.backButton);
-                prefInstance.inputListener.addListener(engineInstance.worldCreator);
+                preferencesInstance.inputListener.addListener(engineInstance.worldCreator.sartButton);
+                preferencesInstance.inputListener.addListener(engineInstance.worldCreator.backButton);
+                preferencesInstance.inputListener.addListener(engineInstance.worldCreator);
 
-                engineInstance.currentScreen = 3;
+                engineInstance.currentScreen = MainEngine.Screen.WORLD_CONSTRUCT;
                 break;
         }
 

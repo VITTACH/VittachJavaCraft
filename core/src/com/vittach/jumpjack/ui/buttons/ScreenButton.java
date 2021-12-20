@@ -22,13 +22,13 @@ public class ScreenButton extends InputListener {
     public int textX;
     public int textY;
     public ColorImpl color = new ColorImpl(1, 1, 1);
-    public ImageHandler background = new ImageHandler();
+    public ImageHandler selectedBoxImage = new ImageHandler();
     public ImageHandler screen = new ImageHandler();
     public ImageHandler choice;
     public float x;
     public float y;
     
-    private final Preferences prefInstance = Preferences.getInstance();
+    private final Preferences preferenceInstance = Preferences.getInstance();
     private final MainEngine engineInstance = MainEngine.getInstance();
 
     @Override
@@ -42,7 +42,7 @@ public class ScreenButton extends InputListener {
                 }
             } else if (!hasBackground) {
                 screen.clear();
-                screen.blit(background);
+                screen.blit(selectedBoxImage);
                 hasBackground = true;
             }
         }
@@ -50,34 +50,34 @@ public class ScreenButton extends InputListener {
     }
 
     @Override
-    public boolean touchDragged(int xPosition, int yPosition, int pointer) {
-        mouseMoved(xPosition, yPosition);
+    public boolean touchDragged(int x, int y, int pointer) {
+        mouseMoved(x, y);
         return true;
     }
 
-    public boolean touchDown(int xPosition, int yPosition) {
-        return touchDown(xPosition, yPosition, 0);
+    public boolean touchDown(int x, int y) {
+        return touchDown(x, y, 0);
     }
 
-    public boolean touchDown(int xPosition, int yPosition, int id) {
+    public boolean touchDown(int x, int y, int id) {
         if (choice != null && !hasBackground && id >= 0) {
             screen.clear();
-            screen.blit(background);
+            screen.blit(selectedBoxImage);
             hasBackground = true;
         }
 
-        float scaleX = prefInstance.screenWidth / engineInstance.renderWidth;
-        float scaleY = prefInstance.screenHeight / engineInstance.renderHeight;
-        xPosition -= (prefInstance.displayWidth - prefInstance.screenWidth) / 2;
-        yPosition -= (prefInstance.displayHeight - prefInstance.screenHeight) / 2;
+        float scaleX = preferenceInstance.screenWidth / (float) engineInstance.renderWidth;
+        float scaleY = preferenceInstance.screenHeight / (float) engineInstance.renderHeight;
+        x -= (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
+        y -= (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
 
-        return xPosition >= x * scaleX
-                && xPosition <= x * scaleX + background.getWidth() * scaleX
-                && yPosition >= (prefInstance.screenHeight - y * scaleY) - background.getHeight() * scaleY
-                && yPosition <= (prefInstance.screenHeight - y * scaleY);
+        return x >= this.x * scaleX
+                && x <= this.x * scaleX + selectedBoxImage.getWidth() * scaleX
+                && y >= (preferenceInstance.screenHeight - this.y * scaleY) - selectedBoxImage.getHeight() * scaleY
+                && y <= (preferenceInstance.screenHeight - this.y * scaleY);
     }
 
-    public void show(Viewport viewport) {
+    public void draw(Viewport viewport) {
         if (message != null) {
             screen.fontPrint(font, textX, textY, message, color);
         }
@@ -99,16 +99,16 @@ public class ScreenButton extends InputListener {
     }
 
     public int getWidth() {
-        return background.getWidth();
+        return selectedBoxImage.getWidth();
     }
 
     public int getHeight() {
-        return background.getHeight();
+        return selectedBoxImage.getHeight();
     }
 
     public void dispose() {
         spriteBatch.dispose();
-        background.dispose();
+        selectedBoxImage.dispose();
         screen.dispose();
     }
 }
