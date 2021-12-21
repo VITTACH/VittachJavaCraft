@@ -18,7 +18,7 @@ public class MyTimer implements Serializable {
                 return true;
             } else {
                 timerListener.onTimerStopped();
-                reset();
+                finish();
             }
         }
         return false;
@@ -28,7 +28,7 @@ public class MyTimer implements Serializable {
         return (endTime == 0) ? 0 : currentTime / 1000f;
     }
 
-    public void reset() {
+    public void finish() {
         endTime = 0;
     }
 }

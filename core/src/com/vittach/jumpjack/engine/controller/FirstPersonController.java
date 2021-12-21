@@ -10,15 +10,6 @@ import com.vittach.jumpjack.Preferences;
 import java.util.HashSet;
 
 public class FirstPersonController implements ProcessorInput {
-    private final float MOVE_VELOCITY = 0.1f;
-    private final float FAST_VELOCITY = 1.0f;
-    private final Preferences preferencesInstance = Preferences.getInstance();
-
-    private int deviceId;
-    private int idOffset = 0;
-    private int health = 100;
-    private final PerspectiveCamera camera;
-
     private static final int FLY = Input.Keys.F;
     private static final int LEFT = Input.Keys.A;
     private static final int RIGHT = Input.Keys.D;
@@ -27,22 +18,31 @@ public class FirstPersonController implements ProcessorInput {
     private static final int DOWN = Input.Keys.SPACE;
     private static final int JUMP = Input.Keys.ALT_LEFT;
     private static final int RUN = Input.Keys.SHIFT_LEFT;
-
     private static final int ESCAPE = Input.Keys.ESCAPE;
+
+    private final float MOVE_VELOCITY = 0.1f;
+    private final float FAST_VELOCITY = 1.0f;
+    private final MainEngine engineInstance = MainEngine.getInstance();
+    private final Preferences preferenceInstance = Preferences.getInstance();
+
+    private int deviceId;
+    private int idOffset = 0;
+    private int health = 100;
+    private final PerspectiveCamera camera;
 
     private float velocity = MOVE_VELOCITY;
     private float cameraNewDelta;
 
     public int viewDistance = 64;
 
-    public HashSet<Integer> pressedKeys;
+    public HashSet<Integer> keySet;
 
     public FirstPersonController(int deviceId) {
         this.deviceId = deviceId;
 
-        camera = new PerspectiveCamera(67, MainEngine.getInstance().renderWidth, MainEngine.getInstance().renderHeight);
+        camera = new PerspectiveCamera(67, engineInstance.renderWidth, engineInstance.renderHeight);
 
-        pressedKeys = new HashSet<Integer>();
+        keySet = new HashSet<Integer>();
 
         float[] position = new float[]{0, 0, 0};
 
@@ -53,7 +53,7 @@ public class FirstPersonController implements ProcessorInput {
     }
 
     @Override
-    public void setIDOffset(int idOffset) {
+    public void setIdOffset(int idOffset) {
         this.idOffset = idOffset;
     }
 
@@ -64,12 +64,12 @@ public class FirstPersonController implements ProcessorInput {
 
     @Override
     public boolean keyDown(int code) {
-        if (code == FLY && pressedKeys.contains(FLY)) {
-            pressedKeys.remove(code);
+        if (code == FLY && keySet.contains(FLY)) {
+            keySet.remove(code);
             return true;
         }
 
-        return pressedKeys.add(code);
+        return keySet.add(code);
     }
 
     @Override
@@ -84,53 +84,33 @@ public class FirstPersonController implements ProcessorInput {
         } else if (code == FLY) {
             return true;
         }
-        return pressedKeys.remove(code);
+        return keySet.remove(code);
     }
 
     @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        float verticalSense = 1;
-        float cameraDelta = -Gdx.input.getDeltaY() * verticalSense;
-        Vector3 right = new Vector3().set(camera.direction).crs(camera.up);
-
-        if (cameraNewDelta + cameraDelta < 90 && cameraNewDelta + cameraDelta > -90) {
-            camera.rotate(right, cameraDelta);
-            cameraNewDelta += cameraDelta;
-        } else {
-            if (cameraNewDelta + cameraDelta >= 90.0f) {
-                camera.rotate(right, 89.0f - cameraNewDelta);
-                cameraNewDelta = 89f;
-            } else {
-                camera.rotate(right, -90.f - cameraNewDelta);
-                cameraNewDelta = -90;
-            }
-        }
-
-        float horizontalSense = 1;
-        Vector3 up = new Vector3().set(0, 1, 0);
-        camera.rotate(up, -Gdx.input.getDeltaX() * horizontalSense);
-        camera.update();
+    public boolean mouseMoved(int x, int y) {
+        onMouseMoved(x, y);
         return true;
     }
 
     @Override
-    public boolean touchUp(int x, int y, int pointer, int button) {
-        return preferencesInstance.inputIdMap.remove(pointer + idOffset);
+    public boolean touchUp(int x, int y, int id, int button) {
+        preferenceInstance.inputIdMap.remove(id + idOffset);
+        return true;
     }
 
     @Override
-    public boolean touchDown(int x, int y, int pointer, int button) {
-        boolean screenCornersLeft = x > 0 && x < preferencesInstance.screenWidth / 4f
-                && y > preferencesInstance.screenHeight - preferencesInstance.screenHeight / 4.f
-                && y < preferencesInstance.screenHeight;
+    public boolean touchDown(int x, int y, int id, int button) {
+        float widthPart4 = preferenceInstance.screenWidth / 4f;
+        float heightPart4 = preferenceInstance.screenHeight / 4f;
 
-        boolean screenCornersRight = x > preferencesInstance.screenWidth - preferencesInstance.screenWidth / 4f
-                && x < preferencesInstance.screenWidth
-                && y > preferencesInstance.screenHeight - preferencesInstance.screenHeight / 4.f
-                && y < preferencesInstance.screenHeight;
+        boolean isInLeftArea = x > 0 && x < widthPart4 && y > preferenceInstance.screenHeight - heightPart4
+            && y < preferenceInstance.screenHeight;
+        boolean isInRightArea = x > preferenceInstance.screenWidth - widthPart4 && x < preferenceInstance.screenWidth
+            && y > preferenceInstance.screenHeight - heightPart4 && y < preferenceInstance.screenHeight;
 
-        if (!(screenCornersLeft || screenCornersRight) || deviceId == 0) {
-            preferencesInstance.inputIdMap.add(pointer + idOffset);
+        if (!(isInLeftArea || isInRightArea) || deviceId == 0) {
+            preferenceInstance.inputIdMap.add(id + idOffset);
 
             if (button == Input.Buttons.LEFT) {
                 deleteCube();
@@ -143,10 +123,9 @@ public class FirstPersonController implements ProcessorInput {
     }
 
     @Override
-    public boolean touchDragged(int x, int y, int pointer) {
-        if (preferencesInstance.inputIdMap.contains(pointer + idOffset)) {
-            mouseMoved(x, y);
-        }
+    public boolean touchDragged(int x, int y, int id) {
+        if (!preferenceInstance.inputIdMap.contains(id + idOffset)) return true;
+        onMouseMoved(x, y);
         return true;
     }
 
@@ -167,39 +146,35 @@ public class FirstPersonController implements ProcessorInput {
 
     public void handleInput() {
         Vector3 move = new Vector3();
-        Vector3 normal = new Vector3();
+        Vector3 up = new Vector3();
 
-        if (pressedKeys.contains(FLY)) {
-            if (pressedKeys.contains(DOWN)) move.add(normal.set(0, 1, 0).scl(-velocity));
-            else if (pressedKeys.contains(JUMP)) move.add(normal.set(0, 1, 0).scl(velocity));
+        if (keySet.contains(LEFT)) {
+            move.add(up.set(camera.direction.x, 0, camera.direction.z).setLength2(1).crs(0, 1, 0).scl(-velocity));
+        } else if (keySet.contains(RIGHT)) {
+            move.add(up.set(camera.direction.x, 0, camera.direction.z).setLength2(1).crs(0, 1, 0).scl(velocity));
         }
 
-        if (pressedKeys.contains(FORWARD)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1).scl(velocity));
-        } else if (pressedKeys.contains(BACK)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z).setLength2(1).scl(-velocity));
+        if (keySet.contains(RUN)) {
+            velocity = FAST_VELOCITY;
         }
 
-        if (pressedKeys.contains(RUN)) velocity = FAST_VELOCITY;
-
-        if (pressedKeys.contains(LEFT)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                    .setLength2(1)
-                    .crs(0, 1, 0)
-                    .scl(-velocity)
-            );
-        } else if (pressedKeys.contains(RIGHT)) {
-            move.add(normal.set(camera.direction.x, 0, camera.direction.z)
-                    .setLength2(1)
-                    .crs(0, 1, 0)
-                    .scl(velocity)
-            );
+        if (keySet.contains(FLY)) {
+            if (keySet.contains(DOWN)) {
+                move.add(up.set(0, 1, 0).scl(-velocity));
+            } else if (keySet.contains(JUMP)) {
+                move.add(up.set(0, 1, 0).scl(velocity));
+            }
         }
 
         // движение перса по диагонали
-        if ((pressedKeys.contains(RIGHT) || pressedKeys.contains(LEFT))
-                && (pressedKeys.contains(BACK) || pressedKeys.contains(FORWARD))) {
+        if ((keySet.contains(RIGHT) || keySet.contains(LEFT)) && (keySet.contains(BACK) || keySet.contains(FORWARD))) {
             move.setLength2(1).scl(velocity);
+        }
+
+        if (keySet.contains(FORWARD)) {
+            move.add(up.set(camera.direction.x, 0, camera.direction.z).setLength2(1).scl(velocity));
+        } else if (keySet.contains(BACK)) {
+            move.add(up.set(camera.direction.x, 0, camera.direction.z).setLength2(1).scl(-velocity));
         }
 
         camera.translate(move);
@@ -249,6 +224,30 @@ public class FirstPersonController implements ProcessorInput {
     public void onRun(Boolean isPressed) {
         if (isPressed) keyDown(RUN);
         else keyUp(RUN);
+    }
+
+    private void onMouseMoved(int x, int y) {
+        float verticalSense = 1;
+        float cameraDelta = -Gdx.input.getDeltaY() * verticalSense;
+        Vector3 right = new Vector3().set(camera.direction).crs(camera.up);
+
+        if (cameraNewDelta + cameraDelta < 90 && cameraNewDelta + cameraDelta > -90) {
+            camera.rotate(right, cameraDelta);
+            cameraNewDelta += cameraDelta;
+        } else {
+            if (cameraNewDelta + cameraDelta >= 90.0f) {
+                camera.rotate(right, 89.0f - cameraNewDelta);
+                cameraNewDelta = 89f;
+            } else {
+                camera.rotate(right, -90.f - cameraNewDelta);
+                cameraNewDelta = -90;
+            }
+        }
+
+        float horizontalSense = 1;
+        Vector3 up = new Vector3().set(0, 1, 0);
+        camera.rotate(up, -Gdx.input.getDeltaX() * horizontalSense);
+        camera.update();
     }
 
     private void detectCube() {

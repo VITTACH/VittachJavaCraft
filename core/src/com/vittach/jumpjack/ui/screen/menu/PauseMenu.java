@@ -137,14 +137,14 @@ public class PauseMenu extends InputListener {
     }
 
     @Override
-    public boolean keyUp(int id) {
+    public boolean keyUp(int keyCode) {
         pressedKey = -1;
         return true;
     }
 
     @Override
-    public boolean keyDown(int id) {
-        pressedKey = id;
+    public boolean keyDown(int keyCode) {
+        pressedKey = keyCode;
         return true;
     }
 
@@ -159,18 +159,18 @@ public class PauseMenu extends InputListener {
         for (int i = 0; i < columns; i++)
             for (int j = 0; j < rows; j++)
                 if (x > preferenceInstance.screenWidth / 2f + (i - columns / 2) * scaleX
-                        && x <= preferenceInstance.screenWidth / 2f + (i - columns / 2) * scaleX + scaleX
-                        && y > preferenceInstance.screenHeight / 2f + (j - rows / 2) * scaleY
-                        && y <= preferenceInstance.screenHeight / 2f + (j - rows / 2) * scaleY + scaleY) {
+                    && x <= preferenceInstance.screenWidth / 2f + (i - columns / 2) * scaleX + scaleX
+                    && y > preferenceInstance.screenHeight / 2f + (j - rows / 2) * scaleY
+                    && y <= preferenceInstance.screenHeight / 2f + (j - rows / 2) * scaleY + scaleY) {
                     isChecked = true;
 
                     if (oldColumn != i || oldRow != j) {
                         screen.clear();
                         screen.blit(backgroundImage);
                         screen.blit(
-                                width + (i - columns / 2) * cellBoxImage.getWidth(),
-                                height + (j - rows / 2) * cellBoxImage.getHeight(),
-                                cellSelectImage
+                            width + (i - columns / 2) * cellBoxImage.getWidth(),
+                            height + (j - rows / 2) * cellBoxImage.getHeight(),
+                            cellSelectImage
                         );
                         oldColumn = i;
                         oldRow = j;
@@ -184,7 +184,7 @@ public class PauseMenu extends InputListener {
     }
 
     @Override
-    public boolean touchDragged(int x, int y, int pointer) {
+    public boolean touchDragged(int x, int y, int id) {
         return mouseMoved(x, y);
     }
 

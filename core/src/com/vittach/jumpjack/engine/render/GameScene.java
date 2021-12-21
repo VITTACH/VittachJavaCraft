@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.badlogic.gdx.Gdx.graphics;
 
-public class MainScreen {
+public class GameScene {
     private final Mesh cubeMesh;
     private final ModelBatch modelBatch;
     private final ShaderProgram shaderProgram;
@@ -58,7 +58,7 @@ public class MainScreen {
         cubeChunkMap.clear();
     }
 
-    public MainScreen() {
+    public GameScene() {
         backgroundShape.setColor(0.2f, 0.3f, 0.43f, 1);
         camPosition = new Vector3(0, 0, 0);
         setTextures(Gdx.files.internal("sprites/cubesSprite.png"));
@@ -72,9 +72,9 @@ public class MainScreen {
         });
 
         VertexAttributes attributes = new VertexAttributes(
-                new VertexAttribute(Usage.Position, 3, "a_position"),
-                new VertexAttribute(Usage.Normal, 3, "a_normal"),
-                new VertexAttribute(Usage.TextureCoordinates, 2, "a_texCoord0")
+            new VertexAttribute(Usage.Position, 3, "a_position"),
+            new VertexAttribute(Usage.Normal, 3, "a_normal"),
+            new VertexAttribute(Usage.TextureCoordinates, 2, "a_texCoord0")
         );
 
         MeshBuilder cubeBuilder = new MeshBuilder();
@@ -128,14 +128,14 @@ public class MainScreen {
         backgroundShape.rect(0, 0, graphics.getWidth(), graphics.getHeight());
         backgroundShape.end();
 
-        renderScene(cubeChunkMap, modelInstanceObjMap, textureMap);
+        render(cubeChunkMap, modelInstanceObjMap, textureMap);
     }
 
     public ShaderProgram setupShader(final String prefix) {
         ShaderProgram.pedantic = false;
         final ShaderProgram shaderProgram = new ShaderProgram(
-                Gdx.files.internal("shaders/" + prefix + "_v.glsl"),
-                Gdx.files.internal("shaders/" + prefix + "_f.glsl")
+            Gdx.files.internal("shaders/" + prefix + "_v.glsl"),
+            Gdx.files.internal("shaders/" + prefix + "_f.glsl")
         );
 
         if (!shaderProgram.isCompiled()) {
@@ -188,10 +188,10 @@ public class MainScreen {
         }
     }
 
-    private void renderScene(
-            Map<Vector3, Chunk> chunkMap,
-            Map<Vector3, ModelInstanceObj> modelInstanceObjMap,
-            Map<String, List<TextureRegion>> textureMap
+    private void render(
+        Map<Vector3, Chunk> chunkMap,
+        Map<Vector3, ModelInstanceObj> modelInstanceObjMap,
+        Map<String, List<TextureRegion>> textureMap
     ) {
         PerspectiveCamera fpCamera = engineInstance.fpController.getFpCamera();
         camPosition = fpCamera.position;
@@ -201,8 +201,8 @@ public class MainScreen {
             chunkTrans = chunkTrans.setToTranslation(position);
 
             if (Math.abs(camPosition.x - position.x) > distance
-                    || Math.abs(camPosition.z - position.z) > distance
-                    || Math.abs(camPosition.y - position.y) > distance) {
+                || Math.abs(camPosition.z - position.z) > distance
+                || Math.abs(camPosition.y - position.y) > distance) {
                 continue;
             }
 

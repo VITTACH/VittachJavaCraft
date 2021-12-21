@@ -4,9 +4,9 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.framework.ImageHandler;
 import com.vittach.jumpjack.ui.InputListener;
 import com.vittach.jumpjack.ui.buttons.ScreenButton;
-import com.vittach.jumpjack.framework.ImageHandler;
 
 public class StartMenu extends InputListener {
     public ScreenButton gameButton;
@@ -15,7 +15,7 @@ public class StartMenu extends InputListener {
 
     public int pressedKey = -1;
     private Sprite sprite;
-    private SpriteBatch spriteWindow;
+    private SpriteBatch spriteBatch;
 
     private ImageHandler background;
     private ImageHandler paperImage;
@@ -29,7 +29,7 @@ public class StartMenu extends InputListener {
 
     public void dispose() {
         background.dispose();
-        spriteWindow.dispose();
+        spriteBatch.dispose();
         paperImage.dispose();
         gameButton.dispose();
         loadButton.dispose();
@@ -78,7 +78,7 @@ public class StartMenu extends InputListener {
         paperImage.load("ui/paper.png");
 
         background = new ImageHandler();
-        spriteWindow = new SpriteBatch();
+        spriteBatch = new SpriteBatch();
         background.load("ui/background.png");
         background.blit(54, 27, paperImage);
         background.blit(120, 164, logoImage);
@@ -88,10 +88,10 @@ public class StartMenu extends InputListener {
 
     public void display(Viewport viewport) {
         viewport.apply();
-        spriteWindow.setProjectionMatrix(viewport.getCamera().combined);
-        spriteWindow.begin();
-        sprite.draw(spriteWindow);
-        spriteWindow.end();
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+        spriteBatch.begin();
+        sprite.draw(spriteBatch);
+        spriteBatch.end();
         gameButton.draw(viewport);
         loadButton.draw(viewport);
         moreButton.draw(viewport);

@@ -1,11 +1,12 @@
 package com.vittach.jumpjack.ui;
 
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.vittach.jumpjack.engine.controller.ProcessorInput;
 
 import java.util.ArrayList;
 
-public class InputListener implements InputProcessor, ProcessorInput {
+public class InputListener extends Stage implements InputProcessor, ProcessorInput {
     private boolean allProcess;
     private int idOffset = 0;
     private ArrayList<ProcessorInput> processes = new ArrayList<ProcessorInput>();
@@ -20,7 +21,7 @@ public class InputListener implements InputProcessor, ProcessorInput {
     }
 
     public void addListener(ProcessorInput processorInput) {
-        processorInput.setIDOffset(idOffset++);
+        processorInput.setIdOffset(idOffset += 10);
         processes.add(processorInput);
     }
 
@@ -28,69 +29,76 @@ public class InputListener implements InputProcessor, ProcessorInput {
         processes.remove(processorInput);
     }
 
-    public void setIDOffset(int idOffset) {
+    public void setIdOffset(int idOffset) {
         this.idOffset = idOffset;
     }
 
     @Override
-    public boolean keyUp(int idKey) {
+    public boolean keyUp(int keyCode) {
+        super.keyUp(keyCode);
         allProcess = true;
         for (ProcessorInput process : processes) {
-            allProcess = allProcess && process.keyUp(idKey);
+            allProcess = allProcess && process.keyUp(keyCode);
         }
         return allProcess;
     }
 
     @Override
-    public boolean keyDown(int idkey) {
+    public boolean keyDown(int keyCode) {
+        super.keyDown(keyCode);
         allProcess = true;
         for (ProcessorInput process : processes) {
-            allProcess = allProcess && process.keyDown(idkey);
+            allProcess = allProcess && process.keyDown(keyCode);
         }
         return allProcess;
     }
 
     @Override
-    public boolean keyTyped(char code) {
+    public boolean keyTyped(char keyCode) {
+        super.keyTyped(keyCode);
         allProcess = true;
         for (ProcessorInput process : processes) {
-            allProcess = allProcess && process.keyTyped(code);
+            allProcess = allProcess && process.keyTyped(keyCode);
         }
         return allProcess;
     }
 
     @Override
-    public boolean mouseMoved(int screenX, int screnY) {
+    public boolean mouseMoved(int x, int y) {
+        super.mouseMoved(x, y);
         allProcess = true;
         for (ProcessorInput process : processes) {
-            allProcess = allProcess && process.mouseMoved(screenX, screnY);
+            allProcess = allProcess && process.mouseMoved(x, y);
         }
         return allProcess;
     }
 
     @Override
-    public boolean touchDragged(int x, int y, int pointer) {
+    public boolean touchDragged(int x, int y, int id) {
+        super.touchDragged(x, y, id);
         allProcess = true;
         for (ProcessorInput process : processes) {
-            allProcess = allProcess && process.touchDragged(x, y, pointer);
+            allProcess = allProcess && process.touchDragged(x, y, id);
         }
         return allProcess;
     }
 
     @Override
-    public boolean touchUp(int x, int y, int pointer, int pid) {
+    public boolean touchUp(int x, int y, int id, int button) {
+        super.touchUp(x, y, id, button);
         allProcess = true;
         for (ProcessorInput process : processes) {
-            allProcess = allProcess && process.touchUp(x, y, pointer, pid);
+            allProcess = allProcess && process.touchUp(x, y, id, button);
         }
         return allProcess;
     }
 
     @Override
-    public boolean touchDown(int x, int y, int pointer, int p) {
+    public boolean touchDown(int x, int y, int id, int button) {
+        super.touchDown(x, y, id, button);
         allProcess = true;
         for (ProcessorInput process : processes) {
-            allProcess = allProcess && process.touchDown(x, y, pointer, p);
+            allProcess = allProcess && process.touchDown(x, y, id, button);
         }
         return allProcess;
     }

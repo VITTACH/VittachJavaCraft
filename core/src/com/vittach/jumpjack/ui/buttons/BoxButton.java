@@ -20,7 +20,7 @@ public class BoxButton extends ScreenButton {
         selectedBoxImage.load("ui/selected_box.png");
     }
 
-    public boolean touchDown(int x, int y, int pointer, int button) {
+    public boolean touchDown(int x, int y, int id, int button) {
         if (touchDown(x, y, button)) {
             engineInstance.fpController.onEscape(true);
         }

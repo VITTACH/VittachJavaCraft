@@ -20,11 +20,11 @@ public class MeshCompressor {
     }
 
     private static boolean hasSurface(
-            List<MeshObj> meshes,
-            Integer i,
-            Integer j,
-            Integer sideLength,
-            Integer chunkLength
+        List<MeshObj> meshes,
+        Integer i,
+        Integer j,
+        Integer sideLength,
+        Integer chunkLength
     ) {
 
         int floorSize = chunkLength * chunkLength;
@@ -59,10 +59,10 @@ public class MeshCompressor {
     }
 
     public static Mesh compressMeshes(
-            List<MeshObj> meshes,
-            Map<String, List<TextureRegion>> textureMap,
-            List<Matrix4> translates,
-            Integer chunkLength
+        List<MeshObj> meshes,
+        Map<String, List<TextureRegion>> textureMap,
+        List<Matrix4> translates,
+        Integer chunkLength
     ) {
         if (meshes == null || meshes.isEmpty()) return null;
 
@@ -119,10 +119,10 @@ public class MeshCompressor {
 
     private static Mesh mergeMesh(List<Float> vertexList, List<Short> indiceList, List<MeshObj> meshes) {
         Mesh mergedMesh = new Mesh(
-                true,
-                vertexList.size(),
-                indiceList.size(),
-                meshes.get(0).getMesh().getVertexAttributes()
+            true,
+            vertexList.size(),
+            indiceList.size(),
+            meshes.get(0).getMesh().getVertexAttributes()
         );
 
         int i = 0;

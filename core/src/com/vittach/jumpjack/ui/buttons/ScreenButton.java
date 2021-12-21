@@ -27,14 +27,14 @@ public class ScreenButton extends InputListener {
     public ImageHandler choice;
     public float x;
     public float y;
-    
+
     private final Preferences preferenceInstance = Preferences.getInstance();
     private final MainEngine engineInstance = MainEngine.getInstance();
 
     @Override
-    public boolean mouseMoved(int screenX, int screenY) {
+    public boolean mouseMoved(int x, int y) {
         if (choice != null) {
-            if (touchDown(screenX, screenY, -1)) {
+            if (touchDown(x, y, -1)) {
                 if (hasBackground) {
                     screen.clear();
                     hasBackground = false;
@@ -50,7 +50,7 @@ public class ScreenButton extends InputListener {
     }
 
     @Override
-    public boolean touchDragged(int x, int y, int pointer) {
+    public boolean touchDragged(int x, int y, int id) {
         mouseMoved(x, y);
         return true;
     }
@@ -72,9 +72,9 @@ public class ScreenButton extends InputListener {
         y -= (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
 
         return x >= this.x * scaleX
-                && x <= this.x * scaleX + selectedBoxImage.getWidth() * scaleX
-                && y >= (preferenceInstance.screenHeight - this.y * scaleY) - selectedBoxImage.getHeight() * scaleY
-                && y <= (preferenceInstance.screenHeight - this.y * scaleY);
+            && x <= this.x * scaleX + selectedBoxImage.getWidth() * scaleX
+            && y >= (preferenceInstance.screenHeight - this.y * scaleY) - selectedBoxImage.getHeight() * scaleY
+            && y <= (preferenceInstance.screenHeight - this.y * scaleY);
     }
 
     public void draw(Viewport viewport) {
@@ -98,11 +98,11 @@ public class ScreenButton extends InputListener {
         this.y = y;
     }
 
-    public int getWidth() {
+    public float getWidth() {
         return selectedBoxImage.getWidth();
     }
 
-    public int getHeight() {
+    public float getHeight() {
         return selectedBoxImage.getHeight();
     }
 

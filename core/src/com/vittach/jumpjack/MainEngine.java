@@ -6,20 +6,16 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.ui.buttons.JoystickController;
-import com.vittach.jumpjack.ui.screen.WorldConstructor;
-import com.vittach.jumpjack.ui.buttons.BoxButton;
-import com.vittach.jumpjack.ui.screen.GameScreen;
 import com.vittach.jumpjack.engine.controller.FirstPersonController;
-import com.vittach.jumpjack.engine.render.MainScreen;
-import com.vittach.jumpjack.ui.screen.GamePlay;
-import com.vittach.jumpjack.ui.screen.GameStop;
-import com.vittach.jumpjack.ui.screen.LoadSave;
-import com.vittach.jumpjack.ui.screen.WorldCreator;
-import com.vittach.jumpjack.ui.screen.menu.FileMenu;
-import com.vittach.jumpjack.ui.screen.menu.MainMenu;
+import com.vittach.jumpjack.engine.render.GameScene;
+import com.vittach.jumpjack.ui.buttons.BoxButton;
+import com.vittach.jumpjack.ui.buttons.JoystickController;
+import com.vittach.jumpjack.ui.screen.*;
+import com.vittach.jumpjack.ui.screen.menu.LoadAndSaveMenu;
+import com.vittach.jumpjack.ui.screen.MainScreen;
 import com.vittach.jumpjack.ui.screen.menu.PauseMenu;
 import com.vittach.jumpjack.ui.screen.menu.StartMenu;
+import com.vittach.jumpjack.ui.screen.menu.CreateWorldMenu;
 
 import java.util.HashMap;
 
@@ -37,15 +33,15 @@ public class MainEngine extends ApplicationAdapter {
     public int renderHeight = 272;
 
     public FirstPersonController fpController;
-    public MainScreen mainScreen;
+    public GameScene gameScene;
 
     public JoystickController leftStick;
     public JoystickController rightStick;
 
     public PauseMenu pauseMenu;
     public BoxButton boxBtn;
-    public FileMenu fileMenu;
-    public WorldCreator worldCreator;
+    public LoadAndSaveMenu loadAndSaveMenu;
+    public CreateWorldMenu createWorldMenu;
     public StartMenu startMenu;
 
     private final int deviceId;
@@ -74,10 +70,10 @@ public class MainEngine extends ApplicationAdapter {
     @Override
     public void dispose() {
         pauseMenu.dispose();
-        mainScreen.dispose();
+        gameScene.dispose();
         boxBtn.dispose();
-        worldCreator.dispose();
-        fileMenu.dispose();
+        createWorldMenu.dispose();
+        loadAndSaveMenu.dispose();
         startMenu.dispose();
     }
 
@@ -118,11 +114,11 @@ public class MainEngine extends ApplicationAdapter {
         preferenceInstance.playerMusic.play();
 
         gameScreenMap = new HashMap<Screen, GameScreen>() {{
-            put(Screen.GAME_PLAY, new GamePlay());
-            put(Screen.GAME_STOP, new GameStop());
-            put(Screen.GAME_MAIN_SCREEN, new MainMenu());
-            put(Screen.WORLD_CONSTRUCT, new WorldConstructor());
-            put(Screen.LOAD_SAVE, new LoadSave());
+            put(Screen.GAME_PLAY, new GameSceneScreen());
+            put(Screen.GAME_STOP, new PauseScreen());
+            put(Screen.GAME_MAIN_SCREEN, new MainScreen());
+            put(Screen.WORLD_CONSTRUCT, new CreateWorldScreen());
+            put(Screen.LOAD_SAVE, new LoadAndSaveScreen());
         }};
 
         fpController = new FirstPersonController(deviceId);
@@ -130,9 +126,9 @@ public class MainEngine extends ApplicationAdapter {
         leftStick = new JoystickController(JoystickController.Stick.LEFT);
         rightStick = new JoystickController(JoystickController.Stick.RIGHT);
 
-        fileMenu = new FileMenu();
-        mainScreen = new MainScreen();
-        worldCreator = new WorldCreator();
+        loadAndSaveMenu = new LoadAndSaveMenu();
+        gameScene = new GameScene();
+        createWorldMenu = new CreateWorldMenu();
         pauseMenu = new PauseMenu();
 
         boxBtn = new BoxButton();

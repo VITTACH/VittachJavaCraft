@@ -15,7 +15,7 @@ import com.vittach.jumpjack.ui.buttons.ScreenButton;
 
 import java.util.ArrayList;
 
-public class FileMenu extends InputListener {
+public class LoadAndSaveMenu extends InputListener {
     private final ColorImpl color;
 
     private final Sprite sprite;
@@ -54,9 +54,9 @@ public class FileMenu extends InputListener {
     private final MainEngine engineInstance = MainEngine.getInstance();
 
     @Override
-    public boolean keyDown(int ikey) {
-        if (ikey == 19) scroll(oldY++);
-        if (ikey == 20) scroll(oldY--);
+    public boolean keyDown(int keyCode) {
+        if (keyCode == 19) scroll(oldY++);
+        if (keyCode == 20) scroll(oldY--);
         return true;
     }
 
@@ -90,7 +90,7 @@ public class FileMenu extends InputListener {
         loadButton.dispose();
     }
 
-    public FileMenu() {
+    public LoadAndSaveMenu() {
         paperImage = new ImageHandler().load("ui/paper.png");
         backgroundImage = new ImageHandler().load("ui/background.png");
         dirBackgroundImage = new ImageHandler().load("ui/list_background.png");
@@ -174,7 +174,7 @@ public class FileMenu extends InputListener {
 
         for (int i = 0; i < id; i++) {
             if (y >= (-i - 1) * stepY * scaleY + offsetY * scaleY
-                    && y <= -i * stepY * scaleY + offsetY * scaleY && x >= 64 * scaleX && x <= 416 * scaleX) {
+                && y <= -i * stepY * scaleY + offsetY * scaleY && x >= 64 * scaleX && x <= 416 * scaleX) {
                 selectSprite.setPosition(123, (-i - 1) * stepY + offsetY);
                 oldIndex = i + startIndex;
                 break;
@@ -189,8 +189,8 @@ public class FileMenu extends InputListener {
         y = preferenceInstance.displayHeight - y - (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
         x -= (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
         if (x >= selectSprite.getX() * scaleX && x <= offsetX + itemSelectedImage.getWidth() * scaleX
-                && y <= offsetY * scaleY
-                && y >= offsetY * scaleY - scaleY * itemSelectedImage.getHeight() * 3) {
+            && y <= offsetY * scaleY
+            && y >= offsetY * scaleY - scaleY * itemSelectedImage.getHeight() * 3) {
             positionY = y;
         }
         return true;
@@ -201,10 +201,10 @@ public class FileMenu extends InputListener {
         int j = 0, i;
         for (i = startIndex; i < countOfFiles; i++, j++) {
             screen.fontPrint(arcadepixFont, offsetX,
-                    offsetY - 2 - j * stepY, i + ") " + fileHandles.get(i).name().replace(".JJ", ""), color);
+                offsetY - 2 - j * stepY, i + ") " + fileHandles.get(i).name().replace(".JJ", ""), color);
             screen.fontPrint(arcadepixFont, engineInstance.renderWidth / 2, offsetY - 2 - j * stepY,
-                    "~" + (System.currentTimeMillis() - fileHandles.get(i).lastModified()) / 3600000
-                            + " hrs ago", color);
+                "~" + (System.currentTimeMillis() - fileHandles.get(i).lastModified()) / 3600000
+                    + " hrs ago", color);
         }
         if (countOfFiles < 3 && oldIndex > 0) {
             i = --oldIndex - startIndex;

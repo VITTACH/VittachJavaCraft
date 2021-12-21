@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.vittach.jumpjack.MainEngine;
-import com.vittach.jumpjack.engine.render.MainScreen;
+import com.vittach.jumpjack.engine.render.GameScene;
 
 public class DirectionalLight extends Light {
 
@@ -20,8 +20,8 @@ public class DirectionalLight extends Light {
 
     private final MainEngine engine = MainEngine.getInstance();
 
-    public DirectionalLight(MainScreen mainScreen, final Vector3 position, final Vector3 direction) {
-        super(mainScreen);
+    public DirectionalLight(GameScene gameScene, final Vector3 position, final Vector3 direction) {
+        super(gameScene);
         this.position = position;
         this.direction = direction;
         init();
