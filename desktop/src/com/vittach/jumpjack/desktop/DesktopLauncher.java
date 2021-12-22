@@ -11,6 +11,6 @@ public class DesktopLauncher {
         config0.width = 960;
         config0.height = 544;
         config0.title = "VitaCraft";
-        new LwjglApplication(MainEngine.getInstance(0), config0);
+        new LwjglApplication(MainEngine.getInstance(MainEngine.Device.DESKTOP), config0);
     }
 }

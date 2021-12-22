@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.Preferences;
 import com.vittach.jumpjack.engine.render.domain.Chunk;
 import com.vittach.jumpjack.engine.render.domain.MeshObj;
 import com.vittach.jumpjack.engine.render.domain.ModelInstanceObj;
@@ -23,6 +24,7 @@ import com.vittach.jumpjack.engine.render.light.DirectionalLight;
 import com.vittach.jumpjack.engine.render.light.Light;
 import com.vittach.jumpjack.engine.render.shader.SimpleTextureShader;
 import com.vittach.jumpjack.engine.render.utils.MeshCompressor;
+import com.vittach.jumpjack.ui.buttons.BoxButton;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.badlogic.gdx.Gdx.graphics;
 
 public class GameScene {
+    private final BoxButton boxBtn;
+
     private final Mesh cubeMesh;
     private final ModelBatch modelBatch;
     private final ShaderProgram shaderProgram;
@@ -43,6 +47,8 @@ public class GameScene {
     private final Map<Vector3, Chunk> cubeChunkMap = new ConcurrentHashMap<Vector3, Chunk>();
 
     private final MainEngine engineInstance = MainEngine.getInstance();
+    private final Preferences preferenceInstance = Preferences.getInstance();
+
     private final int distance = engineInstance.fpController.viewDistance;
     private final int chunkSize = 16;
     private final int mapHeight = 48;
@@ -52,10 +58,19 @@ public class GameScene {
     private final ModelBuilder modelBuilder = new ModelBuilder();
     private Matrix4 chunkTrans = new Matrix4();
 
+
     public void dispose() {
         textureMap.clear();
         modelInstanceObjMap.clear();
         cubeChunkMap.clear();
+        boxBtn.dispose();
+    }
+
+    public void setUpListeners() {
+        preferenceInstance.inputListener.addListener(boxBtn);
+        preferenceInstance.inputListener.addListener(engineInstance.fpController);
+        preferenceInstance.inputListener.addListener(engineInstance.leftStick);
+        preferenceInstance.inputListener.addListener(engineInstance.rightStick);
     }
 
     public GameScene() {
@@ -81,6 +96,9 @@ public class GameScene {
         cubeBuilder.begin(attributes, GL20.GL_TRIANGLES);
         cubeBuilder.box(1.0f, 1.0f, 1.0f);
         cubeMesh = cubeBuilder.end();
+
+        boxBtn = new BoxButton();
+        boxBtn.setPosition(engineInstance.renderWidth - boxBtn.getWidth(), engineInstance.renderHeight - boxBtn.getHeight());
     }
 
     public void genWorld() {
@@ -129,6 +147,8 @@ public class GameScene {
         backgroundShape.end();
 
         render(cubeChunkMap, modelInstanceObjMap, textureMap);
+
+        boxBtn.display(viewport);
     }
 
     public ShaderProgram setupShader(final String prefix) {

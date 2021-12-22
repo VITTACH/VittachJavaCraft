@@ -8,35 +8,36 @@ import com.vittach.jumpjack.MainEngine;
 import com.vittach.jumpjack.Preferences;
 import com.vittach.jumpjack.framework.ImageHandler;
 import com.vittach.jumpjack.ui.InputListener;
+import com.vittach.jumpjack.ui.buttons.ButtonClickListener;
 import com.vittach.jumpjack.ui.buttons.ScreenButton;
 
 public class PauseMenu extends InputListener {
-    private boolean isChecked;
+    private boolean isCubeChecked = false;
 
     private int oldRow = 0;
     private int oldColumn = 0;
-    private int columns = 10;
-    private int rows = 4;
+    private final int columns = 10;
+    private final int rows = 4;
 
     private final float width;
     private final float height;
 
-    private SpriteBatch spriteWindow;
+    private final SpriteBatch spriteWindow;
     private Sprite resultSprite;
 
-    private ImageHandler backgroundImage;
-    private ImageHandler cellBoxImage;
-    private ImageHandler cellSelectImage;
-    private ImageHandler blockImage;
-    private ImageHandler screen;
+    private final ImageHandler backgroundImage;
+    private final ImageHandler cellBoxImage;
+    private final ImageHandler cellSelectImage;
+    private final ImageHandler blockImage;
+    private final ImageHandler screen;
 
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
 
-    public ScreenButton saveButton;
-    public ScreenButton loadButton;
-    public ScreenButton playButton;
-    public ScreenButton exitButton;
+    private final ScreenButton saveButton;
+    private final ScreenButton loadButton;
+    private final ScreenButton playButton;
+    private final ScreenButton exitButton;
 
     public int pressedKey;
 
@@ -48,6 +49,14 @@ public class PauseMenu extends InputListener {
         saveButton.dispose();
         loadButton.dispose();
         exitButton.dispose();
+    }
+
+    public void setUpListeners() {
+        preferenceInstance.inputListener.addListener(saveButton);
+        preferenceInstance.inputListener.addListener(exitButton);
+        preferenceInstance.inputListener.addListener(loadButton);
+        preferenceInstance.inputListener.addListener(playButton);
+        preferenceInstance.inputListener.addListener(this);
     }
 
     public PauseMenu() {
@@ -156,13 +165,14 @@ public class PauseMenu extends InputListener {
         x = x - (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
         y = preferenceInstance.displayHeight - y - (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
 
-        for (int i = 0; i < columns; i++)
-            for (int j = 0; j < rows; j++)
+        boolean isSelected = false;
+        for (int i = 0; i < columns; i++) {
+            for (int j = 0; j < rows; j++) {
                 if (x > preferenceInstance.screenWidth / 2f + (i - columns / 2) * scaleX
                     && x <= preferenceInstance.screenWidth / 2f + (i - columns / 2) * scaleX + scaleX
                     && y > preferenceInstance.screenHeight / 2f + (j - rows / 2) * scaleY
                     && y <= preferenceInstance.screenHeight / 2f + (j - rows / 2) * scaleY + scaleY) {
-                    isChecked = true;
+                    isSelected = true;
 
                     if (oldColumn != i || oldRow != j) {
                         screen.clear();
@@ -180,6 +190,9 @@ public class PauseMenu extends InputListener {
                         break;
                     }
                 }
+            }
+        }
+        isCubeChecked = isSelected;
         return true;
     }
 
@@ -189,23 +202,39 @@ public class PauseMenu extends InputListener {
     }
 
     @Override
-    public boolean touchDown(int x, int y, int id, int button) {
+    public boolean touchUp(int x, int y, int id, int button) {
         mouseMoved(x, y);
 
-        if (isChecked) {
+        if (isCubeChecked) {
             pressedKey = Input.Keys.ESCAPE;
         }
 
-        if (playButton.touchDown(x, y)) {
-            pressedKey = Input.Keys.ESCAPE;
-        } else if (loadButton.touchDown(x, y)) {
-            // TODO Load world
-            pressedKey = Input.Keys.ESCAPE;
-        } else if (saveButton.touchDown(x, y)) {
-            // TODO save world
-        } else if (exitButton.touchDown(x, y)) {
-            pressedKey = 67;
-        }
+        playButton.onClicked(x, y, new ButtonClickListener() {
+            @Override
+            public void onClicked() {
+                pressedKey = Input.Keys.ESCAPE;
+            }
+        });
+
+        loadButton.onClicked(x, y, new ButtonClickListener() {
+            @Override
+            public void onClicked() {
+                pressedKey = Input.Keys.ESCAPE;
+            }
+        });
+
+        saveButton.onClicked(x, y, new ButtonClickListener() {
+            @Override
+            public void onClicked() {
+            }
+        });
+
+        exitButton.onClicked(x, y, new ButtonClickListener() {
+            @Override
+            public void onClicked() {
+                pressedKey = 2;
+            }
+        });
 
         return true;
     }

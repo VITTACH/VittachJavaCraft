@@ -15,27 +15,17 @@ public class MainScreen implements GameScreen {
     }
 
     private void listenInput() {
-        if (engineInstance.startMenu.pressedKey < 0) return;
+        int pressedKey = engineInstance.startMenu.pressedKey;
+        if (pressedKey < 0) return;
+
         preferenceInstance.inputListener.cleanProcesses();
-        switch (engineInstance.startMenu.pressedKey) {
-            case 2:
-                preferenceInstance.inputListener.addListener(engineInstance.loadAndSaveMenu.backButton);
-                preferenceInstance.inputListener.addListener(engineInstance.loadAndSaveMenu.loadButton);
-                preferenceInstance.inputListener.addListener(engineInstance.loadAndSaveMenu.startButton);
-                preferenceInstance.inputListener.addListener(engineInstance.loadAndSaveMenu);
-                engineInstance.loadAndSaveMenu.updateDir();
-                engineInstance.loadAndSaveMenu.getCurDir();
 
-                engineInstance.currentScreen = MainEngine.Screen.LOAD_SAVE;
-                break;
-
-            case 1:
-                preferenceInstance.inputListener.addListener(engineInstance.createWorldMenu.sartButton);
-                preferenceInstance.inputListener.addListener(engineInstance.createWorldMenu.backButton);
-                preferenceInstance.inputListener.addListener(engineInstance.createWorldMenu);
-
-                engineInstance.currentScreen = MainEngine.Screen.WORLD_CONSTRUCT;
-                break;
+        if (pressedKey == 1) {
+            engineInstance.createWorldMenu.setUpListeners();
+            engineInstance.currentScreen = MainEngine.Screen.WORLD_CONSTRUCT;
+        } else if (pressedKey == 2) {
+            engineInstance.loadAndSaveMenu.setUpListeners();
+            engineInstance.currentScreen = MainEngine.Screen.LOAD_SAVE;
         }
 
         engineInstance.startMenu.pressedKey = -1;

@@ -55,11 +55,23 @@ public class ScreenButton extends InputListener {
         return true;
     }
 
-    public boolean touchDown(int x, int y) {
-        return touchDown(x, y, 0);
+    public void onClicked(final int x, final int y, final ButtonClickListener listener) {
+        final boolean isInArea = touchDown(x, y, 0);
+        new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(150L);
+                    if (isInArea) {
+                        listener.onClicked();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 
-    public boolean touchDown(int x, int y, int id) {
+    private boolean touchDown(int x, int y, int id) {
         if (choice != null && !hasBackground && id >= 0) {
             screen.clear();
             screen.blit(selectedBoxImage);
@@ -82,13 +94,12 @@ public class ScreenButton extends InputListener {
             screen.fontPrint(font, textX, textY, message, color);
         }
 
-        Sprite sprite = screen.render();
-        sprite.setPosition(x, y);
-
         viewport.apply();
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
 
         spriteBatch.begin();
+        Sprite sprite = screen.render();
+        sprite.setPosition(x, y);
         sprite.draw(spriteBatch);
         spriteBatch.end();
     }

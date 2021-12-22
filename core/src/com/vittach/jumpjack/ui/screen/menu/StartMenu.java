@@ -4,14 +4,18 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.Preferences;
 import com.vittach.jumpjack.framework.ImageHandler;
 import com.vittach.jumpjack.ui.InputListener;
+import com.vittach.jumpjack.ui.buttons.ButtonClickListener;
 import com.vittach.jumpjack.ui.buttons.ScreenButton;
 
 public class StartMenu extends InputListener {
-    public ScreenButton gameButton;
-    public ScreenButton loadButton;
-    public ScreenButton moreButton;
+    private final ScreenButton gameButton;
+    private final ScreenButton loadButton;
+    private final ScreenButton moreButton;
+
+    private final Preferences preferenceInstance = Preferences.getInstance();
 
     public int pressedKey = -1;
     private Sprite sprite;
@@ -21,9 +25,20 @@ public class StartMenu extends InputListener {
     private ImageHandler paperImage;
 
     @Override
-    public boolean touchDown(int x, int y, int id, int b) {
-        if (loadButton.touchDown(x, y)) pressedKey = 2;
-        if (gameButton.touchDown(x, y)) pressedKey = 1;
+    public boolean touchUp(int x, int y, int id, int b) {
+        loadButton.onClicked(x, y, new ButtonClickListener() {
+            @Override
+            public void onClicked() {
+                pressedKey = 2;
+            }
+        });
+
+        gameButton.onClicked(x, y, new ButtonClickListener() {
+            @Override
+            public void onClicked() {
+                pressedKey = 1;
+            }
+        });
         return true;
     }
 
@@ -34,6 +49,13 @@ public class StartMenu extends InputListener {
         gameButton.dispose();
         loadButton.dispose();
         moreButton.dispose();
+    }
+
+    public void setUpListeners() {
+        preferenceInstance.inputListener.addListener(gameButton);
+        preferenceInstance.inputListener.addListener(loadButton);
+        preferenceInstance.inputListener.addListener(moreButton);
+        preferenceInstance.inputListener.addListener(this);
     }
 
     public StartMenu() {
@@ -89,9 +111,11 @@ public class StartMenu extends InputListener {
     public void display(Viewport viewport) {
         viewport.apply();
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+
         spriteBatch.begin();
         sprite.draw(spriteBatch);
         spriteBatch.end();
+
         gameButton.draw(viewport);
         loadButton.draw(viewport);
         moreButton.draw(viewport);

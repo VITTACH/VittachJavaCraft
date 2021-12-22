@@ -4,18 +4,16 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.engine.controller.FirstPersonController;
 import com.vittach.jumpjack.engine.render.GameScene;
-import com.vittach.jumpjack.ui.buttons.BoxButton;
 import com.vittach.jumpjack.ui.buttons.JoystickController;
 import com.vittach.jumpjack.ui.screen.*;
+import com.vittach.jumpjack.ui.screen.menu.CreateWorldMenu;
 import com.vittach.jumpjack.ui.screen.menu.LoadAndSaveMenu;
-import com.vittach.jumpjack.ui.screen.MainScreen;
 import com.vittach.jumpjack.ui.screen.menu.PauseMenu;
 import com.vittach.jumpjack.ui.screen.menu.StartMenu;
-import com.vittach.jumpjack.ui.screen.menu.CreateWorldMenu;
 
 import java.util.HashMap;
 
@@ -26,68 +24,62 @@ public class MainEngine extends ApplicationAdapter {
         GAME_PLAY, GAME_STOP, GAME_MAIN_SCREEN, WORLD_CONSTRUCT, LOAD_SAVE
     }
 
+    public enum Device {
+        ANDROID, DESKTOP
+    }
+
     private static MainEngine engineInstance;
 
     public Screen currentScreen = Screen.GAME_MAIN_SCREEN;
     public int renderWidth = 480;
     public int renderHeight = 272;
 
-    public FirstPersonController fpController;
-    public GameScene gameScene;
+    private final Device device;
 
+    public FirstPersonController fpController;
     public JoystickController leftStick;
     public JoystickController rightStick;
 
+    public GameScene gameScene;
     public PauseMenu pauseMenu;
-    public BoxButton boxBtn;
     public LoadAndSaveMenu loadAndSaveMenu;
     public CreateWorldMenu createWorldMenu;
     public StartMenu startMenu;
-
-    private final int deviceId;
 
     private HashMap<Screen, GameScreen> gameScreenMap;
     private Preferences preferenceInstance;
 
     private Viewport viewport;
-    private OrthographicCamera orthographicCamera;
+    private OrthographicCamera camera;
 
-    private MainEngine(int deviceId) {
-        this.deviceId = deviceId;
+    private MainEngine(Device device) {
+        this.device = device;
     }
 
     public static MainEngine getInstance() {
-        return getInstance(0);
+        return engineInstance;
     }
 
-    public static synchronized MainEngine getInstance(int deviceId) {
+    public static synchronized MainEngine getInstance(Device device) {
         if (engineInstance == null) {
-            engineInstance = new MainEngine(deviceId);
+            engineInstance = new MainEngine(device);
         }
         return engineInstance;
     }
 
     @Override
-    public void dispose() {
-        pauseMenu.dispose();
-        gameScene.dispose();
-        boxBtn.dispose();
-        createWorldMenu.dispose();
-        loadAndSaveMenu.dispose();
-        startMenu.dispose();
-    }
-
-    @Override
     public void resize(int width, int height) {
-        orthographicCamera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
+        camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
+        camera.update();
 
-        viewport.update(width, height);
+        viewport.update(width, height, true);
+
         preferenceInstance.setWidth(viewport.getScreenWidth(), width);
         preferenceInstance.setHeight(viewport.getScreenHeight(), height);
-        orthographicCamera.update();
 
-        leftStick.setJoystickPosition();
-        rightStick.setJoystickPosition();
+        fpController.updateAspectRatio();
+        leftStick.updateAspectRatio();
+        rightStick.updateAspectRatio();
     }
 
     @Override
@@ -99,19 +91,16 @@ public class MainEngine extends ApplicationAdapter {
 
     @Override
     public void create() {
-        startMenu = new StartMenu();
-
         preferenceInstance = Preferences.getInstance();
 
-        preferenceInstance.inputListener.addListener(startMenu);
-        preferenceInstance.inputListener.addListener(startMenu.gameButton);
-        preferenceInstance.inputListener.addListener(startMenu.loadButton);
-        preferenceInstance.inputListener.addListener(startMenu.moreButton);
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, graphics.getWidth(), graphics.getHeight());
+        camera.update();
 
-        preferenceInstance.playerMusic.load("1.ogg");
-        preferenceInstance.playerMusic.setLoop(true);
-        preferenceInstance.playerMusic.setVolume(1f);
-        preferenceInstance.playerMusic.play();
+        viewport = new ExtendViewport(renderWidth, renderHeight, camera);
+
+        startMenu = new StartMenu();
+        startMenu.setUpListeners();
 
         gameScreenMap = new HashMap<Screen, GameScreen>() {{
             put(Screen.GAME_PLAY, new GameSceneScreen());
@@ -121,8 +110,7 @@ public class MainEngine extends ApplicationAdapter {
             put(Screen.LOAD_SAVE, new LoadAndSaveScreen());
         }};
 
-        fpController = new FirstPersonController(deviceId);
-
+        fpController = new FirstPersonController(device);
         leftStick = new JoystickController(JoystickController.Stick.LEFT);
         rightStick = new JoystickController(JoystickController.Stick.RIGHT);
 
@@ -131,15 +119,20 @@ public class MainEngine extends ApplicationAdapter {
         createWorldMenu = new CreateWorldMenu();
         pauseMenu = new PauseMenu();
 
-        boxBtn = new BoxButton();
-        boxBtn.setPosition(renderWidth - boxBtn.getWidth(), renderHeight - boxBtn.getHeight());
-
-        orthographicCamera = new OrthographicCamera();
-        orthographicCamera.setToOrtho(false, graphics.getWidth(), graphics.getHeight());
-        orthographicCamera.update();
-
-        viewport = new FitViewport(renderWidth, renderHeight, orthographicCamera);
+        preferenceInstance.playerMusic.load("1.ogg");
+        preferenceInstance.playerMusic.setLoop(true);
+        preferenceInstance.playerMusic.setVolume(1f);
+        preferenceInstance.playerMusic.play();
 
         Gdx.input.setInputProcessor(preferenceInstance.inputListener);
+    }
+
+    @Override
+    public void dispose() {
+        pauseMenu.dispose();
+        gameScene.dispose();
+        createWorldMenu.dispose();
+        loadAndSaveMenu.dispose();
+        startMenu.dispose();
     }
 }

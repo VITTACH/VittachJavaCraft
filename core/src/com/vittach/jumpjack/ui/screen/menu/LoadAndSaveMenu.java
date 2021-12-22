@@ -11,6 +11,7 @@ import com.vittach.jumpjack.framework.ColorImpl;
 import com.vittach.jumpjack.framework.FontHandler;
 import com.vittach.jumpjack.framework.ImageHandler;
 import com.vittach.jumpjack.ui.InputListener;
+import com.vittach.jumpjack.ui.buttons.ButtonClickListener;
 import com.vittach.jumpjack.ui.buttons.ScreenButton;
 
 import java.util.ArrayList;
@@ -23,9 +24,9 @@ public class LoadAndSaveMenu extends InputListener {
     private final Sprite selectSprite;
     private final SpriteBatch spriteBatch;
 
-    public ScreenButton startButton;
-    public ScreenButton backButton;
-    public ScreenButton loadButton;
+    private final ScreenButton startButton;
+    private final ScreenButton backButton;
+    private final ScreenButton loadButton;
 
     public int pressedKey = -1;
 
@@ -60,7 +61,7 @@ public class LoadAndSaveMenu extends InputListener {
         return true;
     }
 
-    public void updateDir() {
+    private void updateDir() {
         fileHandles.clear();
         countOfFiles = (startIndex = 0) - 1;
         for (FileHandle file : Gdx.files.local("").list()) {
@@ -75,6 +76,16 @@ public class LoadAndSaveMenu extends InputListener {
                 countOfFiles = 3;
             }
         }
+    }
+
+    public void setUpListeners() {
+        preferenceInstance.inputListener.addListener(backButton);
+        preferenceInstance.inputListener.addListener(loadButton);
+        preferenceInstance.inputListener.addListener(startButton);
+        preferenceInstance.inputListener.addListener(this);
+
+        updateDir();
+        getCurrentDir();
     }
 
     public void dispose() {
@@ -151,22 +162,36 @@ public class LoadAndSaveMenu extends InputListener {
         selectSprite.setPosition(123, offsetY - itemSelectedImage.getHeight() + 1);
         sprite = backgroundImage.render();
         updateDir();
-        getCurDir();
+        getCurrentDir();
     }
 
     @Override
-    public boolean touchDown(int x, int y, int id, int button) {
+    public boolean touchUp(int x, int y, int id, int button) {
         scaleX = preferenceInstance.screenWidth / (float) engineInstance.renderWidth;
         scaleY = preferenceInstance.screenHeight / (float) engineInstance.renderHeight;
 
         if (fileHandles.size() > 0) {
-            if (startButton.touchDown(x, y)) delFile();
-            if (loadButton.touchDown(x, y)) {
-                pressedKey = 1;
-            }
+            startButton.onClicked(x, y, new ButtonClickListener() {
+                @Override
+                public void onClicked() {
+                    delFile();
+                }
+            });
+
+            loadButton.onClicked(x, y, new ButtonClickListener() {
+                @Override
+                public void onClicked() {
+                    pressedKey = 1;
+                }
+            });
         }
 
-        if (backButton.touchDown(x, y)) pressedKey = 2;
+        backButton.onClicked(x, y, new ButtonClickListener() {
+            @Override
+            public void onClicked() {
+                pressedKey = 2;
+            }
+        });
 
         y = preferenceInstance.displayHeight - y - (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
         x -= (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
@@ -196,7 +221,7 @@ public class LoadAndSaveMenu extends InputListener {
         return true;
     }
 
-    public void getCurDir() {
+    private void getCurrentDir() {
         screen.clear();
         int j = 0, i;
         for (i = startIndex; i < countOfFiles; i++, j++) {
@@ -219,8 +244,8 @@ public class LoadAndSaveMenu extends InputListener {
         }
 
         viewport.apply();
-
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+
         spriteBatch.begin();
         sprite.draw(spriteBatch);
         dirSprite.draw(spriteBatch);
@@ -248,12 +273,12 @@ public class LoadAndSaveMenu extends InputListener {
         }
 
         oldY = y;
-        getCurDir();
+        getCurrentDir();
     }
 
     public void delFile() {
         fileHandles.get(oldIndex).delete();
         updateDir();
-        getCurDir();
+        getCurrentDir();
     }
 }

@@ -7,15 +7,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.Preferences;
 import com.vittach.jumpjack.framework.FontHandler;
 import com.vittach.jumpjack.framework.ImageHandler;
 import com.vittach.jumpjack.ui.InputListener;
+import com.vittach.jumpjack.ui.buttons.ButtonClickListener;
 import com.vittach.jumpjack.ui.buttons.ScreenButton;
 
 public class CreateWorldMenu extends InputListener {
     public Sprite sprite;
-    public ScreenButton backButton;
-    public ScreenButton sartButton;
+    private final ScreenButton backButton;
+    private final ScreenButton startButton;
     public TextField textField;
 
     private final FontHandler arcadepixFont;
@@ -29,42 +31,57 @@ public class CreateWorldMenu extends InputListener {
     private final ImageHandler cursor;
 
     private final MainEngine engineInstance = MainEngine.getInstance();
+    private final Preferences preferenceInstance = Preferences.getInstance();
 
     public int pressedKey = -1;
 
     @Override
-    public boolean touchDown(int x, int y, int id, int button) {
+    public boolean touchUp(int x, int y, int id, int button) {
         super.touchDown(x, y, id, button);
-        if (sartButton.touchDown(x, y))
-            if (getName().length() > 3) pressedKey = 1;
-            else {
-                textField.setMessageText(" input correct name");
+        startButton.onClicked(x, y, new ButtonClickListener() {
+            @Override
+            public void onClicked() {
+                if (getName().length() > 3) {
+                    pressedKey = 1;
+                } else textField.setMessageText(" input correct name");
             }
-        if (backButton.touchDown(x, y)) {
-            pressedKey = 2;
-        }
+        });
+
+        backButton.onClicked(x, y, new ButtonClickListener() {
+            @Override
+            public void onClicked() {
+                pressedKey = 2;
+            }
+        });
         return true;
     }
 
     public void display(Viewport viewport) {
         viewport.apply();
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+
         spriteBatch.begin();
         sprite.draw(spriteBatch);
         spriteBatch.end();
-        sartButton.draw(viewport);
+
+        startButton.draw(viewport);
         backButton.draw(viewport);
+
         setViewport(viewport);
         act();
         draw();
+    }
+
+    public void setUpListeners() {
+        preferenceInstance.inputListener.addListener(startButton);
+        preferenceInstance.inputListener.addListener(backButton);
+        preferenceInstance.inputListener.addListener(this);
     }
 
     public CreateWorldMenu() {
         jumpjackFont = new FontHandler();
         arcadepixFont = new FontHandler();
         spriteBatch = new SpriteBatch();
-        sartButton = new ScreenButton();
-        backButton = new ScreenButton();
 
         arcadepixFont.load("arcadepix.ttf");
         arcadepixFont.setPixelSize(14);
@@ -106,16 +123,16 @@ public class CreateWorldMenu extends InputListener {
         addActor(textField);
         sprite = backgroundImage.render();
 
-        sartButton = new ScreenButton();
-        sartButton.choice = new ImageHandler();
-        sartButton.choice.load("ui/button_selected.png");
-        sartButton.selectedBoxImage.load("ui/button_default.png");
-        sartButton.screen.blit(sartButton.selectedBoxImage);
-        sartButton.setPosition(engineInstance.renderWidth / 2.0f - sartButton.getWidth() / 2f, 98);
-        sartButton.font = jumpjackFont;
-        sartButton.message = "qnheary";
-        sartButton.textY = 19;
-        sartButton.textX = 80;
+        startButton = new ScreenButton();
+        startButton.choice = new ImageHandler();
+        startButton.choice.load("ui/button_selected.png");
+        startButton.selectedBoxImage.load("ui/button_default.png");
+        startButton.screen.blit(startButton.selectedBoxImage);
+        startButton.setPosition(engineInstance.renderWidth / 2.0f - startButton.getWidth() / 2f, 98);
+        startButton.font = jumpjackFont;
+        startButton.message = "qnheary";
+        startButton.textY = 19;
+        startButton.textX = 80;
 
         backButton = new ScreenButton();
         backButton.choice = new ImageHandler();
@@ -151,7 +168,7 @@ public class CreateWorldMenu extends InputListener {
         backgroundImage.dispose();
         paperImage.dispose();
 
-        sartButton.dispose();
+        startButton.dispose();
         backButton.dispose();
     }
 

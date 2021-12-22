@@ -16,17 +16,14 @@ public class JoystickController implements ProcessorInput {
         LEFT, RIGHT
     }
 
-    private float scaleX, scaleY;
     private final TouchPoint[] touchPoints = new TouchPoint[2];
-    private boolean isTouchUpped = true;
-    private boolean isTimerInitialised = false;
+    private boolean hasTouchUpped = true;
+    private boolean hasFirstTouch = false;
 
     private final Stick stick;
     private int offsetX, offsetY;
     private int touchX, touchY, idOffset = 0;
     private int touchId = -1;
-
-    private int smallRadius, largeRadius;
 
     private final ColorImpl whiteColor = new ColorImpl(1, 1, 1, 0.5f);
 
@@ -34,6 +31,9 @@ public class JoystickController implements ProcessorInput {
     private final Preferences preferenceInstance = Preferences.getInstance();
 
     private final MyTimer joystickTimer;
+
+    private final int largeRadius = engineInstance.renderHeight / 5;
+    private final int smallRadius = largeRadius / 2;
 
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
@@ -77,7 +77,7 @@ public class JoystickController implements ProcessorInput {
         preferenceInstance.inputIdMap.remove(id + idOffset);
         if (!isTimerActive() && touchId >= 0) {
             touchId = -1;
-            isTouchUpped = false;
+            hasTouchUpped = false;
             joystickTimer.start(2000);
             touchPoints[1] = touchPoints[0];
         }
@@ -104,7 +104,7 @@ public class JoystickController implements ProcessorInput {
 
         if (id != touchId) return true;
 
-        double radiusSquare = Math.pow((touchX - touchPoints[0].getX()), 2) + Math.pow((touchY - touchPoints[0].getY()), 2);
+        double radiusSquare = Math.pow((x - touchPoints[0].getX()), 2) + Math.pow((y - touchPoints[0].getY()), 2);
         double angle = Math.acos((x - touchPoints[0].getX()) / Math.sqrt(radiusSquare));
 
         if (isTimerActive()) joystickTimer.finish();
@@ -122,7 +122,10 @@ public class JoystickController implements ProcessorInput {
     }
 
     public void display(Viewport viewport) {
-        if (!isTimerInitialised) return;
+        if (!hasFirstTouch) return;
+
+        float scaleX = engineInstance.renderWidth / (float) preferenceInstance.screenWidth;
+        float scaleY = engineInstance.renderHeight / (float) preferenceInstance.screenHeight;
 
         Gdx.gl.glEnable(3042);
         Gdx.gl.glBlendFunc(770, 771);
@@ -147,12 +150,12 @@ public class JoystickController implements ProcessorInput {
     public void handleInput() {
         switch (stick) {
             case LEFT:
-                if (isTouchUpped()) {
+                if (isHasTouchUpped()) {
                     engineInstance.fpController.onRight(false);
                     engineInstance.fpController.onForward(false);
                     engineInstance.fpController.onBack(false);
                     engineInstance.fpController.onLeft(false);
-                } else if (!isTimerActive() && isTimerInitialised) {
+                } else if (!isTimerActive() && hasFirstTouch) {
                     engineInstance.fpController.onRight(engineInstance.leftStick.distanceX() > 5);
                     engineInstance.fpController.onBack(engineInstance.leftStick.distanceY() > 5);
                     engineInstance.fpController.onLeft(engineInstance.leftStick.distanceX() < -5);
@@ -161,12 +164,12 @@ public class JoystickController implements ProcessorInput {
                 break;
 
             case RIGHT:
-                if (isTouchUpped()) {
+                if (isHasTouchUpped()) {
                     engineInstance.fpController.onDown(false);
                     engineInstance.fpController.onJump(false);
                     engineInstance.fpController.onFly(false);
                     engineInstance.fpController.onRun(false);
-                } else if (!isTimerActive() && isTimerInitialised) {
+                } else if (!isTimerActive() && hasFirstTouch) {
                     engineInstance.fpController.onDown(engineInstance.rightStick.distanceX() > 5);
                     engineInstance.fpController.onFly(engineInstance.rightStick.distanceY() > 5);
                     engineInstance.fpController.onRun(engineInstance.rightStick.distanceY() < -5);
@@ -176,11 +179,16 @@ public class JoystickController implements ProcessorInput {
         }
     }
 
-    private boolean isTouchUpped() {
-        if (isTouchUpped) {
+    public void updateAspectRatio() {
+        offsetX = (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
+        offsetY = (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
+    }
+
+    private boolean isHasTouchUpped() {
+        if (hasTouchUpped) {
             return false;
         } else {
-            return isTouchUpped = true;
+            return hasTouchUpped = true;
         }
     }
 
@@ -188,7 +196,7 @@ public class JoystickController implements ProcessorInput {
         return joystickTimer.isActive(new TimerListener() {
             @Override
             public void onTimerStopped() {
-                isTimerInitialised = false;
+                hasFirstTouch = false;
             }
         });
     }
@@ -197,56 +205,42 @@ public class JoystickController implements ProcessorInput {
         float widthPart4 = preferenceInstance.screenWidth / 4f;
         float heightPart4 = preferenceInstance.screenHeight / 4f;
 
+        boolean isNewId = !preferenceInstance.inputIdMap.contains(id + idOffset);
         boolean isInLeftArea = x > 0 && x < widthPart4 && y > preferenceInstance.screenHeight - heightPart4
             && y < preferenceInstance.screenHeight;
         boolean isInRightArea = x > preferenceInstance.screenWidth - widthPart4 && x < preferenceInstance.screenWidth
             && y > preferenceInstance.screenHeight - heightPart4 && y < preferenceInstance.screenHeight;
-        boolean isNewId = !preferenceInstance.inputIdMap.contains(id + idOffset);
 
-        if (isNewId && ((stick == Stick.LEFT && isInLeftArea) || (stick == Stick.RIGHT && isInRightArea))) {
-            if (!isTimerInitialised) {
-                isTimerInitialised = true;
-                touchId = id;
-                touchPoints[0] = new TouchPoint(x, y);
-                touchPoints[1] = new TouchPoint(x, y);
-            } else if (touchX >= touchPoints[0].getX() - largeRadius
-                && touchX <= touchPoints[0].getX() + largeRadius
-                && touchY >= touchPoints[0].getY() - largeRadius
-                && touchY <= touchPoints[0].getY() + largeRadius
-            ) {
-                if (!isDragged) {
-                    touchPoints[1] = new TouchPoint(x, touchY);
-                    joystickTimer.finish();
-                }
-                touchId = id;
+        if (!isNewId || !((stick == Stick.LEFT && isInLeftArea) || (stick == Stick.RIGHT && isInRightArea))) return;
+        preferenceInstance.inputIdMap.add(id + idOffset);
+
+        if (!hasFirstTouch) {
+            hasFirstTouch = true;
+            touchId = id;
+            touchPoints[0] = new TouchPoint(x, y);
+            touchPoints[1] = touchPoints[0];
+        } else if (x >= touchPoints[0].getX() - largeRadius
+            && x <= touchPoints[0].getX() + largeRadius
+            && y >= touchPoints[0].getY() - largeRadius
+            && y <= touchPoints[0].getY() + largeRadius
+        ) {
+            if (!isDragged) {
+                touchPoints[1] = new TouchPoint(x, touchY);
+                joystickTimer.finish();
             }
-            preferenceInstance.inputIdMap.add(id + idOffset);
+            touchId = id;
         }
-    }
-
-    public void setJoystickPosition() {
-        scaleX = engineInstance.renderWidth / (float) preferenceInstance.screenWidth;
-        scaleY = engineInstance.renderHeight / (float) preferenceInstance.screenHeight;
-
-        offsetX = (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
-        offsetY = (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
-
-        smallRadius = (largeRadius = engineInstance.renderHeight / 5) / 2;
     }
 
     private float distanceX() {
-        if (!isTimerActive() && isTimerInitialised) {
+        if (!isTimerActive() && hasFirstTouch) {
             return (touchX - touchPoints[0].getX()) / (preferenceInstance.screenHeight / 256f);
-        } else {
-            return 0f;
-        }
+        } else return 0;
     }
 
     private float distanceY() {
-        if (!isTimerActive() && isTimerInitialised) {
+        if (!isTimerActive() && hasFirstTouch) {
             return (touchY - touchPoints[0].getY()) / (preferenceInstance.screenHeight / 256f);
-        } else {
-            return 0f;
-        }
+        } else return 0;
     }
 }

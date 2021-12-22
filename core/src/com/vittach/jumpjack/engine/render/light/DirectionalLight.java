@@ -14,11 +14,10 @@ import com.vittach.jumpjack.engine.render.GameScene;
 
 public class DirectionalLight extends Light {
 
-    public Vector3 direction;
-    public FrameBuffer frameBuffer;
-    public Texture depthMap;
+    private final Vector3 direction;
+    private Texture depthMap;
 
-    private final MainEngine engine = MainEngine.getInstance();
+    private final MainEngine engineInstance = MainEngine.getInstance();
 
     public DirectionalLight(GameScene gameScene, final Vector3 position, final Vector3 direction) {
         super(gameScene);
@@ -35,9 +34,9 @@ public class DirectionalLight extends Light {
     public void init() {
         super.init();
 
-        camera = new PerspectiveCamera(120f, engine.renderWidth, engine.renderHeight);
+        camera = new PerspectiveCamera(120f, engineInstance.renderWidth, engineInstance.renderHeight);
         camera.near = 0.1f;
-        camera.far = engine.fpController.viewDistance;
+        camera.far = engineInstance.fpController.viewDistance;
         camera.position.set(position);
         camera.lookAt(direction);
         camera.update();
@@ -45,7 +44,12 @@ public class DirectionalLight extends Light {
 
     @Override
     public void render(ModelInstance modelInstance, Matrix4 chunkTrans) {
-        frameBuffer = new FrameBuffer(Format.RGBA8888, engine.renderWidth, engine.renderHeight, true);
+        FrameBuffer frameBuffer = new FrameBuffer(
+            Format.RGBA8888,
+            engineInstance.renderWidth,
+            engineInstance.renderHeight,
+            true
+        );
         frameBuffer.begin();
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);

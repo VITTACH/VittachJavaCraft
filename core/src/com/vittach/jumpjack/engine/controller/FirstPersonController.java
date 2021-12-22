@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.vittach.jumpjack.MainEngine;
 import com.vittach.jumpjack.Preferences;
+import com.vittach.jumpjack.framework.TouchPoint;
 
 import java.util.HashSet;
 
@@ -25,20 +26,24 @@ public class FirstPersonController implements ProcessorInput {
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
 
-    private int deviceId;
+    private TouchPoint touchPoint;
+
+    private MainEngine.Device device;
+    private int offsetX, offsetY;
     private int idOffset = 0;
-    private int health = 100;
+
     private final PerspectiveCamera camera;
 
     private float velocity = MOVE_VELOCITY;
     private float cameraNewDelta;
 
+    private int health = 100;
     public int viewDistance = 64;
 
     public HashSet<Integer> keySet;
 
-    public FirstPersonController(int deviceId) {
-        this.deviceId = deviceId;
+    public FirstPersonController(MainEngine.Device device) {
+        this.device = device;
 
         camera = new PerspectiveCamera(67, engineInstance.renderWidth, engineInstance.renderHeight);
 
@@ -89,7 +94,7 @@ public class FirstPersonController implements ProcessorInput {
 
     @Override
     public boolean mouseMoved(int x, int y) {
-        onMouseMoved(x, y);
+        handleTouchDragged(Gdx.input.getDeltaX(), Gdx.input.getDeltaY());
         return true;
     }
 
@@ -101,31 +106,26 @@ public class FirstPersonController implements ProcessorInput {
 
     @Override
     public boolean touchDown(int x, int y, int id, int button) {
-        float widthPart4 = preferenceInstance.screenWidth / 4f;
-        float heightPart4 = preferenceInstance.screenHeight / 4f;
+        x -= offsetX;
+        y -= offsetY;
 
-        boolean isInLeftArea = x > 0 && x < widthPart4 && y > preferenceInstance.screenHeight - heightPart4
-            && y < preferenceInstance.screenHeight;
-        boolean isInRightArea = x > preferenceInstance.screenWidth - widthPart4 && x < preferenceInstance.screenWidth
-            && y > preferenceInstance.screenHeight - heightPart4 && y < preferenceInstance.screenHeight;
-
-        if (!(isInLeftArea || isInRightArea) || deviceId == 0) {
-            preferenceInstance.inputIdMap.add(id + idOffset);
-
-            if (button == Input.Buttons.LEFT) {
-                deleteCube();
-            } else if (button == Input.Buttons.RIGHT) {
-                detectCube();
-            }
+        if (touchPoint == null) {
+            touchPoint = new TouchPoint(x, y);
         }
-
+        handleTouchDown(x, y, id, button);
+        touchPoint.updatePoint(x, y);
         return true;
     }
 
     @Override
     public boolean touchDragged(int x, int y, int id) {
         if (!preferenceInstance.inputIdMap.contains(id + idOffset)) return true;
-        onMouseMoved(x, y);
+
+        x -= offsetX;
+        y -= offsetY;
+
+        handleTouchDragged(x - touchPoint.getX(), y - touchPoint.getY());
+        touchPoint.updatePoint(x, y);
         return true;
     }
 
@@ -226,16 +226,41 @@ public class FirstPersonController implements ProcessorInput {
         else keyUp(RUN);
     }
 
-    private void onMouseMoved(int x, int y) {
+    public void updateAspectRatio() {
+        offsetX = (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
+        offsetY = (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
+    }
+
+    private void handleTouchDown(int x, int y, int id, int button) {
+        float widthPart4 = preferenceInstance.screenWidth / 4f;
+        float heightPart4 = preferenceInstance.screenHeight / 4f;
+
+        boolean isNewId = !preferenceInstance.inputIdMap.contains(id + idOffset);
+        boolean isInLeftArea = x > 0 && x < widthPart4 && y > preferenceInstance.screenHeight - heightPart4
+            && y < preferenceInstance.screenHeight;
+        boolean isInRightArea = x > preferenceInstance.screenWidth - widthPart4 && x < preferenceInstance.screenWidth
+            && y > preferenceInstance.screenHeight - heightPart4 && y < preferenceInstance.screenHeight;
+
+        if (!isNewId || isInLeftArea || isInRightArea) return;
+        preferenceInstance.inputIdMap.add(id + idOffset);
+
+        if (button == Input.Buttons.LEFT) {
+            deleteCube();
+        } else if (button == Input.Buttons.RIGHT) {
+            detectCube();
+        }
+    }
+
+    private void handleTouchDragged(int x, int y) {
         float verticalSense = 1;
-        float cameraDelta = -Gdx.input.getDeltaY() * verticalSense;
+        float delta = -y * verticalSense;
         Vector3 right = new Vector3().set(camera.direction).crs(camera.up);
 
-        if (cameraNewDelta + cameraDelta < 90 && cameraNewDelta + cameraDelta > -90) {
-            camera.rotate(right, cameraDelta);
-            cameraNewDelta += cameraDelta;
+        if (cameraNewDelta + delta < 90 && cameraNewDelta + delta > -90) {
+            camera.rotate(right, delta);
+            cameraNewDelta += delta;
         } else {
-            if (cameraNewDelta + cameraDelta >= 90.0f) {
+            if (cameraNewDelta + delta >= 90.0f) {
                 camera.rotate(right, 89.0f - cameraNewDelta);
                 cameraNewDelta = 89f;
             } else {
@@ -244,9 +269,7 @@ public class FirstPersonController implements ProcessorInput {
             }
         }
 
-        float horizontalSense = 1;
-        Vector3 up = new Vector3().set(0, 1, 0);
-        camera.rotate(up, -Gdx.input.getDeltaX() * horizontalSense);
+        camera.rotate(new Vector3().set(0, 1, 0), -x);
         camera.update();
     }
 

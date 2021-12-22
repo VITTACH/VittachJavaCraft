@@ -17,23 +17,20 @@ public class GameSceneScreen implements GameScreen {
         engineInstance.gameScene.display(view);
         engineInstance.rightStick.display(view);
         engineInstance.leftStick.display(view);
-        engineInstance.boxBtn.display(view);
 
         listenInput();
     }
 
     private void listenInput() {
-        if (!engineInstance.fpController.keySet.contains(Input.Keys.ESCAPE)) return;
+        if (!engineInstance.fpController.keySet.contains(Input.Keys.ESCAPE)) {
+            return;
+        }
 
         preferenceInstance.inputListener.cleanProcesses();
 
-        preferenceInstance.inputListener.addListener(engineInstance.pauseMenu.saveButton);
-        preferenceInstance.inputListener.addListener(engineInstance.pauseMenu.exitButton);
-        preferenceInstance.inputListener.addListener(engineInstance.pauseMenu.loadButton);
-        preferenceInstance.inputListener.addListener(engineInstance.pauseMenu.playButton);
-        preferenceInstance.inputListener.addListener(engineInstance.pauseMenu);
+        engineInstance.pauseMenu.setUpListeners();
+        engineInstance.currentScreen = MainEngine.Screen.GAME_STOP;
 
         engineInstance.fpController.keySet.clear();
-        engineInstance.currentScreen = MainEngine.Screen.GAME_STOP;
     }
 }

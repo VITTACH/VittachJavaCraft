@@ -15,28 +15,17 @@ public class LoadAndSaveScreen implements GameScreen {
     }
 
     private void listenInput() {
-        if (engineInstance.loadAndSaveMenu.pressedKey < 0) return;
+        int pressedKey = engineInstance.loadAndSaveMenu.pressedKey;
+        if (pressedKey < 0) return;
 
         preferenceInstance.inputListener.cleanProcesses();
 
-        switch (engineInstance.loadAndSaveMenu.pressedKey) {
-            case 1:
-                preferenceInstance.inputListener.addListener(engineInstance.boxBtn);
-                preferenceInstance.inputListener.addListener(engineInstance.fpController);
-                preferenceInstance.inputListener.addListener(engineInstance.leftStick);
-                preferenceInstance.inputListener.addListener(engineInstance.rightStick);
-
-                engineInstance.currentScreen = MainEngine.Screen.GAME_PLAY;
-                break;
-
-            case 2:
-                preferenceInstance.inputListener.addListener(engineInstance.startMenu.gameButton);
-                preferenceInstance.inputListener.addListener(engineInstance.startMenu.loadButton);
-                preferenceInstance.inputListener.addListener(engineInstance.startMenu.moreButton);
-                preferenceInstance.inputListener.addListener(engineInstance.startMenu);
-
-                engineInstance.currentScreen = MainEngine.Screen.GAME_MAIN_SCREEN;
-                break;
+        if (pressedKey == 1) {
+            engineInstance.gameScene.setUpListeners();
+            engineInstance.currentScreen = MainEngine.Screen.GAME_PLAY;
+        } else if (pressedKey == 2) {
+            engineInstance.startMenu.setUpListeners();
+            engineInstance.currentScreen = MainEngine.Screen.GAME_MAIN_SCREEN;
         }
 
         engineInstance.loadAndSaveMenu.pressedKey = -1;
