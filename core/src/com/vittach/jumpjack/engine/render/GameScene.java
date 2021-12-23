@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
@@ -117,11 +116,6 @@ public class GameScene {
         texture = new Texture(path);
         TextureRegion[][] imageRegions = TextureRegion.split(texture, texture.getWidth() / 8, texture.getHeight() / 8);
 
-        OrthographicCamera camera = new OrthographicCamera();
-        camera.setToOrtho(false, 16, 16);
-        SpriteBatch batch = new SpriteBatch();
-        batch.setProjectionMatrix(camera.combined);
-
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 7; j++) {
                 String symbol;
@@ -129,6 +123,7 @@ public class GameScene {
                 else if (i == 6 && j == 0) symbol = "a";
                 else if (i == 3 && j == 1) symbol = "c";
                 else continue;
+
                 List<TextureRegion> regionList = new ArrayList<TextureRegion>();
                 regionList.add(imageRegions[i][0]);
                 textureMap.put(symbol, regionList);
@@ -146,7 +141,7 @@ public class GameScene {
         shapeRenderer.rect(0, 0, graphics.getWidth(), graphics.getHeight());
         shapeRenderer.end();
 
-        render(cubeChunkMap, modelInstanceObjMap, textureMap);
+        render(cubeChunkMap, modelInstanceObjMap, textureMap, viewport);
 
         boxBtn.display(viewport);
     }
@@ -211,7 +206,8 @@ public class GameScene {
     private void render(
         Map<Vector3, Chunk> chunkMap,
         Map<Vector3, ModelInstanceObj> modelInstanceObjMap,
-        Map<String, List<TextureRegion>> textureMap
+        Map<String, List<TextureRegion>> textureMap,
+        Viewport viewport
     ) {
         PerspectiveCamera fpCamera = engineInstance.fpController.getFpCamera();
         camPosition = fpCamera.position;
@@ -240,6 +236,8 @@ public class GameScene {
             }
 
             applyShaders(fpCamera, instanceObj.getDepthMap());
+
+            viewport.apply();
 
             modelBatch.begin(fpCamera);
             modelBatch.render(instanceObj.getModelInstance());

@@ -23,7 +23,6 @@ public class FirstPersonController implements ProcessorInput {
 
     private final float MOVE_VELOCITY = 0.1f;
     private final float FAST_VELOCITY = 1.0f;
-    private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
 
     private TouchPoint touchPoint;
@@ -45,6 +44,7 @@ public class FirstPersonController implements ProcessorInput {
     public FirstPersonController(MainEngine.Device device) {
         this.device = device;
 
+        MainEngine engineInstance = MainEngine.getInstance();
         camera = new PerspectiveCamera(67, engineInstance.renderWidth, engineInstance.renderHeight);
 
         keySet = new HashSet<Integer>();

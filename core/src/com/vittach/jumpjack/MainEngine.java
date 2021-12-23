@@ -34,6 +34,12 @@ public class MainEngine extends ApplicationAdapter {
 
     private final Device device;
 
+    private HashMap<Screen, GameScreen> gameScreenMap;
+    private Preferences preferenceInstance;
+
+    private Viewport viewport;
+    private OrthographicCamera camera;
+
     public FirstPersonController fpController;
     public JoystickController leftStick;
     public JoystickController rightStick;
@@ -44,16 +50,6 @@ public class MainEngine extends ApplicationAdapter {
     public CreateWorldMenu createWorldMenu;
     public StartMenu startMenu;
 
-    private HashMap<Screen, GameScreen> gameScreenMap;
-    private Preferences preferenceInstance;
-
-    private Viewport viewport;
-    private OrthographicCamera camera;
-
-    private MainEngine(Device device) {
-        this.device = device;
-    }
-
     public static MainEngine getInstance() {
         return engineInstance;
     }
@@ -63,6 +59,10 @@ public class MainEngine extends ApplicationAdapter {
             engineInstance = new MainEngine(device);
         }
         return engineInstance;
+    }
+
+    private MainEngine(Device device) {
+        this.device = device;
     }
 
     @Override

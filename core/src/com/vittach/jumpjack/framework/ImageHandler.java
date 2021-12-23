@@ -46,10 +46,10 @@ public class ImageHandler {
     }
 
     public void blit(float x, float y, ImageHandler imageHandler, int m, int n, int w, int h) {
-        Sprite sprite;
         frameBuffer.begin();
         spriteBatch.begin();
 
+        Sprite sprite;
         if (w != 0 && h != 0) {
             sprite = new Sprite(imageHandler.getTexture(), m, n, w, h);
             sprite.setPosition(x, y);
@@ -67,7 +67,7 @@ public class ImageHandler {
 
     public ImageHandler load(String path) {
         Texture blank = new Texture(path);
-        frameBuffer = new FrameBuffer(Format.RGBA4444, blank.getWidth(), blank.getHeight(), true);
+        frameBuffer = new FrameBuffer(Format.RGBA8888, blank.getWidth(), blank.getHeight(), true);
         setCamera(blank.getWidth(), blank.getHeight());
 
         frameBuffer.begin();
@@ -120,7 +120,7 @@ public class ImageHandler {
     }
 
     public void setEmpty(int width, int height) {
-        frameBuffer = new FrameBuffer(Format.RGBA4444, width, height, true);
+        frameBuffer = new FrameBuffer(Format.RGBA8888, width, height, true);
         setCamera(width, height);
     }
 

@@ -51,15 +51,12 @@ public class DirectionalLight extends Light {
             true
         );
         frameBuffer.begin();
-
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
         applyShader(chunkTrans);
 
         modelBatch.begin(camera);
         modelBatch.render(modelInstance);
         modelBatch.end();
-
         frameBuffer.end();
 
         depthMap = frameBuffer.getColorBufferTexture();
