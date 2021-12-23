@@ -4,7 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.engine.controller.FirstPersonController;
 import com.vittach.jumpjack.engine.render.GameScene;
@@ -16,8 +16,6 @@ import com.vittach.jumpjack.ui.screen.menu.PauseMenu;
 import com.vittach.jumpjack.ui.screen.menu.StartMenu;
 
 import java.util.HashMap;
-
-import static com.badlogic.gdx.Gdx.graphics;
 
 public class MainEngine extends ApplicationAdapter {
     public enum Screen {
@@ -69,10 +67,9 @@ public class MainEngine extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
-        camera.update();
+        viewport.update(width, height);
 
-        viewport.update(width, height, true);
+        camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
 
         preferenceInstance.setWidth(viewport.getScreenWidth(), width);
         preferenceInstance.setHeight(viewport.getScreenHeight(), height);
@@ -86,6 +83,7 @@ public class MainEngine extends ApplicationAdapter {
     public void render() {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+        viewport.apply();
         gameScreenMap.get(currentScreen).display(viewport);
     }
 
@@ -94,13 +92,7 @@ public class MainEngine extends ApplicationAdapter {
         preferenceInstance = Preferences.getInstance();
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, graphics.getWidth(), graphics.getHeight());
-        camera.update();
-
-        viewport = new ExtendViewport(renderWidth, renderHeight, camera);
-
-        startMenu = new StartMenu();
-        startMenu.setUpListeners();
+        viewport = new FitViewport(renderWidth, renderHeight, camera);
 
         gameScreenMap = new HashMap<Screen, GameScreen>() {{
             put(Screen.GAME_PLAY, new GameSceneScreen());
@@ -114,6 +106,7 @@ public class MainEngine extends ApplicationAdapter {
         leftStick = new JoystickController(JoystickController.Stick.LEFT);
         rightStick = new JoystickController(JoystickController.Stick.RIGHT);
 
+        startMenu = new StartMenu();
         loadAndSaveMenu = new LoadAndSaveMenu();
         gameScene = new GameScene();
         createWorldMenu = new CreateWorldMenu();
@@ -125,6 +118,7 @@ public class MainEngine extends ApplicationAdapter {
         preferenceInstance.playerMusic.play();
 
         Gdx.input.setInputProcessor(preferenceInstance.inputListener);
+        startMenu.setUpListeners();
     }
 
     @Override

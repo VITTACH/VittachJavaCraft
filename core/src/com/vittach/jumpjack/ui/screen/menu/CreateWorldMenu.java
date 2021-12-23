@@ -20,8 +20,8 @@ public class CreateWorldMenu extends InputListener {
     private final ScreenButton startButton;
     public TextField textField;
 
-    private final FontHandler arcadepixFont;
-    private final FontHandler jumpjackFont;
+    private final FontHandler arcadePixFont;
+    private final FontHandler jumpJackFont;
     private final SpriteBatch spriteBatch;
 
     private final ImageHandler backgroundImage;
@@ -57,15 +57,13 @@ public class CreateWorldMenu extends InputListener {
     }
 
     public void display(Viewport viewport) {
-        viewport.apply();
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
 
         spriteBatch.begin();
         sprite.draw(spriteBatch);
+        startButton.draw(spriteBatch);
+        backButton.draw(spriteBatch);
         spriteBatch.end();
-
-        startButton.draw(viewport);
-        backButton.draw(viewport);
 
         setViewport(viewport);
         act();
@@ -79,15 +77,16 @@ public class CreateWorldMenu extends InputListener {
     }
 
     public CreateWorldMenu() {
-        jumpjackFont = new FontHandler();
-        arcadepixFont = new FontHandler();
         spriteBatch = new SpriteBatch();
-
-        arcadepixFont.load("arcadepix.ttf");
-        arcadepixFont.setPixelSize(14);
-        jumpjackFont.load("jumpjack.ttf");
-        jumpjackFont.setPixelSize(12);
         sprite = new Sprite();
+
+        arcadePixFont = new FontHandler();
+        arcadePixFont.load("arcadepix.ttf");
+        arcadePixFont.setPixelSize(14);
+
+        jumpJackFont = new FontHandler();
+        jumpJackFont.load("jumpjack.ttf");
+        jumpJackFont.setPixelSize(12);
 
         backgroundImage = new ImageHandler().load("ui/background.png");
 
@@ -97,7 +96,7 @@ public class CreateWorldMenu extends InputListener {
         paperImage = new ImageHandler().load("ui/paper.png");
 
         TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(
-            arcadepixFont.getBitmapFont(), new Color(1, 1, 1, 1),
+            arcadePixFont.getBitmapFont(), new Color(1, 1, 1, 1),
             new TextureRegionDrawable(cursor.render()),
             new TextureRegionDrawable(selectorImage.render()),
             new TextureRegionDrawable(textFieldImage.render())
@@ -126,24 +125,20 @@ public class CreateWorldMenu extends InputListener {
         startButton = new ScreenButton();
         startButton.choice = new ImageHandler();
         startButton.choice.load("ui/button_selected.png");
-        startButton.selectedBoxImage.load("ui/button_default.png");
-        startButton.screen.blit(startButton.selectedBoxImage);
+        startButton.foreground.load("ui/button_default.png");
+        startButton.screen.blit(startButton.foreground);
         startButton.setPosition(engineInstance.renderWidth / 2.0f - startButton.getWidth() / 2f, 98);
-        startButton.font = jumpjackFont;
-        startButton.message = "qnheary";
-        startButton.textY = 19;
-        startButton.textX = 80;
+        startButton.font = jumpJackFont;
+        startButton.setMessage(80, 19, "qnheary");
 
         backButton = new ScreenButton();
         backButton.choice = new ImageHandler();
         backButton.choice.load("ui/button_selected.png");
-        backButton.selectedBoxImage.load("ui/button_default.png");
-        backButton.screen.blit(backButton.selectedBoxImage);
+        backButton.foreground.load("ui/button_default.png");
+        backButton.screen.blit(backButton.foreground);
         backButton.setPosition(engineInstance.renderWidth / 2.0f - backButton.getWidth() / 2f, 68);
-        backButton.font = jumpjackFont;
-        backButton.message = "mahae";
-        backButton.textY = 19;
-        backButton.textX = 90;
+        backButton.font = jumpJackFont;
+        backButton.setMessage(90, 19, "mahae");
 
         textField.setOnlyFontChars(true);
         textField.setMessageText(" Hi!");
@@ -157,8 +152,8 @@ public class CreateWorldMenu extends InputListener {
     }
 
     public void dispose() {
-        jumpjackFont.dispose();
-        arcadepixFont.dispose();
+        jumpJackFont.dispose();
+        arcadePixFont.dispose();
 
         spriteBatch.dispose();
         cursor.dispose();

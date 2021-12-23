@@ -8,8 +8,8 @@ public class LoadAndSaveScreen implements GameScreen {
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
 
-    public void display(Viewport view) {
-        engineInstance.loadAndSaveMenu.display(view);
+    public void display(Viewport viewport) {
+        engineInstance.loadAndSaveMenu.display(viewport);
 
         listenInput();
     }

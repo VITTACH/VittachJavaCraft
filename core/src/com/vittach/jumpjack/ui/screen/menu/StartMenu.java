@@ -19,7 +19,7 @@ public class StartMenu extends InputListener {
 
     public int pressedKey = -1;
     private Sprite sprite;
-    private SpriteBatch spriteBatch;
+    private final SpriteBatch spriteBatch = new SpriteBatch();
 
     private ImageHandler background;
     private ImageHandler paperImage;
@@ -65,42 +65,35 @@ public class StartMenu extends InputListener {
         gameButton = new ScreenButton();
         gameButton.choice = new ImageHandler();
         gameButton.choice.load("ui/button_selected.png");
-        gameButton.selectedBoxImage.load("ui/button_default.png");
-        gameButton.screen.blit(gameButton.selectedBoxImage);
+        gameButton.foreground.load("ui/button_default.png");
+        gameButton.screen.blit(gameButton.foreground);
         gameButton.setPosition(MainEngine.getInstance().renderWidth / 2 - gameButton.getWidth() / 2, 128);
         gameButton.font.load("jumpjack.ttf");
-        gameButton.textY = 19;
-        gameButton.textX = 84;
-        gameButton.message = "idpary";
         gameButton.font.setPixelSize(12);
+        gameButton.setMessage(84, 19, "idpary");
 
         loadButton = new ScreenButton();
         loadButton.choice = new ImageHandler();
         loadButton.choice.load("ui/button_selected.png");
-        loadButton.selectedBoxImage.load("ui/button_default.png");
-        loadButton.screen.blit(loadButton.selectedBoxImage);
+        loadButton.foreground.load("ui/button_default.png");
+        loadButton.screen.blit(loadButton.foreground);
         loadButton.setPosition(MainEngine.getInstance().renderWidth / 2 - loadButton.getWidth() / 2, 98);
         loadButton.font = gameButton.font;
-        loadButton.textY = 19;
-        loadButton.textX = 74;
-        loadButton.message = "hadpshja";
+        loadButton.setMessage(74, 19, "hadpshja");
 
         moreButton = new ScreenButton();
         moreButton.choice = new ImageHandler();
         moreButton.choice.load("ui/button_selected.png");
-        moreButton.selectedBoxImage.load("ui/button_default.png");
-        moreButton.screen.blit(moreButton.selectedBoxImage);
+        moreButton.foreground.load("ui/button_default.png");
+        moreButton.screen.blit(moreButton.foreground);
         moreButton.setPosition(MainEngine.getInstance().renderWidth / 2 - moreButton.getWidth() / 2, 68);
         moreButton.font = gameButton.font;
-        moreButton.textY = 19;
-        moreButton.textX = 74;
-        moreButton.message = "n acrnpf";
+        moreButton.setMessage(74, 19, "n acrnpf");
 
         paperImage = new ImageHandler();
         paperImage.load("ui/paper.png");
 
         background = new ImageHandler();
-        spriteBatch = new SpriteBatch();
         background.load("ui/background.png");
         background.blit(54, 27, paperImage);
         background.blit(120, 164, logoImage);
@@ -109,15 +102,13 @@ public class StartMenu extends InputListener {
     }
 
     public void display(Viewport viewport) {
-        viewport.apply();
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
 
         spriteBatch.begin();
         sprite.draw(spriteBatch);
+        gameButton.draw(spriteBatch);
+        loadButton.draw(spriteBatch);
+        moreButton.draw(spriteBatch);
         spriteBatch.end();
-
-        gameButton.draw(viewport);
-        loadButton.draw(viewport);
-        moreButton.draw(viewport);
     }
 }

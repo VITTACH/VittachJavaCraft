@@ -132,31 +132,25 @@ public class LoadAndSaveMenu extends InputListener {
         buttonsFont.setPixelSize(12);
 
         backButton.choice.load("ui/button_selected.png");
-        backButton.selectedBoxImage.load("ui/button_default.png");
-        backButton.screen.blit(backButton.selectedBoxImage);
+        backButton.foreground.load("ui/button_default.png");
+        backButton.screen.blit(backButton.foreground);
         backButton.setPosition(engineInstance.renderWidth / 2 - backButton.getWidth() / 2f, 68);
         backButton.font = buttonsFont;
-        backButton.textY = 19;
-        backButton.textX = 90;
-        backButton.message = "mahae";
+        backButton.setMessage(90, 19, "mahae");
 
         startButton.choice.load("ui/button_selected.png");
-        startButton.selectedBoxImage.load("ui/button_default.png");
-        startButton.screen.blit(startButton.selectedBoxImage);
+        startButton.foreground.load("ui/button_default.png");
+        startButton.screen.blit(startButton.foreground);
         startButton.setPosition(engineInstance.renderWidth / 2 - startButton.getWidth() / 2f, 98);
         startButton.font = buttonsFont;
-        startButton.textY = 19;
-        startButton.textX = 79;
-        startButton.message = "seakiry";
+        startButton.setMessage(79, 19, "seakiry");
 
         loadButton.choice.load("ui/button_selected.png");
-        loadButton.selectedBoxImage.load("ui/button_default.png");
-        loadButton.screen.blit(loadButton.selectedBoxImage);
+        loadButton.foreground.load("ui/button_default.png");
+        loadButton.screen.blit(loadButton.foreground);
         loadButton.setPosition(engineInstance.renderWidth / 2 - loadButton.getWidth() / 2, 184);
         loadButton.font = buttonsFont;
-        loadButton.textY = 19;
-        loadButton.textX = 74;
-        loadButton.message = "hadpshja";
+        loadButton.setMessage(74, 19, "hadpshja");
 
         selectSprite = itemSelectedImage.render();
         selectSprite.setPosition(123, offsetY - itemSelectedImage.getHeight() + 1);
@@ -243,7 +237,6 @@ public class LoadAndSaveMenu extends InputListener {
             scroll(positionY);
         }
 
-        viewport.apply();
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
 
         spriteBatch.begin();
@@ -252,11 +245,10 @@ public class LoadAndSaveMenu extends InputListener {
         if (selectSprite.getY() < offsetY && selectSprite.getY() >= itemSelectedImage.getHeight() * -3 + offsetY) {
             selectSprite.draw(spriteBatch);
         }
+        startButton.draw(spriteBatch);
+        backButton.draw(spriteBatch);
+        loadButton.draw(spriteBatch);
         spriteBatch.end();
-
-        startButton.draw(viewport);
-        backButton.draw(viewport);
-        loadButton.draw(viewport);
     }
 
     public void scroll(int y) {

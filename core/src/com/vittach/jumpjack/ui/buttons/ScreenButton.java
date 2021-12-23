@@ -2,7 +2,6 @@ package com.vittach.jumpjack.ui.buttons;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.MainEngine;
 import com.vittach.jumpjack.Preferences;
 import com.vittach.jumpjack.framework.ColorImpl;
@@ -15,16 +14,17 @@ import com.vittach.jumpjack.ui.InputListener;
  */
 
 public class ScreenButton extends InputListener {
+    private boolean isShowForeground = false;
+    private String message;
+    private int textX;
+    private int textY;
+
     public FontHandler font = new FontHandler();
-    private SpriteBatch spriteBatch = new SpriteBatch();
-    public String message;
-    private boolean hasBackground;
-    public int textX;
-    public int textY;
-    public ColorImpl color = new ColorImpl(1, 1, 1);
-    public ImageHandler selectedBoxImage = new ImageHandler();
+    public ColorImpl fontColor = new ColorImpl(1, 1, 1);
+    public ImageHandler foreground = new ImageHandler();
     public ImageHandler screen = new ImageHandler();
     public ImageHandler choice;
+
     public float x;
     public float y;
 
@@ -35,16 +35,17 @@ public class ScreenButton extends InputListener {
     public boolean mouseMoved(int x, int y) {
         if (choice != null) {
             if (touchDown(x, y, -1)) {
-                if (hasBackground) {
+                if (isShowForeground) {
+                    isShowForeground = false;
                     screen.clear();
-                    hasBackground = false;
                     screen.blit(choice);
                 }
-            } else if (!hasBackground) {
+            } else if (!isShowForeground) {
                 screen.clear();
-                screen.blit(selectedBoxImage);
-                hasBackground = true;
+                screen.blit(foreground);
+                isShowForeground = true;
             }
+            fontPrint();
         }
         return true;
     }
@@ -71,37 +72,10 @@ public class ScreenButton extends InputListener {
         }.start();
     }
 
-    private boolean touchDown(int x, int y, int id) {
-        if (choice != null && !hasBackground && id >= 0) {
-            screen.clear();
-            screen.blit(selectedBoxImage);
-            hasBackground = true;
-        }
-
-        float scaleX = preferenceInstance.screenWidth / (float) engineInstance.renderWidth;
-        float scaleY = preferenceInstance.screenHeight / (float) engineInstance.renderHeight;
-        x -= (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
-        y -= (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
-
-        return x >= this.x * scaleX
-            && x <= this.x * scaleX + selectedBoxImage.getWidth() * scaleX
-            && y >= (preferenceInstance.screenHeight - this.y * scaleY) - selectedBoxImage.getHeight() * scaleY
-            && y <= (preferenceInstance.screenHeight - this.y * scaleY);
-    }
-
-    public void draw(Viewport viewport) {
-        if (message != null) {
-            screen.fontPrint(font, textX, textY, message, color);
-        }
-
-        viewport.apply();
-        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
-
-        spriteBatch.begin();
+    public void draw(SpriteBatch spriteBatch) {
         Sprite sprite = screen.render();
         sprite.setPosition(x, y);
         sprite.draw(spriteBatch);
-        spriteBatch.end();
     }
 
     public void setPosition(float x, float y) {
@@ -110,16 +84,45 @@ public class ScreenButton extends InputListener {
     }
 
     public float getWidth() {
-        return selectedBoxImage.getWidth();
+        return foreground.getWidth();
     }
 
     public float getHeight() {
-        return selectedBoxImage.getHeight();
+        return foreground.getHeight();
+    }
+
+    public void setMessage(int textX, int textY, String message) {
+        this.textX = textX;
+        this.textY = textY;
+        this.message = message;
+        fontPrint();
+    }
+
+    private boolean touchDown(int x, int y, int id) {
+        if (choice != null && !isShowForeground && id >= 0) {
+            isShowForeground = true;
+            screen.clear();
+            screen.blit(foreground);
+            fontPrint();
+        }
+
+        float scaleX = preferenceInstance.screenWidth / (float) engineInstance.renderWidth;
+        float scaleY = preferenceInstance.screenHeight / (float) engineInstance.renderHeight;
+        x -= (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
+        y -= (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
+
+        return x >= this.x * scaleX
+            && x <= this.x * scaleX + foreground.getWidth() * scaleX
+            && y >= (preferenceInstance.screenHeight - this.y * scaleY) - foreground.getHeight() * scaleY
+            && y <= (preferenceInstance.screenHeight - this.y * scaleY);
+    }
+
+    private void fontPrint() {
+        screen.fontPrint(font, textX, textY, message, fontColor);
     }
 
     public void dispose() {
-        spriteBatch.dispose();
-        selectedBoxImage.dispose();
+        foreground.dispose();
         screen.dispose();
     }
 }

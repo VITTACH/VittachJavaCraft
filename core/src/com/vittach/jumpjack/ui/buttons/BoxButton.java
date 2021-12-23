@@ -1,10 +1,13 @@
 package com.vittach.jumpjack.ui.buttons;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.vittach.jumpjack.MainEngine;
 import com.vittach.jumpjack.framework.ImageHandler;
 
 public class BoxButton extends ScreenButton {
+    private final SpriteBatch spriteBatch;
+
     private final ImageHandler cellBoxImage;
     private final ImageHandler cubesImage;
 
@@ -15,9 +18,12 @@ public class BoxButton extends ScreenButton {
     private final MainEngine engineInstance = MainEngine.getInstance();
 
     public BoxButton() {
+        spriteBatch = new SpriteBatch();
+
         cellBoxImage = new ImageHandler().load("ui/cell_box_default.png");
         cubesImage = new ImageHandler().load("ui/cubes_sprite.png");
-        selectedBoxImage.load("ui/selected_box.png");
+        foreground.load("ui/selected_box.png");
+        changeBox();
     }
 
     public boolean touchUp(int x, int y, int id, int button) {
@@ -31,18 +37,22 @@ public class BoxButton extends ScreenButton {
     }
 
     public void display(Viewport viewport) {
-        changeBox();
-        draw(viewport);
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+
+        spriteBatch.begin();
+        draw(spriteBatch);
+        spriteBatch.end();
     }
 
     private void changeBox() {
         screen.blit(10, 10, cellBoxImage);
-        screen.blit(selectedBoxImage);
+        screen.blit(foreground);
         screen.blit(17, 17, cubesImage, oldColumn * boxSize, oldRow * boxSize, boxSize, boxSize);
     }
 
     public void dispose() {
         cubesImage.dispose();
         cellBoxImage.dispose();
+        spriteBatch.dispose();
     }
 }

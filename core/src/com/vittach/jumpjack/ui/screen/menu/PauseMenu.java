@@ -22,8 +22,8 @@ public class PauseMenu extends InputListener {
     private final float width;
     private final float height;
 
-    private final SpriteBatch spriteWindow;
-    private Sprite resultSprite;
+    private final SpriteBatch spriteBatch;
+    private Sprite sprite;
 
     private final ImageHandler backgroundImage;
     private final ImageHandler cellBoxImage;
@@ -44,7 +44,7 @@ public class PauseMenu extends InputListener {
     public void dispose() {
         screen.dispose();
         playButton.dispose();
-        spriteWindow.dispose();
+        spriteBatch.dispose();
         backgroundImage.dispose();
         saveButton.dispose();
         loadButton.dispose();
@@ -68,61 +68,50 @@ public class PauseMenu extends InputListener {
         width = engineInstance.renderWidth / 2f;
         height = engineInstance.renderHeight / 2f;
 
-        exitButton = new ScreenButton();
         playButton = new ScreenButton();
-        loadButton = new ScreenButton();
-        saveButton = new ScreenButton();
-
-        backgroundImage = new ImageHandler();
-
-        exitButton.choice = new ImageHandler();
-        saveButton.choice = new ImageHandler();
-        loadButton.choice = new ImageHandler();
         playButton.choice = new ImageHandler();
-
-        exitButton.textX = 16;
-        exitButton.textY = 19;
-        loadButton.textY = 19;
-        playButton.textY = 19;
-        playButton.textX = 13;
-        saveButton.textY = 19;
-        saveButton.textX = 6;
-        loadButton.textX = 6;
-
+        playButton.choice.load("ui/button_small_selected.png");
+        playButton.foreground.load("ui/button_small_default.png");
+        playButton.screen.blit(playButton.foreground);
         playButton.setPosition(298, 205);
-        loadButton.setPosition(194, 45);
-        exitButton.setPosition(298, 45);
-        saveButton.setPosition(90, 45);
-
         playButton.font.load("jumpjack.ttf");
         playButton.font.setPixelSize(12);
+        playButton.setMessage(13, 19, "idpary");
 
-        playButton.message = "idpary";
-        loadButton.font = playButton.font;
-        loadButton.message = "pfqrapr";
-        saveButton.font = playButton.font;
-        saveButton.message = "qnupami";
-        exitButton.font = playButton.font;
-        exitButton.message = "cxune";
-
-        playButton.choice.load("ui/button_small_selected.png");
-        playButton.selectedBoxImage.load("ui/button_small_default.png");
-        playButton.screen.blit(playButton.selectedBoxImage);
-        loadButton.choice.load("ui/button_small_selected.png");
-        loadButton.selectedBoxImage.load("ui/button_small_default.png");
-        loadButton.screen.blit(loadButton.selectedBoxImage);
-        saveButton.choice.load("ui/button_small_selected.png");
-        saveButton.selectedBoxImage.load("ui/button_small_default.png");
-        saveButton.screen.blit(saveButton.selectedBoxImage);
+        exitButton = new ScreenButton();
+        exitButton.choice = new ImageHandler();
         exitButton.choice.load("ui/button_small_selected.png");
-        exitButton.selectedBoxImage.load("ui/button_small_default.png");
-        exitButton.screen.blit(exitButton.selectedBoxImage);
+        exitButton.foreground.load("ui/button_small_default.png");
+        exitButton.screen.blit(exitButton.foreground);
+        exitButton.setPosition(298, 45);
+        exitButton.font = playButton.font;
+        exitButton.setMessage(16, 19, "cxune");
+
+        loadButton = new ScreenButton();
+        loadButton.choice = new ImageHandler();
+        loadButton.choice.load("ui/button_small_selected.png");
+        loadButton.foreground.load("ui/button_small_default.png");
+        loadButton.screen.blit(loadButton.foreground);
+        loadButton.setPosition(194, 45);
+        loadButton.font = playButton.font;
+        loadButton.setMessage(6, 19, "pfqrapr");
+
+        saveButton = new ScreenButton();
+        saveButton.choice = new ImageHandler();
+        saveButton.choice.load("ui/button_small_selected.png");
+        saveButton.foreground.load("ui/button_small_default.png");
+        saveButton.screen.blit(saveButton.foreground);
+        saveButton.setPosition(90, 45);
+        saveButton.font = playButton.font;
+        saveButton.setMessage(6, 19, "qnupami");
+
+        backgroundImage = new ImageHandler();
 
         backgroundImage.load("ui/background.png");
         cellBoxImage.load("ui/cell_box_default.png");
         cellSelectImage.load("ui/cell_box_selected.png");
         blockImage.load("ui/cubes_sprite.png");
-        spriteWindow = new SpriteBatch();
+        spriteBatch = new SpriteBatch();
 
         backgroundImage.blit(54, 27, new ImageHandler().load("ui/paper.png"));
 
@@ -142,7 +131,7 @@ public class PauseMenu extends InputListener {
             }
 
         screen.blit(backgroundImage);
-        resultSprite = screen.render();
+        sprite = screen.render();
     }
 
     @Override
@@ -184,7 +173,7 @@ public class PauseMenu extends InputListener {
                         );
                         oldColumn = i;
                         oldRow = j;
-                        resultSprite = screen.render();
+                        sprite = screen.render();
                     } else {
                         i = columns;
                         break;
@@ -239,17 +228,15 @@ public class PauseMenu extends InputListener {
         return true;
     }
 
-    public void display(Viewport view) {
-        view.apply();
-        spriteWindow.setProjectionMatrix(view.getCamera().combined);
+    public void display(Viewport viewport) {
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
 
-        spriteWindow.begin();
-        resultSprite.draw(spriteWindow);
-        spriteWindow.end();
-
-        playButton.draw(view);
-        loadButton.draw(view);
-        saveButton.draw(view);
-        exitButton.draw(view);
+        spriteBatch.begin();
+        sprite.draw(spriteBatch);
+        playButton.draw(spriteBatch);
+        loadButton.draw(spriteBatch);
+        saveButton.draw(spriteBatch);
+        exitButton.draw(spriteBatch);
+        spriteBatch.end();
     }
 }

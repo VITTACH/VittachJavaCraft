@@ -9,8 +9,8 @@ public class PauseScreen implements GameScreen {
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
 
-    public void display(Viewport view) {
-        engineInstance.pauseMenu.display(view);
+    public void display(Viewport viewport) {
+        engineInstance.pauseMenu.display(viewport);
 
         listenInput();
     }

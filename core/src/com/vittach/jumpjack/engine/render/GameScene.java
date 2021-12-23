@@ -37,7 +37,7 @@ public class GameScene {
     private final Mesh cubeMesh;
     private final ModelBatch modelBatch;
     private final ShaderProgram shaderProgram;
-    private final ShapeRenderer backgroundShape = new ShapeRenderer();
+    private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     private Texture texture;
     private Vector3 camPosition;
@@ -74,7 +74,7 @@ public class GameScene {
     }
 
     public GameScene() {
-        backgroundShape.setColor(0.2f, 0.3f, 0.43f, 1);
+        shapeRenderer.setColor(0.2f, 0.3f, 0.43f, 1);
         camPosition = new Vector3(0, 0, 0);
         setTextures(Gdx.files.internal("sprites/cubesSprite.png"));
 
@@ -139,12 +139,12 @@ public class GameScene {
     public void display(Viewport viewport) {
         System.out.println("FPS counter: " + graphics.getFramesPerSecond());
 
-        viewport.apply();
-
         // background filled
-        backgroundShape.begin(ShapeRenderer.ShapeType.Filled);
-        backgroundShape.rect(0, 0, graphics.getWidth(), graphics.getHeight());
-        backgroundShape.end();
+        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.rect(0, 0, graphics.getWidth(), graphics.getHeight());
+        shapeRenderer.end();
 
         render(cubeChunkMap, modelInstanceObjMap, textureMap);
 

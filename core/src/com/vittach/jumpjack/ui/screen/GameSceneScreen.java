@@ -9,14 +9,14 @@ public class GameSceneScreen implements GameScreen {
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
 
-    public void display(Viewport view) {
+    public void display(Viewport viewport) {
         engineInstance.fpController.handleInput();
         engineInstance.rightStick.handleInput();
         engineInstance.leftStick.handleInput();
 
-        engineInstance.gameScene.display(view);
-        engineInstance.rightStick.display(view);
-        engineInstance.leftStick.display(view);
+        engineInstance.gameScene.display(viewport);
+        engineInstance.rightStick.display(viewport);
+        engineInstance.leftStick.display(viewport);
 
         listenInput();
     }

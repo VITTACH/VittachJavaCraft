@@ -130,7 +130,6 @@ public class JoystickController implements ProcessorInput {
         Gdx.gl.glEnable(3042);
         Gdx.gl.glBlendFunc(770, 771);
 
-        viewport.apply();
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
