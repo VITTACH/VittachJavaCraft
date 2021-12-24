@@ -1,7 +1,7 @@
 package com.vittach.jumpjack;
 
 import com.badlogic.gdx.Gdx;
-import com.vittach.jumpjack.framework.PlayerMusic;
+import com.vittach.jumpjack.utils.PlayerMusic;
 import com.vittach.jumpjack.ui.InputListener;
 
 import java.util.HashSet;

@@ -1,39 +1,39 @@
-package com.vittach.jumpjack.ui.buttons;
+package com.vittach.jumpjack.ui.controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.Preferences;
-import com.vittach.jumpjack.engine.controller.ProcessorInput;
-import com.vittach.jumpjack.framework.ColorImpl;
-import com.vittach.jumpjack.framework.MyTimer;
-import com.vittach.jumpjack.framework.TimerListener;
-import com.vittach.jumpjack.framework.TouchPoint;
+import com.vittach.jumpjack.utils.ColorImpl;
+import com.vittach.jumpjack.utils.MyTimer;
+import com.vittach.jumpjack.utils.TimerListener;
+import com.vittach.jumpjack.utils.TouchPoint;
 
 public class JoystickController implements ProcessorInput {
     public enum Stick {
         LEFT, RIGHT
     }
 
-    private final TouchPoint[] touchPoints = new TouchPoint[2];
-    private boolean hasTouchUpped = true;
-    private boolean hasFirstTouch = false;
-
-    private final Stick stick;
-    private int offsetX, offsetY;
-    private int touchX, touchY, idOffset = 0;
-    private int touchId = -1;
-
     private final ColorImpl whiteColor = new ColorImpl(1, 1, 1, 0.5f);
 
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
 
+    private final Stick stick;
+    private final TouchPoint[] touchPoints = new TouchPoint[2];
+    private boolean hasTouchUpped = true;
+    private boolean hasFirstTouch = false;
+
+    private int offsetX, offsetY;
+    private int touchX, touchY;
+    private int idOffset = 0, touchId = -1;
+
     private final MyTimer joystickTimer;
 
-    private final int largeRadius = engineInstance.renderHeight / 5;
-    private final int smallRadius = largeRadius / 2;
+    private int largeRadius;
+    private float scaleX;
+    private float scaleY;
 
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
@@ -124,9 +124,6 @@ public class JoystickController implements ProcessorInput {
     public void display(Viewport viewport) {
         if (!hasFirstTouch) return;
 
-        float scaleX = engineInstance.renderWidth / (float) preferenceInstance.screenWidth;
-        float scaleY = engineInstance.renderHeight / (float) preferenceInstance.screenHeight;
-
         Gdx.gl.glEnable(3042);
         Gdx.gl.glBlendFunc(770, 771);
 
@@ -136,13 +133,13 @@ public class JoystickController implements ProcessorInput {
         float x = touchPoints[0].getX() * scaleX;
         float y = engineInstance.renderHeight - touchPoints[0].getY() * scaleY;
         shapeRenderer.setColor(whiteColor.getColor());
-        shapeRenderer.circle(x, y, largeRadius / 2f);
+        shapeRenderer.circle(x, y, largeRadius * scaleX);
         shapeRenderer.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         x = touchPoints[1].getX() * scaleX;
         y = engineInstance.renderHeight - touchPoints[1].getY() * scaleY;
-        shapeRenderer.circle(x, y, smallRadius);
+        shapeRenderer.circle(x, y, largeRadius * scaleX);
         shapeRenderer.end();
     }
 
@@ -181,6 +178,10 @@ public class JoystickController implements ProcessorInput {
     public void updateAspectRatio() {
         offsetX = (preferenceInstance.displayWidth - preferenceInstance.screenWidth) / 2;
         offsetY = (preferenceInstance.displayHeight - preferenceInstance.screenHeight) / 2;
+
+        scaleX = engineInstance.renderWidth / (float) preferenceInstance.screenWidth;
+        scaleY = engineInstance.renderHeight / (float) preferenceInstance.screenHeight;
+        largeRadius = preferenceInstance.screenHeight / 10;
     }
 
     private boolean isHasTouchUpped() {

@@ -1,16 +1,16 @@
-package com.vittach.jumpjack.engine.controller;
+package com.vittach.jumpjack.ui.controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
-import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.Preferences;
-import com.vittach.jumpjack.framework.TouchPoint;
+import com.vittach.jumpjack.utils.TouchPoint;
 
 import java.util.HashSet;
 
-public class FirstPersonController implements ProcessorInput {
+public class CameraController implements ProcessorInput {
     private static final int FLY = Input.Keys.F;
     private static final int LEFT = Input.Keys.A;
     private static final int RIGHT = Input.Keys.D;
@@ -41,7 +41,7 @@ public class FirstPersonController implements ProcessorInput {
 
     public HashSet<Integer> keySet;
 
-    public FirstPersonController(MainEngine.Device device) {
+    public CameraController(MainEngine.Device device) {
         this.device = device;
 
         MainEngine engineInstance = MainEngine.getInstance();

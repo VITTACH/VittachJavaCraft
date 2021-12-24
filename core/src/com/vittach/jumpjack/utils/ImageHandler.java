@@ -1,4 +1,4 @@
-package com.vittach.jumpjack.framework;
+package com.vittach.jumpjack.utils;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.engine.MainEngine;
 
 public class ImageHandler {
     private FrameBuffer frameBuffer;
@@ -91,7 +91,7 @@ public class ImageHandler {
         return frameBuffer.getColorBufferTexture();
     }
 
-    public void fontPrint(FontHandler font, float x, float y, String text, ColorImpl color) {
+    public void fontPrint(FontHandler font, float x, float y, String text, com.vittach.jumpjack.utils.ColorImpl color) {
         BitmapFont bitmapFont = font.getBitmapFont();
         bitmapFont.setColor(color.getColor());
 

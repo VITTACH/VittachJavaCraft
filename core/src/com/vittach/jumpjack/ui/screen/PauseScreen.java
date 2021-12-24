@@ -2,7 +2,7 @@ package com.vittach.jumpjack.ui.screen;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.Preferences;
 
 public class PauseScreen implements GameScreen {

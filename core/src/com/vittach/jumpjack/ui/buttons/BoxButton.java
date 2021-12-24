@@ -2,8 +2,8 @@ package com.vittach.jumpjack.ui.buttons;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.MainEngine;
-import com.vittach.jumpjack.framework.ImageHandler;
+import com.vittach.jumpjack.engine.MainEngine;
+import com.vittach.jumpjack.utils.ImageHandler;
 
 public class BoxButton extends ScreenButton {
     private final SpriteBatch spriteBatch;

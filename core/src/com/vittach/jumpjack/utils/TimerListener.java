@@ -1,4 +1,4 @@
-package com.vittach.jumpjack.framework;
+package com.vittach.jumpjack.utils;
 
 public interface TimerListener {
     void onTimerStopped();

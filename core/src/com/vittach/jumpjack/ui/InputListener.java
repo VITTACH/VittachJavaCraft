@@ -2,7 +2,7 @@ package com.vittach.jumpjack.ui;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.vittach.jumpjack.engine.controller.ProcessorInput;
+import com.vittach.jumpjack.ui.controller.ProcessorInput;
 
 import java.util.ArrayList;
 

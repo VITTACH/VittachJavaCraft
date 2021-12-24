@@ -1,4 +1,4 @@
-package com.vittach.jumpjack;
+package com.vittach.jumpjack.engine;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -6,9 +6,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.controller.FirstPersonController;
+import com.vittach.jumpjack.Preferences;
+import com.vittach.jumpjack.ui.controller.CameraController;
 import com.vittach.jumpjack.engine.render.GameScene;
-import com.vittach.jumpjack.ui.buttons.JoystickController;
+import com.vittach.jumpjack.ui.controller.JoystickController;
 import com.vittach.jumpjack.ui.screen.*;
 import com.vittach.jumpjack.ui.screen.menu.CreateWorldMenu;
 import com.vittach.jumpjack.ui.screen.menu.LoadAndSaveMenu;
@@ -40,7 +41,7 @@ public class MainEngine extends ApplicationAdapter {
     private Viewport viewport;
     private OrthographicCamera camera;
 
-    public FirstPersonController fpController;
+    public CameraController fpController;
     public JoystickController leftStick;
     public JoystickController rightStick;
 
@@ -102,7 +103,7 @@ public class MainEngine extends ApplicationAdapter {
             put(Screen.LOAD_SAVE, new LoadAndSaveScreen());
         }};
 
-        fpController = new FirstPersonController(device);
+        fpController = new CameraController(device);
         leftStick = new JoystickController(JoystickController.Stick.LEFT);
         rightStick = new JoystickController(JoystickController.Stick.RIGHT);
 

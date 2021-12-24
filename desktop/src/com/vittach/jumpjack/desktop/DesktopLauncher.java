@@ -2,7 +2,7 @@ package com.vittach.jumpjack.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.vittach.jumpjack.MainEngine;
+import com.vittach.jumpjack.engine.MainEngine;
 
 public class DesktopLauncher {
 
