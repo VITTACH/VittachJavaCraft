@@ -1,8 +1,8 @@
 package com.vittach.jumpjack.ui.screen;
 
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.Preferences;
+import com.vittach.jumpjack.engine.MainEngine;
 
 public class MainScreen implements GameScreen {
     private final MainEngine engineInstance = MainEngine.getInstance();

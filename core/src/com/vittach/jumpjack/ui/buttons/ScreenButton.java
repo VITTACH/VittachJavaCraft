@@ -2,12 +2,12 @@ package com.vittach.jumpjack.ui.buttons;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.Preferences;
+import com.vittach.jumpjack.engine.MainEngine;
+import com.vittach.jumpjack.ui.InputListener;
 import com.vittach.jumpjack.utils.ColorImpl;
 import com.vittach.jumpjack.utils.FontHandler;
 import com.vittach.jumpjack.utils.ImageHandler;
-import com.vittach.jumpjack.ui.InputListener;
 
 /**
  * Created by ZHARIKOV VITALIY at 12.02.2016.

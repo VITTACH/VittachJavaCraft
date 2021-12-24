@@ -4,8 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
-import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.Preferences;
+import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.utils.TouchPoint;
 
 import java.util.HashSet;

@@ -4,12 +4,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.Preferences;
-import com.vittach.jumpjack.utils.ImageHandler;
+import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.ui.InputListener;
 import com.vittach.jumpjack.ui.buttons.ButtonClickListener;
 import com.vittach.jumpjack.ui.buttons.ScreenButton;
+import com.vittach.jumpjack.utils.ImageHandler;
 
 public class PauseMenu extends InputListener {
     private boolean isCubeChecked = false;
