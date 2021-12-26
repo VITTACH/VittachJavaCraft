@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -31,19 +31,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.badlogic.gdx.Gdx.graphics;
 
 public class GameScene {
-    private final BoxButton boxBtn;
-
-    private final Mesh cubeMesh;
     private final ModelBatch modelBatch;
+    private final ModelBatch skyModelBatch;
     private final ShaderProgram shaderProgram;
-    private final ShapeRenderer shapeRenderer = new ShapeRenderer();
+    private final ModelInstance skyModelInstance;
+    private final Mesh cubeMesh;
 
-    private Texture texture;
-    private Vector3 camPosition;
+    private final BoxButton boxButton;
 
-    private final Map<Vector3, ModelInstanceObj> modelInstanceObjMap = new HashMap<Vector3, ModelInstanceObj>();
-    private final Map<String, List<TextureRegion>> textureMap = new HashMap<String, List<TextureRegion>>();
-    private final Map<Vector3, Chunk> cubeChunkMap = new ConcurrentHashMap<Vector3, Chunk>();
+    private final ModelBuilder modelBuilder = new ModelBuilder();
+    private Matrix4 chunkTrans = new Matrix4();
+
+    private final Map<Vector3, Chunk> cubeChunkMap = new ConcurrentHashMap<>();
+    private final Map<Vector3, ModelInstanceObj> modelInstanceObjMap = new HashMap<>();
+    private final Map<String, List<TextureRegion>> textureMap = new HashMap<>();
 
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
@@ -54,30 +55,32 @@ public class GameScene {
 
     private final Light sunLight = new DirectionalLight(this, new Vector3(-10, 10, 10), new Vector3(-10, 0, 0));
 
-    private final ModelBuilder modelBuilder = new ModelBuilder();
-    private Matrix4 chunkTrans = new Matrix4();
+    private Texture texture;
+    private Vector3 camPosition;
 
 
     public void dispose() {
         textureMap.clear();
         modelInstanceObjMap.clear();
         cubeChunkMap.clear();
-        boxBtn.dispose();
+        boxButton.dispose();
     }
 
     public void setUpListeners() {
-        preferenceInstance.inputListener.addListener(boxBtn);
+        preferenceInstance.inputListener.addListener(boxButton);
         preferenceInstance.inputListener.addListener(engineInstance.fpController);
         preferenceInstance.inputListener.addListener(engineInstance.leftStick);
         preferenceInstance.inputListener.addListener(engineInstance.rightStick);
     }
 
     public GameScene() {
-        shapeRenderer.setColor(0.2f, 0.3f, 0.43f, 1);
+        skyModelInstance = new ModelInstance(new ObjLoader().loadModel(Gdx.files.internal("models/skyboxModel.obj")));
+
         camPosition = new Vector3(0, 0, 0);
         setTextures(Gdx.files.internal("sprites/cubesSprite.png"));
 
         shaderProgram = setupShader("scene");
+        skyModelBatch = new ModelBatch();
         modelBatch = new ModelBatch(new DefaultShaderProvider() {
             @Override
             protected Shader createShader(final Renderable renderable) {
@@ -96,8 +99,11 @@ public class GameScene {
         cubeBuilder.box(1.0f, 1.0f, 1.0f);
         cubeMesh = cubeBuilder.end();
 
-        boxBtn = new BoxButton();
-        boxBtn.setPosition(engineInstance.renderWidth - boxBtn.getWidth(), engineInstance.renderHeight - boxBtn.getHeight());
+        boxButton = new BoxButton();
+        boxButton.setPosition(
+            engineInstance.renderWidth - boxButton.getWidth(),
+            engineInstance.renderHeight - boxButton.getHeight()
+        );
     }
 
     public void genWorld() {
@@ -124,7 +130,7 @@ public class GameScene {
                 else if (i == 3 && j == 1) symbol = "c";
                 else continue;
 
-                List<TextureRegion> regionList = new ArrayList<TextureRegion>();
+                List<TextureRegion> regionList = new ArrayList<>();
                 regionList.add(imageRegions[i][0]);
                 textureMap.put(symbol, regionList);
             }
@@ -134,16 +140,9 @@ public class GameScene {
     public void display(Viewport viewport) {
         System.out.println("FPS counter: " + graphics.getFramesPerSecond());
 
-        // background filled
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+        renderScene(cubeChunkMap, modelInstanceObjMap, textureMap, viewport);
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.rect(0, 0, graphics.getWidth(), graphics.getHeight());
-        shapeRenderer.end();
-
-        render(cubeChunkMap, modelInstanceObjMap, textureMap, viewport);
-
-        boxBtn.display(viewport);
+        boxButton.display(viewport);
     }
 
     public ShaderProgram setupShader(final String prefix) {
@@ -163,7 +162,7 @@ public class GameScene {
     }
 
     private Mesh getCompressedMesh(List<MeshObj> meshObjects, Map<String, List<TextureRegion>> textureMap) {
-        List<Matrix4> matrix = new ArrayList<Matrix4>();
+        List<Matrix4> matrix = new ArrayList<>();
         for (MeshObj meshObj : meshObjects) {
             matrix.add(new Matrix4().setToTranslation(meshObj.getPosition()));
         }
@@ -178,7 +177,7 @@ public class GameScene {
                     chunkPosition = new Vector3(x * chunkSize, y * chunkSize, z * chunkSize);
                     if (cubeChunkMap.keySet().contains(chunkPosition)) continue;
 
-                    List<MeshObj> cubeMeshes = new ArrayList<MeshObj>();
+                    List<MeshObj> cubeMeshes = new ArrayList<>();
                     generateChunk(cubeMeshes, cubeMesh);
 
                     cubeChunkMap.put(chunkPosition, new Chunk(cubeMeshes));
@@ -203,7 +202,7 @@ public class GameScene {
         }
     }
 
-    private void render(
+    private void renderScene(
         Map<Vector3, Chunk> chunkMap,
         Map<Vector3, ModelInstanceObj> modelInstanceObjMap,
         Map<String, List<TextureRegion>> textureMap,
@@ -211,28 +210,33 @@ public class GameScene {
     ) {
         PerspectiveCamera fpCamera = engineInstance.fpController.getFpCamera();
         camPosition = fpCamera.position;
+        skyModelInstance.transform.setToTranslation(camPosition);
+
+        skyModelBatch.begin(fpCamera);
+        skyModelBatch.render(skyModelInstance);
+        skyModelBatch.end();
 
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
-            Vector3 position = chunkEntry.getKey();
-            chunkTrans = chunkTrans.setToTranslation(position);
+            Vector3 chunkPosition = chunkEntry.getKey();
+            chunkTrans = chunkTrans.setToTranslation(chunkPosition);
 
-            if (Math.abs(camPosition.x - position.x) > distance
-                || Math.abs(camPosition.z - position.z) > distance
-                || Math.abs(camPosition.y - position.y) > distance) {
+            if (Math.abs(camPosition.x - chunkPosition.x) > distance
+                || Math.abs(camPosition.z - chunkPosition.z) > distance
+                || Math.abs(camPosition.y - chunkPosition.y) > distance) {
                 continue;
             }
 
-            List<MeshObj> nonCompressedMeshObjs = chunkEntry.getValue().getMeshObjs();
-            ModelInstanceObj instanceObj = modelInstanceObjMap.get(position);
+            List<MeshObj> noCompressedMeshObjs = chunkEntry.getValue().getMeshObjs();
+            ModelInstanceObj instanceObj = modelInstanceObjMap.get(chunkPosition);
             if (instanceObj == null) {
-                Mesh compressedMesh = getCompressedMesh(nonCompressedMeshObjs, textureMap);
+                Mesh compressedMesh = getCompressedMesh(noCompressedMeshObjs, textureMap);
                 if (compressedMesh == null) continue;
                 ModelInstance modelInstance = meshToModelInst(compressedMesh);
 
                 sunLight.render(modelInstance, chunkTrans);
 
                 instanceObj = new ModelInstanceObj(modelInstance, sunLight.getDepthMap());
-                modelInstanceObjMap.put(position, instanceObj);
+                modelInstanceObjMap.put(chunkPosition, instanceObj);
             }
 
             applyShaders(fpCamera, instanceObj.getDepthMap());
@@ -260,7 +264,7 @@ public class GameScene {
         shaderProgram.setUniformf("u_lightPosition", sunLight.getCamera().position);
         shaderProgram.setUniformMatrix("u_lightTrans", sunLight.getCamera().combined);
 
-        shaderProgram.setUniform4fv("u_fogColor", new float[]{0.8f, 0.9f, 1f, 1f}, 0, 4);
+        shaderProgram.setUniform4fv("u_fogColor", new float[]{1f, 0.9f, 0.5f, 1f}, 0, 4);
         shaderProgram.setUniformf("u_fogFar", distance * 0.8f);
         shaderProgram.setUniformf("u_fogNear", distance * 0.2f);
 

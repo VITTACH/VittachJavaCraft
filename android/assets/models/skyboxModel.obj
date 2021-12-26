@@ -1,6 +1,5 @@
-# Exported from Wings 3D 1.5.4
-mtllib skyBoxModel.mtl
-o Cube1
+mtllib skyboxModel.mtl
+o cube
 #8 vertices, 6 faces
 v 54.60000000 54.60000000 -54.60000000
 v 54.60000000 54.60000000 54.60000000
@@ -48,8 +47,8 @@ vn 1.00000000 1.9520405e-16 0.0000000e+0
 vn -1.9520405e-16 1.00000000 0.0000000e+0
 vn 0.0000000e+0 0.0000000e+0 -1.00000000
 vn 1.00000000 1.9520405e-16 0.0000000e+0
-g Cube1_Cube1_auv
-usemtl Cube1_auv
+g cube_cube_auv
+usemtl cube_auv
 s 1
 f 1/4/3 3/3/9 4/7/12 2/6/6
 f 6/11/18 8/9/24 7/14/21 5/13/15
