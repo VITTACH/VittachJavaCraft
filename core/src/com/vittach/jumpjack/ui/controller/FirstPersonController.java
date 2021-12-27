@@ -11,7 +11,7 @@ import com.vittach.jumpjack.utils.TouchPoint;
 
 import java.util.HashSet;
 
-public class CameraController implements ProcessorInput {
+public class FirstPersonController extends DefaultController implements ProcessorInput {
     private static final int FLY = Input.Keys.F;
     private static final int LEFT = Input.Keys.A;
     private static final int RIGHT = Input.Keys.D;
@@ -32,28 +32,22 @@ public class CameraController implements ProcessorInput {
 
     private MainEngine.Device device;
     private int offsetX, offsetY;
-    private int idOffset = 0;
 
     private final Camera camera;
 
     private float velocity = MOVE_VELOCITY;
-    private float cameraNewDelta;
+    private float currentYDelta;
 
     private int health = 100;
 
-    public HashSet<Integer> keySet;
+    public HashSet<Integer> keySet = new HashSet<Integer>();
 
-    public CameraController(MainEngine.Device device) {
+    public FirstPersonController(MainEngine.Device device) {
         this.device = device;
-
-        keySet = new HashSet<Integer>();
-
-        float[] position = new float[]{0, 0, 0};
 
         camera = new PerspectiveCamera(67, engineInstance.renderWidth, engineInstance.renderHeight);
         camera.near = 0.1f;
-        camera.far = 500f;
-        camera.position.set(position);
+        camera.position.set(new float[]{0, 0, 0});
         camera.update();
     }
 
@@ -232,14 +226,7 @@ public class CameraController implements ProcessorInput {
     }
 
     private void handleTouchDown(int x, int y, int id, int button) {
-        float widthPart4 = preferenceInstance.screenWidth / 4f;
-        float heightPart4 = preferenceInstance.screenHeight / 4f;
-
-        boolean isNewId = !preferenceInstance.inputIdMap.contains(id + idOffset);
-        boolean isInLeftArea = x > 0 && x < widthPart4 && y > preferenceInstance.screenHeight - heightPart4
-            && y < preferenceInstance.screenHeight;
-        boolean isInRightArea = x > preferenceInstance.screenWidth - widthPart4 && x < preferenceInstance.screenWidth
-            && y > preferenceInstance.screenHeight - heightPart4 && y < preferenceInstance.screenHeight;
+        checkTouchArea(x, y, id);
 
         if (!isNewId || isInLeftArea || isInRightArea) return;
         preferenceInstance.inputIdMap.add(id + idOffset);
@@ -253,19 +240,19 @@ public class CameraController implements ProcessorInput {
 
     private void handleTouchDragged(int x, int y) {
         float verticalSense = 1;
-        float delta = -y * verticalSense;
+        float deltaY = -y * verticalSense;
         Vector3 right = new Vector3().set(camera.direction).crs(camera.up);
 
-        if (cameraNewDelta + delta < 90 && cameraNewDelta + delta > -90) {
-            camera.rotate(right, delta);
-            cameraNewDelta += delta;
+        if (currentYDelta + deltaY < 90 && currentYDelta + deltaY > -90) {
+            camera.rotate(right, deltaY);
+            currentYDelta += deltaY;
         } else {
-            if (cameraNewDelta + delta >= 90.0f) {
-                camera.rotate(right, 89.0f - cameraNewDelta);
-                cameraNewDelta = 89f;
+            if (currentYDelta + deltaY >= 90.0f) {
+                camera.rotate(right, 89.0f - currentYDelta);
+                currentYDelta = 89f;
             } else {
-                camera.rotate(right, -90.f - cameraNewDelta);
-                cameraNewDelta = -90;
+                camera.rotate(right, -90.f - currentYDelta);
+                currentYDelta = -90;
             }
         }
 

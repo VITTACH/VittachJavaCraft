@@ -12,14 +12,14 @@ import com.badlogic.gdx.math.Vector3;
 import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.engine.render.GameScene;
 
-public class SunLight extends Light {
+public class DirectionSunLight extends Light {
 
     private final Vector3 direction;
     private Texture depthMap;
 
     private final MainEngine engineInstance = MainEngine.getInstance();
 
-    public SunLight(GameScene gameScene, final Vector3 position, final Vector3 direction) {
+    public DirectionSunLight(GameScene gameScene, final Vector3 position, final Vector3 direction) {
         super(gameScene);
         this.position = position;
         this.direction = direction;
@@ -36,7 +36,6 @@ public class SunLight extends Light {
 
         camera = new PerspectiveCamera(134f, engineInstance.renderWidth, engineInstance.renderHeight);
         camera.near = 0.1f;
-        camera.far = 500f;
         camera.position.set(position);
         camera.lookAt(direction);
         camera.update();

@@ -10,7 +10,7 @@ import com.vittach.jumpjack.utils.MyTimer;
 import com.vittach.jumpjack.utils.TimerListener;
 import com.vittach.jumpjack.utils.TouchPoint;
 
-public class JoystickController implements ProcessorInput {
+public class JoystickController extends DefaultController implements ProcessorInput {
     public enum Stick {
         LEFT, RIGHT
     }
@@ -27,7 +27,7 @@ public class JoystickController implements ProcessorInput {
 
     private int offsetX, offsetY;
     private int touchX, touchY;
-    private int idOffset = 0, touchId = -1;
+    private int touchId = -1;
 
     private final MyTimer joystickTimer;
 
@@ -202,14 +202,7 @@ public class JoystickController implements ProcessorInput {
     }
 
     private void handleTouchDown(int x, int y, int id, boolean isDragged) {
-        float widthPart4 = preferenceInstance.screenWidth / 4f;
-        float heightPart4 = preferenceInstance.screenHeight / 4f;
-
-        boolean isNewId = !preferenceInstance.inputIdMap.contains(id + idOffset);
-        boolean isInLeftArea = x > 0 && x < widthPart4 && y > preferenceInstance.screenHeight - heightPart4
-            && y < preferenceInstance.screenHeight;
-        boolean isInRightArea = x > preferenceInstance.screenWidth - widthPart4 && x < preferenceInstance.screenWidth
-            && y > preferenceInstance.screenHeight - heightPart4 && y < preferenceInstance.screenHeight;
+        checkTouchArea(x, y, id);
 
         if (!isNewId || !((stick == Stick.LEFT && isInLeftArea) || (stick == Stick.RIGHT && isInRightArea))) return;
         preferenceInstance.inputIdMap.add(id + idOffset);

@@ -20,7 +20,7 @@ import com.vittach.jumpjack.engine.render.domain.Chunk;
 import com.vittach.jumpjack.engine.render.domain.MeshObj;
 import com.vittach.jumpjack.engine.render.domain.ModelInstanceObj;
 import com.vittach.jumpjack.engine.render.light.Light;
-import com.vittach.jumpjack.engine.render.light.SunLight;
+import com.vittach.jumpjack.engine.render.light.DirectionSunLight;
 import com.vittach.jumpjack.engine.render.shader.SimpleTextureShader;
 import com.vittach.jumpjack.engine.render.utils.MeshCompressor;
 import com.vittach.jumpjack.ui.buttons.BoxButton;
@@ -35,9 +35,6 @@ public class GameScene {
     private final ModelInstance skyModelInstance;
     private final Mesh cubeMesh;
 
-    private final ModelBuilder modelBuilder = new ModelBuilder();
-    private Matrix4 chunkTrans = new Matrix4();
-
     private final Map<Vector3, Chunk> cubeChunkMap = new ConcurrentHashMap<>();
     private final Map<Vector3, ModelInstanceObj> modelInstanceObjMap = new HashMap<>();
     private final Map<String, List<TextureRegion>> textureMap = new HashMap<>();
@@ -45,17 +42,19 @@ public class GameScene {
     private final int chunkSize = 16;
     private final int mapHeight = 48;
     private final int distance = 64;
-
     private final float cubeHeight = 1f;
-
-    private final Light sunLight = new SunLight(this, new Vector3(0, mapHeight * cubeHeight, 0), new Vector3(0, 0, 0));
-
-    private final MainEngine engineInstance = MainEngine.getInstance();
-    private final Preferences preferenceInstance = Preferences.getInstance();
 
     private final BoxButton boxButton;
     private Texture texture;
     private Vector3 camPosition;
+
+    private final Light sunLight = new DirectionSunLight(this, new Vector3(0, mapHeight, 0), new Vector3(0, 0, 0));
+
+    private final MainEngine engineInstance = MainEngine.getInstance();
+    private final Preferences preferenceInstance = Preferences.getInstance();
+
+    private final ModelBuilder modelBuilder = new ModelBuilder();
+    private Matrix4 chunkTrans = new Matrix4();
 
 
     public void dispose() {
@@ -197,9 +196,9 @@ public class GameScene {
     }
 
     private void generateChunk(int chunkY, List<MeshObj> meshList, Mesh mesh) {
-        for (int positionY = 0; positionY < Math.min(chunkSize, mapHeight); positionY++) {
-            for (int positionX = 0; positionX < chunkSize; positionX++) {
-                for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
+        for (float positionY = 0; positionY < Math.min(chunkSize, mapHeight); positionY += cubeHeight) {
+            for (float positionX = 0; positionX < chunkSize; positionX += cubeHeight) {
+                for (float positionZ = 0; positionZ < chunkSize; positionZ += cubeHeight) {
                     String symbol = "";
 
                     if (positionY == 0 && new Random().nextInt() % 2 == 0) {
