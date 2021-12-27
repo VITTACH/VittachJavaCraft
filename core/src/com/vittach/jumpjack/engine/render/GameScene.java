@@ -19,8 +19,8 @@ import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.engine.render.domain.Chunk;
 import com.vittach.jumpjack.engine.render.domain.MeshObj;
 import com.vittach.jumpjack.engine.render.domain.ModelInstanceObj;
-import com.vittach.jumpjack.engine.render.light.Light;
 import com.vittach.jumpjack.engine.render.light.DirectionSunLight;
+import com.vittach.jumpjack.engine.render.light.Light;
 import com.vittach.jumpjack.engine.render.shader.SimpleTextureShader;
 import com.vittach.jumpjack.engine.render.utils.MeshCompressor;
 import com.vittach.jumpjack.ui.buttons.BoxButton;
@@ -29,10 +29,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GameScene {
-    private final ModelBatch modelBatch;
-    private final ModelBatch skyModelBatch;
     private final ShaderProgram shaderProgram;
     private final ModelInstance skyModelInstance;
+    private final ModelBatch skyModelBatch;
+    private final ModelBatch sceneModelBatch;
     private final Mesh cubeMesh;
 
     private final Map<Vector3, Chunk> cubeChunkMap = new ConcurrentHashMap<>();
@@ -48,7 +48,7 @@ public class GameScene {
     private Texture texture;
     private Vector3 camPosition;
 
-    private final Light sunLight = new DirectionSunLight(this, new Vector3(0, mapHeight, 0), new Vector3(0, 0, 0));
+    private Light directionSunLight = new DirectionSunLight(this, new Vector3(0, mapHeight, 0), new Vector3(0, 0, 0));
 
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
@@ -79,7 +79,7 @@ public class GameScene {
 
         shaderProgram = setupShader("scene");
         skyModelBatch = new ModelBatch();
-        modelBatch = new ModelBatch(new DefaultShaderProvider() {
+        sceneModelBatch = new ModelBatch(new DefaultShaderProvider() {
             @Override
             protected Shader createShader(final Renderable renderable) {
                 return new SimpleTextureShader(renderable, shaderProgram);
@@ -148,7 +148,7 @@ public class GameScene {
         skyModelBatch.render(skyModelInstance);
         skyModelBatch.end();
 
-        renderScene(fpCamera, viewport, modelInstanceObjMap, textureMap, cubeChunkMap);
+        renderScene(cubeChunkMap, modelInstanceObjMap, textureMap, fpCamera, viewport);
 
         boxButton.display(viewport);
     }
@@ -227,7 +227,7 @@ public class GameScene {
 
     private void applyShaders(Camera fpCamera, Texture depthMap) {
         shaderProgram.begin();
-        Camera sunCamera = sunLight.getCamera();
+        Camera sunCamera = directionSunLight.getCamera();
 
         shaderProgram.setUniformf("u_cameraFar", sunCamera.far);
         shaderProgram.setUniformf("u_cameraPosition", fpCamera.position);
@@ -248,32 +248,31 @@ public class GameScene {
     }
 
     private void renderScene(
-        Camera fpCamera,
-        Viewport viewport,
+        Map<Vector3, Chunk> cubeChunkMap,
         Map<Vector3, ModelInstanceObj> modelInstanceObjMap,
         Map<String, List<TextureRegion>> textureMap,
-        Map<Vector3, Chunk> chunkMap
+        Camera fpCamera,
+        Viewport viewport
     ) {
-        for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
+        for (Map.Entry<Vector3, Chunk> chunkEntry : cubeChunkMap.entrySet()) {
             Vector3 chunkPosition = chunkEntry.getKey();
-            chunkTrans = chunkTrans.setToTranslation(chunkPosition);
-
             if (Math.abs(camPosition.x - chunkPosition.x) > distance
                 || Math.abs(camPosition.z - chunkPosition.z) > distance
                 || Math.abs(camPosition.y - chunkPosition.y) > distance) {
                 continue;
             }
 
-            List<MeshObj> noCompressedMeshObjs = chunkEntry.getValue().getMeshObjs();
+            chunkTrans = chunkTrans.setToTranslation(chunkPosition);
+            List<MeshObj> meshObjs = chunkEntry.getValue().getMeshObjs();
             ModelInstanceObj instanceObj = modelInstanceObjMap.get(chunkPosition);
             if (instanceObj == null) {
-                Mesh compressedMesh = getCompressedMesh(noCompressedMeshObjs, textureMap);
+                Mesh compressedMesh = getCompressedMesh(meshObjs, textureMap);
                 if (compressedMesh == null) continue;
-                ModelInstance modelInstance = meshToModelInst(compressedMesh);
+                ModelInstance meshModelInstance = meshToModelInst(compressedMesh);
 
-                sunLight.render(modelInstance, chunkTrans);
+                directionSunLight.render(meshModelInstance, chunkTrans);
 
-                instanceObj = new ModelInstanceObj(modelInstance, sunLight.getDepthMap());
+                instanceObj = new ModelInstanceObj(meshModelInstance, directionSunLight.getDepthMap());
                 modelInstanceObjMap.put(chunkPosition, instanceObj);
             }
 
@@ -281,9 +280,9 @@ public class GameScene {
 
             viewport.apply();
 
-            modelBatch.begin(fpCamera);
-            modelBatch.render(instanceObj.getModelInstance());
-            modelBatch.end();
+            sceneModelBatch.begin(fpCamera);
+            sceneModelBatch.render(instanceObj.getModelInstance());
+            sceneModelBatch.end();
         }
     }
 }
