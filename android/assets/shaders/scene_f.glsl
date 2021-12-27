@@ -14,12 +14,12 @@ varying vec2 v_texCoords0;
 varying vec4 v_positionLightTrans;
 varying float v_intensity;
 
-uniform sampler2D u_depthMap;
-uniform sampler2D u_texture;
-
 uniform vec3 u_lightPosition;
 uniform vec3 u_cameraPosition;
 uniform float u_cameraFar;
+
+uniform sampler2D u_depthMap;
+uniform sampler2D u_texture;
 
 uniform float u_fogFar;
 uniform vec4 u_fogColor;
@@ -37,7 +37,7 @@ void main() {
     if (v_positionLightTrans.z >= 0.0 && (depth.x >= 0.0) && (depth.x <= 1.0) && (depth.y >= 0.0) && (depth.y <= 1.0)) {
         float lenToLight = length(v_position.xyz - u_lightPosition) / u_cameraFar;
         float lenDepthMap = texture2D(u_depthMap, depth.xy).a;
-        if (lenDepthMap < lenToLight - 0.005){
+        if (lenDepthMap < lenToLight - 0.005) {
             finalColor.rgb *= 0.4;
         } else {
             finalColor.rgb *= 0.4 + 0.6 * (1.0 - lenToLight);
@@ -50,7 +50,6 @@ void main() {
 
     // calculate fog
     float fogValue = smoothstep(u_fogNear, u_fogFar, lenCamView) * 0.4;
-    vec4 fogColor = mix(finalColor, u_fogColor, fogValue);
 
-    gl_FragColor = fogColor;
+    gl_FragColor = mix(finalColor, u_fogColor, fogValue);
 }

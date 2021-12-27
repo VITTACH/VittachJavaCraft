@@ -19,16 +19,14 @@ import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.engine.render.domain.Chunk;
 import com.vittach.jumpjack.engine.render.domain.MeshObj;
 import com.vittach.jumpjack.engine.render.domain.ModelInstanceObj;
-import com.vittach.jumpjack.engine.render.light.DirectionalLight;
 import com.vittach.jumpjack.engine.render.light.Light;
+import com.vittach.jumpjack.engine.render.light.SunLight;
 import com.vittach.jumpjack.engine.render.shader.SimpleTextureShader;
 import com.vittach.jumpjack.engine.render.utils.MeshCompressor;
 import com.vittach.jumpjack.ui.buttons.BoxButton;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.badlogic.gdx.Gdx.graphics;
 
 public class GameScene {
     private final ModelBatch modelBatch;
@@ -37,8 +35,6 @@ public class GameScene {
     private final ModelInstance skyModelInstance;
     private final Mesh cubeMesh;
 
-    private final BoxButton boxButton;
-
     private final ModelBuilder modelBuilder = new ModelBuilder();
     private Matrix4 chunkTrans = new Matrix4();
 
@@ -46,15 +42,18 @@ public class GameScene {
     private final Map<Vector3, ModelInstanceObj> modelInstanceObjMap = new HashMap<>();
     private final Map<String, List<TextureRegion>> textureMap = new HashMap<>();
 
+    private final int chunkSize = 16;
+    private final int mapHeight = 48;
+    private final int distance = 64;
+
+    private final float cubeHeight = 1f;
+
+    private final Light sunLight = new SunLight(this, new Vector3(0, mapHeight * cubeHeight, 0), new Vector3(0, 0, 0));
+
     private final MainEngine engineInstance = MainEngine.getInstance();
     private final Preferences preferenceInstance = Preferences.getInstance();
 
-    private final int distance = engineInstance.fpController.viewDistance;
-    private final int chunkSize = 16;
-    private final int mapHeight = 48;
-
-    private final Light sunLight = new DirectionalLight(this, new Vector3(-10, 10, 10), new Vector3(-10, 0, 0));
-
+    private final BoxButton boxButton;
     private Texture texture;
     private Vector3 camPosition;
 
@@ -96,7 +95,7 @@ public class GameScene {
 
         MeshBuilder cubeBuilder = new MeshBuilder();
         cubeBuilder.begin(attributes, GL20.GL_TRIANGLES);
-        cubeBuilder.box(1.0f, 1.0f, 1.0f);
+        cubeBuilder.box(cubeHeight, cubeHeight, cubeHeight);
         cubeMesh = cubeBuilder.end();
 
         boxButton = new BoxButton();
@@ -123,24 +122,34 @@ public class GameScene {
         TextureRegion[][] imageRegions = TextureRegion.split(texture, texture.getWidth() / 8, texture.getHeight() / 8);
 
         for (int i = 0; i < 7; i++) {
-            for (int j = 0; j < 7; j++) {
+            for (int j = 0; j < 8; j++) {
                 String symbol;
                 if (i == 5 && j == 0) symbol = "b";
                 else if (i == 6 && j == 0) symbol = "a";
-                else if (i == 3 && j == 1) symbol = "c";
+                else if (i == 2 && j == 7) symbol = "c";
+                else if (i == 2 && j == 0) symbol = "d";
                 else continue;
 
                 List<TextureRegion> regionList = new ArrayList<>();
-                regionList.add(imageRegions[i][0]);
+                regionList.add(imageRegions[i][j]);
                 textureMap.put(symbol, regionList);
             }
         }
     }
 
     public void display(Viewport viewport) {
-        System.out.println("FPS counter: " + graphics.getFramesPerSecond());
+        Gdx.app.log("FPS", "Counter: " + Gdx.graphics.getFramesPerSecond());
 
-        renderScene(cubeChunkMap, modelInstanceObjMap, textureMap, viewport);
+        Camera fpCamera = engineInstance.fpController.getFpCamera();
+        camPosition = fpCamera.position;
+
+        skyModelInstance.transform.setToTranslation(camPosition);
+
+        skyModelBatch.begin(fpCamera);
+        skyModelBatch.render(skyModelInstance);
+        skyModelBatch.end();
+
+        renderScene(fpCamera, viewport, modelInstanceObjMap, textureMap, cubeChunkMap);
 
         boxButton.display(viewport);
     }
@@ -152,11 +161,12 @@ public class GameScene {
             Gdx.files.internal("shaders/" + prefix + "_f.glsl")
         );
 
+        String message = shaderProgram.getLog();
         if (!shaderProgram.isCompiled()) {
-            System.err.println("Error with shader " + prefix + ": " + shaderProgram.getLog());
+            Gdx.app.error("setupShader", "Error with shader " + prefix + ": " + message);
             System.exit(1);
         } else {
-            Gdx.app.log("init", "Shader " + prefix + " compilled " + shaderProgram.getLog());
+            Gdx.app.log("setupShader", "Shader " + prefix + " compiled " + message);
         }
         return shaderProgram;
     }
@@ -178,7 +188,7 @@ public class GameScene {
                     if (cubeChunkMap.keySet().contains(chunkPosition)) continue;
 
                     List<MeshObj> cubeMeshes = new ArrayList<>();
-                    generateChunk(cubeMeshes, cubeMesh);
+                    generateChunk(y, cubeMeshes, cubeMesh);
 
                     cubeChunkMap.put(chunkPosition, new Chunk(cubeMeshes));
                 }
@@ -186,13 +196,21 @@ public class GameScene {
         }
     }
 
-    private void generateChunk(List<MeshObj> meshList, Mesh mesh) {
+    private void generateChunk(int chunkY, List<MeshObj> meshList, Mesh mesh) {
         for (int positionY = 0; positionY < Math.min(chunkSize, mapHeight); positionY++) {
             for (int positionX = 0; positionX < chunkSize; positionX++) {
                 for (int positionZ = 0; positionZ < chunkSize; positionZ++) {
                     String symbol = "";
 
-                    if (positionY == 0 && new Random().nextInt() % 2 == 0) symbol = "a";
+                    if (positionY == 0 && new Random().nextInt() % 2 == 0) {
+                        if (chunkY == 0) {
+                            symbol = "d";
+                        } else if (chunkY == 1) {
+                            symbol = "c";
+                        } else {
+                            symbol = "a";
+                        }
+                    }
                     if (positionX % 6 == 0 && positionZ % 4 == 0 && new Random().nextInt() % 2 == 0) symbol = "b";
 
                     Vector3 meshPosition = new Vector3(positionX, positionY, positionZ);
@@ -202,20 +220,41 @@ public class GameScene {
         }
     }
 
+    private ModelInstance meshToModelInst(Mesh compressedMesh) {
+        modelBuilder.begin();
+        modelBuilder.part("", compressedMesh, GL20.GL_TRIANGLES, new Material());
+        return new ModelInstance(modelBuilder.end());
+    }
+
+    private void applyShaders(Camera fpCamera, Texture depthMap) {
+        shaderProgram.begin();
+        Camera sunCamera = sunLight.getCamera();
+
+        shaderProgram.setUniformf("u_cameraFar", sunCamera.far);
+        shaderProgram.setUniformf("u_cameraPosition", fpCamera.position);
+
+        shaderProgram.setUniformf("u_lightPosition", sunCamera.position);
+        shaderProgram.setUniformMatrix("u_lightTrans", sunCamera.combined);
+
+        shaderProgram.setUniform4fv("u_fogColor", new float[]{1f, 0.8f, 0.7f, 1f}, 0, 4);
+        shaderProgram.setUniformf("u_fogFar", distance * 0.8f);
+        shaderProgram.setUniformf("u_fogNear", distance * 0.2f);
+
+        shaderProgram.setUniformMatrix("u_chunkTrans", chunkTrans);
+
+        texture.bind(1);
+        shaderProgram.setUniformi("u_texture", 1);
+        depthMap.bind(2);
+        shaderProgram.setUniformi("u_depthMap", 2);
+    }
+
     private void renderScene(
-        Map<Vector3, Chunk> chunkMap,
+        Camera fpCamera,
+        Viewport viewport,
         Map<Vector3, ModelInstanceObj> modelInstanceObjMap,
         Map<String, List<TextureRegion>> textureMap,
-        Viewport viewport
+        Map<Vector3, Chunk> chunkMap
     ) {
-        PerspectiveCamera fpCamera = engineInstance.fpController.getFpCamera();
-        camPosition = fpCamera.position;
-        skyModelInstance.transform.setToTranslation(camPosition);
-
-        skyModelBatch.begin(fpCamera);
-        skyModelBatch.render(skyModelInstance);
-        skyModelBatch.end();
-
         for (Map.Entry<Vector3, Chunk> chunkEntry : chunkMap.entrySet()) {
             Vector3 chunkPosition = chunkEntry.getKey();
             chunkTrans = chunkTrans.setToTranslation(chunkPosition);
@@ -247,33 +286,5 @@ public class GameScene {
             modelBatch.render(instanceObj.getModelInstance());
             modelBatch.end();
         }
-    }
-
-    private ModelInstance meshToModelInst(Mesh compressedMesh) {
-        modelBuilder.begin();
-        modelBuilder.part("", compressedMesh, GL20.GL_TRIANGLES, new Material());
-        return new ModelInstance(modelBuilder.end());
-    }
-
-    private void applyShaders(PerspectiveCamera fpCamera, Texture depthMap) {
-        shaderProgram.begin();
-
-        texture.bind(1);
-        shaderProgram.setUniformi("u_texture", 1);
-
-        shaderProgram.setUniformf("u_lightPosition", sunLight.getCamera().position);
-        shaderProgram.setUniformMatrix("u_lightTrans", sunLight.getCamera().combined);
-
-        shaderProgram.setUniform4fv("u_fogColor", new float[]{1f, 0.9f, 0.5f, 1f}, 0, 4);
-        shaderProgram.setUniformf("u_fogFar", distance * 0.8f);
-        shaderProgram.setUniformf("u_fogNear", distance * 0.2f);
-
-        shaderProgram.setUniformMatrix("u_chunkTrans", chunkTrans);
-
-        depthMap.bind(2);
-        shaderProgram.setUniformi("u_depthMap", 2);
-
-        shaderProgram.setUniformf("u_cameraFar", sunLight.getCamera().far);
-        shaderProgram.setUniformf("u_cameraPosition", fpCamera.position);
     }
 }

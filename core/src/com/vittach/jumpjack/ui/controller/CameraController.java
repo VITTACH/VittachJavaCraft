@@ -2,6 +2,7 @@ package com.vittach.jumpjack.ui.controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.vittach.jumpjack.Preferences;
@@ -22,8 +23,10 @@ public class CameraController implements ProcessorInput {
     private static final int ESCAPE = Input.Keys.ESCAPE;
 
     private final float MOVE_VELOCITY = 0.1f;
-    private final float FAST_VELOCITY = 1.0f;
+    private final float FAST_VELOCITY = 0.5f;
+
     private final Preferences preferenceInstance = Preferences.getInstance();
+    private final MainEngine engineInstance = MainEngine.getInstance();
 
     private TouchPoint touchPoint;
 
@@ -31,28 +34,25 @@ public class CameraController implements ProcessorInput {
     private int offsetX, offsetY;
     private int idOffset = 0;
 
-    private final PerspectiveCamera camera;
+    private final Camera camera;
 
     private float velocity = MOVE_VELOCITY;
     private float cameraNewDelta;
 
     private int health = 100;
-    public int viewDistance = 64;
 
     public HashSet<Integer> keySet;
 
     public CameraController(MainEngine.Device device) {
         this.device = device;
 
-        MainEngine engineInstance = MainEngine.getInstance();
-        camera = new PerspectiveCamera(67, engineInstance.renderWidth, engineInstance.renderHeight);
-
         keySet = new HashSet<Integer>();
 
         float[] position = new float[]{0, 0, 0};
 
+        camera = new PerspectiveCamera(67, engineInstance.renderWidth, engineInstance.renderHeight);
         camera.near = 0.1f;
-        camera.far = viewDistance * 2f;
+        camera.far = 500f;
         camera.position.set(position);
         camera.update();
     }
@@ -137,7 +137,7 @@ public class CameraController implements ProcessorInput {
         this.health = health;
     }
 
-    public PerspectiveCamera getFpCamera() {
+    public Camera getFpCamera() {
         return camera;
     }
 

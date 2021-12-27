@@ -12,14 +12,14 @@ import com.badlogic.gdx.math.Vector3;
 import com.vittach.jumpjack.engine.MainEngine;
 import com.vittach.jumpjack.engine.render.GameScene;
 
-public class DirectionalLight extends Light {
+public class SunLight extends Light {
 
     private final Vector3 direction;
     private Texture depthMap;
 
     private final MainEngine engineInstance = MainEngine.getInstance();
 
-    public DirectionalLight(GameScene gameScene, final Vector3 position, final Vector3 direction) {
+    public SunLight(GameScene gameScene, final Vector3 position, final Vector3 direction) {
         super(gameScene);
         this.position = position;
         this.direction = direction;
@@ -34,9 +34,9 @@ public class DirectionalLight extends Light {
     public void init() {
         super.init();
 
-        camera = new PerspectiveCamera(120f, engineInstance.renderWidth, engineInstance.renderHeight);
+        camera = new PerspectiveCamera(134f, engineInstance.renderWidth, engineInstance.renderHeight);
         camera.near = 0.1f;
-        camera.far = engineInstance.fpController.viewDistance;
+        camera.far = 500f;
         camera.position.set(position);
         camera.lookAt(direction);
         camera.update();

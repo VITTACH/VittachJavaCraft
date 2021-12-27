@@ -27,7 +27,7 @@ void main() {
             v_intensity *= 0.8;
         }
         if (normal.z > 0.5 || normal.z < -0.5) {
-            v_intensity *= 0.6;
+            v_intensity *= 0.7;
         }
     }
 }
